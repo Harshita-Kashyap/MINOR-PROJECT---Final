@@ -1,0 +1,6 @@
+node_modules/
+rac-backend/node_modules/
+rac-frontend/node_modules/
+.env
+dist
+build
