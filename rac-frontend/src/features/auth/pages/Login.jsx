@@ -9,9 +9,11 @@ import Captcha from "../../../components/ui/Captcha";
 import IdentityFields from "../../../components/common/IdentityFields";
 import AuthSection from "../../../components/common/AuthSection";
 
+import { useAuth } from "../useAuth";
 import { validateLogin } from "../validation";
 
 function Login() {
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [loginType, setLoginType] = useState("mobile");
@@ -24,6 +26,7 @@ function Login() {
     year: "",
     password: "",
     captcha: "",
+    role: "applicant",
   });
 
   const [errors, setErrors] = useState({});
@@ -33,7 +36,7 @@ function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => { // Added async
     e.preventDefault();
 
     const validationErrors = validateLogin(form, captchaText, loginType);
@@ -44,86 +47,78 @@ function Login() {
     let loginId = "";
     if (loginType === "mobile") loginId = form.mobile;
     else if (loginType === "email") loginId = form.email;
-    else loginId = form.roll;
+    else loginId = form.roll; // Using roll for identity-based lookup
 
     try {
-      // ✅ FIXED API URL
+      // Sending login request to the backend
       const response = await fetch("http://localhost:5000/api/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           loginId,
           password: form.password,
-          loginType,
+          loginType
         }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        console.log("✅ Login Success:", data);
+        // If MySQL returns success, update the local Auth state
+        if (response.ok && data.role) {
 
-        // ✅ STORE USER
-        localStorage.setItem("user", JSON.stringify(data.user));
+  // 🔥 Save full user data (IMPORTANT)
+  localStorage.setItem("user", JSON.stringify(data));
 
-        const role = data.user.role;
+  // 🔥 Update auth state (optional but fine)
+  login(loginId, form.password, data.role);
 
-        // ✅ ROLE BASED REDIRECT
-        if (role === "admin") {
-          navigate("/admin");
-        } else if (role === "selector") {
-          navigate("/selector");
-        } else {
-          navigate("/applicant");
-        }
+  // 🔥 ROLE BASED REDIRECT
+  if (data.role === "admin") {
+    navigate("/admin");
+  } else if (data.role === "selector") {
+    navigate("/selector");
+  } else {
+    navigate("/applicant");
+  }
+
+} else {
+  alert(data.message || "Invalid credentials");
+}
       } else {
-        alert(data.message || "Invalid credentials");
+        // If MySQL returns no user found or wrong password
+        alert(data.message || "You are not registered or credentials invalid.");
       }
     } catch (err) {
-      console.error("❌ Login Error:", err);
-      alert("Server error. Please check backend.");
+      console.error("Login Error:", err);
+      alert("Database connection failed. Is the server running?");
     }
   };
 
   return (
     <AuthLayout>
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm"
-      >
+      <form onSubmit={handleSubmit} className="space-y-6">
+
+        {/* HEADER */}
         <div className="text-center">
           <h2 className="text-2xl font-semibold">Login</h2>
         </div>
 
         {/* LOGIN TYPE */}
         <AuthSection title="Select Login Method">
-          <div className="space-y-3 text-sm">
-            <label>
-              <input
-                type="radio"
-                checked={loginType === "mobile"}
-                onChange={() => setLoginType("mobile")}
-              />
+          <div className="space-y-2 text-sm">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" checked={loginType === "mobile"} onChange={() => setLoginType("mobile")} />
               Mobile
             </label>
 
-            <label>
-              <input
-                type="radio"
-                checked={loginType === "email"}
-                onChange={() => setLoginType("email")}
-              />
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" checked={loginType === "email"} onChange={() => setLoginType("email")} />
               Email
             </label>
 
-            <label>
-              <input
-                type="radio"
-                checked={loginType === "identity"}
-                onChange={() => setLoginType("identity")}
-              />
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" checked={loginType === "identity"} onChange={() => setLoginType("identity")} />
               Identity
             </label>
           </div>
@@ -131,12 +126,14 @@ function Login() {
 
         {/* FORM */}
         <div className="space-y-4">
+
           {loginType === "mobile" && (
             <Input
-              label="Mobile"
+              label="Mobile Number"
               name="mobile"
               value={form.mobile}
               onChange={handleChange}
+              error={errors.mobile}
             />
           )}
 
@@ -146,11 +143,18 @@ function Login() {
               name="email"
               value={form.email}
               onChange={handleChange}
+              error={errors.email}
             />
           )}
 
           {loginType === "identity" && (
-            <IdentityFields form={form} handleChange={handleChange} />
+            <AuthSection >
+              <IdentityFields
+                form={form}
+                errors={errors}
+                handleChange={handleChange}
+              />
+            </AuthSection>
           )}
 
           <Input
@@ -159,23 +163,44 @@ function Login() {
             name="password"
             value={form.password}
             onChange={handleChange}
+            error={errors.password}
           />
 
-          <Captcha setCaptchaText={setCaptchaText} />
+         <div className="flex flex-col sm:flex-row gap-3 w-full">
 
-          <Input
-            label="Enter Captcha"
-            name="captcha"
-            value={form.captcha}
-            onChange={handleChange}
-          />
+          {/* Captcha Display */}
+          <div className="flex-1">
+            <Captcha setCaptchaText={setCaptchaText} />
+          </div>
 
-          <Button type="submit">Login</Button>
+          {/* Input */}
+          <div className="flex-1">
+            <Input
+              label="Enter Captcha"
+              type="text"
+              name="captcha"
+              value={form.captcha}
+              onChange={handleChange}
+              error={errors.captcha}
+            />
+          </div>
+
         </div>
 
+          <Button type="submit" fullWidth>
+            Login
+          </Button>
+
+        </div>
+
+        {/* FOOTER */}
         <p className="text-sm text-center">
-          Don’t have an account? <Link to="/register">Register</Link>
+          Don’t have an account?{" "}
+          <Link to="/register" className="text-blue-600 hover:underline">
+            Register
+          </Link>
         </p>
+
       </form>
     </AuthLayout>
   );
