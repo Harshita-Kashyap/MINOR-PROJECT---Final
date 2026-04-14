@@ -1,4 +1,3 @@
-const user = JSON.parse(localStorage.getItem("user"));
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "../features/auth/pages/Login";
@@ -29,6 +28,10 @@ import ApplicantVacancies from "../pages/ApplicantVacancies";
 import MyApplications from "../pages/MyApplications";
 import TechnicalTest from "../pages/TechnicalTest";
 import PersonalityTest from "../pages/PersonalityTest";
+import ApplicantProfile from "../pages/ApplicantProfile";
+import ApplicantVacancyDetails from "../pages/ApplicantVacancyDetails";
+
+import ProtectedRoute from "./ProtectedRoute";
 
 function AppRoutes() {
   return (
@@ -55,6 +58,10 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <VacancyManagement />
+          path="/selector"
+          element={
+            <ProtectedRoute allowedRoles={["selector"]}>
+              <SelectorDashboard />
             </ProtectedRoute>
           }
         />
@@ -125,23 +132,61 @@ function AppRoutes() {
 
         {/* ================= SELECTOR ROUTES ================= */}
         <Route
-          path="/selector"
+          path="/applicant/vacancies"
           element={
-            <ProtectedRoute allowedRoles={["selector"]}>
-              <SelectorDashboard />
+            <ProtectedRoute allowedRoles={["applicant"]}>
+              <ApplicantVacancies />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/applicant/applications"
+          element={
+            <ProtectedRoute allowedRoles={["applicant"]}>
+              <MyApplications />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/applicant/technical-test"
+          element={
+            <ProtectedRoute allowedRoles={["applicant"]}>
+              <TechnicalTest />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/applicant/personality-test"
+          element={
+            <ProtectedRoute allowedRoles={["applicant"]}>
+              <PersonalityTest />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/applicant/profile"
+          element={
+            <ProtectedRoute allowedRoles={["applicant"]}>
+              <ApplicantProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/applicant/vacancies/:id"
+          element={
+            <ProtectedRoute allowedRoles={["applicant"]}>
+              <ApplicantVacancyDetails />
             </ProtectedRoute>
           }
         />
 
         {/* ❌ Fallback Route */}
         <Route path="*" element={<Landing />} />
-
-        <Route path="/applicant" element={<ApplicantDashboard />} />
-        <Route path="/applicant/vacancies" element={<ApplicantVacancies />} />
-        <Route path="/applicant/applications" element={<MyApplications />} />
-        <Route path="/applicant/technical-test" element={<TechnicalTest />} />
-        <Route path="/applicant/personality-test" element={<PersonalityTest />} />
-
       </Routes>
     </BrowserRouter>
   );

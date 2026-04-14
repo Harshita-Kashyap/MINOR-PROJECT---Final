@@ -1,9 +1,35 @@
 // src/components/applicant/VacancyCard.jsx
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Card from "../ui/Card";
 import Button from "../ui/Button";
 import Badge from "../ui/Badge";
+import { applyToVacancy, hasApplied } from "../../utils/applicationStorage";
+import { isProfileComplete } from "../../utils/profileStorage";
 
 export default function VacancyCard({ vacancy }) {
+  const navigate = useNavigate();
+  const [applied, setApplied] = useState(false);
+  const profileComplete = isProfileComplete();
+  
+  useEffect(() => {
+    setApplied(hasApplied(vacancy.id));
+  }, [vacancy.id]);
+
+  const handleApply = () => {
+    if (!isProfileComplete()) {
+      alert("Please complete your profile before applying for a vacancy.");
+      navigate("/applicant/profile");
+      return;
+    }
+
+    const success = applyToVacancy(vacancy);
+    if (success) {
+      setApplied(true);
+      console.log("Applied for vacancy:", vacancy);
+    }
+  };
+
   return (
     <Card hover className="space-y-3">
       <div className="flex items-start justify-between gap-3">
@@ -23,8 +49,22 @@ export default function VacancyCard({ vacancy }) {
       </p>
 
       <div className="flex gap-2">
-        <Button size="sm">View Details</Button>
-        <Button size="sm" variant="outline">Apply</Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => navigate(`/applicant/vacancies/${vacancy.id}`)}
+        >
+          View Details
+        </Button>
+
+        <Button
+          size="sm"
+          onClick={handleApply}
+          disabled={applied}
+          variant={applied ? "secondary" : "primary"}
+        >
+          {applied ? "Applied" : profileComplete ? "Apply Now" : "Complete Profile First"}
+        </Button>
       </div>
     </Card>
   );
