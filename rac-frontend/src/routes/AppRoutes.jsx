@@ -1,3 +1,4 @@
+const user = JSON.parse(localStorage.getItem("user"));
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "../features/auth/pages/Login";

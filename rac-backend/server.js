@@ -12,7 +12,7 @@ app.use(express.json());
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "7067300217",
+  password: "root",
   database: "authdb",
 });
 
@@ -115,7 +115,7 @@ app.post("/register", (req, res) => {
 
 
 // ================= LOGIN ROUTE =================
-app.post("/login", (req, res) => {
+app.post("/api/login", (req, res) => {
   const { loginId, password, loginType } = req.body;
 
   console.log("🔐 Login Attempt:", { loginId, loginType });
@@ -138,11 +138,14 @@ app.post("/login", (req, res) => {
     if (result.length > 0) {
       console.log("✅ Login Successful");
 
-      res.status(200).json({
-        success: true,
-        message: "Login successful",
-        user: result[0],
-      });
+     const user = result[0];
+
+res.status(200).json({
+  success: true,
+  message: "Login successful",
+  role: user.role,   // 🔥 VERY IMPORTANT
+  name: user.name
+});
     } else {
       console.log("❌ Invalid credentials");
 
