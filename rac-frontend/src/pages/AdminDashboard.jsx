@@ -1,35 +1,41 @@
-import DashboardLayout from "../layouts/DashboardLayout";
-import Button from "../components/ui/Button";
-import Card from "../components/ui/Card";
+import AdminNavbar from "../components/admin/AdminNavbar";
 
 function AdminDashboard() {
   return (
-    <DashboardLayout>
-      <h2 className="text-2xl font-semibold mb-6">
-        Admin Dashboard
-      </h2>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
+      
+      {/* NAVBAR */}
+      <AdminNavbar />
 
-      <div className="grid grid-cols-3 gap-6">
-        <Card>
-          <p>Total Applicants</p>
-          <h3 className="text-xl font-bold">120</h3>
-        </Card>
+      {/* CONTENT */}
+      <div className="p-6">
+        
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
+          Dashboard Overview
+        </h2>
 
-        <Card>
-          <p>Interviews Scheduled</p>
-          <h3 className="text-xl font-bold">45</h3>
-        </Card>
+        {/* CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <div className="p-4 bg-white dark:bg-gray-900 rounded-xl shadow">
+            <h3 className="text-gray-600 dark:text-gray-300">Total Vacancies</h3>
+            <p className="text-2xl font-bold text-blue-600">10</p>
+          </div>
 
-        <Card>
-          <p>Selected Candidates</p>
-          <h3 className="text-xl font-bold">10</h3>
-        </Card>
+          <div className="p-4 bg-white dark:bg-gray-900 rounded-xl shadow">
+            <h3 className="text-gray-600 dark:text-gray-300">Applications</h3>
+            <p className="text-2xl font-bold text-green-600">45</p>
+          </div>
+
+          <div className="p-4 bg-white dark:bg-gray-900 rounded-xl shadow">
+            <h3 className="text-gray-600 dark:text-gray-300">Shortlisted</h3>
+            <p className="text-2xl font-bold text-yellow-500">12</p>
+          </div>
+
+        </div>
+
       </div>
-
-      <div className="mt-6">
-        <Button>Generate Report</Button>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }
 
