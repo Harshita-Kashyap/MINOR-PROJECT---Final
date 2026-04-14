@@ -4,40 +4,35 @@ import LeftPanel from "../components/landing/LeftPanel";
 import CenterPanel from "../components/landing/CenterPanel";
 import RightPanel from "../components/landing/RightPanel";
 
-export default function LandingLayout() {
+export default function LandingLayout({ children }) {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
-
       {/* HEADER */}
       <Header />
 
       {/* NAVBAR */}
       <LandingNavbar />
 
-      {/* MAIN CONTENT */}
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+      {/* CUSTOM PAGE CONTENT */}
+      {children ? (
+        <main className="max-w-[98%] mx-auto px-4 md:px-6 py-6">{children}</main>
+      ) : (
+        <main className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <aside className="lg:col-span-3">
+              <LeftPanel />
+            </aside>
 
-        {/* GRID LAYOUT */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <section className="lg:col-span-6">
+              <CenterPanel />
+            </section>
 
-          {/* LEFT PANEL */}
-          <aside className="lg:col-span-3">
-            <LeftPanel />
-          </aside>
-
-          {/* CENTER PANEL */}
-          <section className="lg:col-span-6">
-            <CenterPanel />
-          </section>
-
-          {/* RIGHT PANEL */}
-          <aside className="lg:col-span-3">
-            <RightPanel />
-          </aside>
-
-        </div>
-
-      </main>
+            <aside className="lg:col-span-3">
+              <RightPanel />
+            </aside>
+          </div>
+        </main>
+      )}
     </div>
   );
 }
