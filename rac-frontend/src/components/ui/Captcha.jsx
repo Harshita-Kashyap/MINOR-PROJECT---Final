@@ -24,25 +24,23 @@ function Captcha({ setCaptchaText }) {
 
   return (
     <div className="flex flex-col gap-2">
-      
       <div className="flex items-center justify-between">
-        <label className="text-sm text-gray-600">
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
           CAPTCHA
         </label>
 
         <button
           type="button"
           onClick={refresh}
-          className="text-xs text-blue-600 hover:underline"
+          className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
         >
           Refresh
         </button>
       </div>
 
-      <div className="bg-gray-200 px-4 py-2 rounded font-mono tracking-widest text-center">
+      <div className="rounded-xl border border-gray-300 bg-gray-100 px-4 py-2 text-center font-mono tracking-widest text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white">
         {captcha}
       </div>
-
     </div>
   );
 }

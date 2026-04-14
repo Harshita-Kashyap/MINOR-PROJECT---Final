@@ -30,27 +30,23 @@ function Register() {
   const [captchaText, setCaptchaText] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 1️⃣ Validate form
     const validationErrors = validateRegister(form, captchaText);
-setErrors(validationErrors);
+    setErrors(validationErrors);
 
-// Show errors clearly in console
-if (Object.keys(validationErrors).length > 0) {
-  Object.entries(validationErrors).forEach(([key, value]) => {
-    console.log(`${key}: ${value}`);
-  });
-  return;
-}
+    if (Object.keys(validationErrors).length > 0) {
+      Object.entries(validationErrors).forEach(([key, value]) => {
+        console.log(`${key}: ${value}`);
+      });
+      return;
+    }
 
     setLoading(true);
 
@@ -92,11 +88,18 @@ if (Object.keys(validationErrors).length > 0) {
 
   return (
     <AuthLayout>
-      <form onSubmit={handleSubmit} className="space-y-6">
-
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-colors dark:border-gray-700 dark:bg-gray-800"
+      >
         {/* HEADER */}
         <div className="text-center">
-          <h2 className="text-2xl font-semibold">Register</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+            Register
+          </h2>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+            Create your applicant account
+          </p>
         </div>
 
         {/* BASIC DETAILS */}
@@ -174,18 +177,20 @@ if (Object.keys(validationErrors).length > 0) {
         </div>
 
         {/* BUTTON */}
-        <Button type="submit" fullWidth disabled={loading}>
+        <Button type="submit" fullWidth disabled={loading} loading={loading}>
           {loading ? "Registering..." : "Register"}
         </Button>
 
         {/* FOOTER */}
-        <p className="text-sm text-center">
+        <p className="text-sm text-center text-gray-600 dark:text-gray-300">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
+          <Link
+            to="/login"
+            className="font-medium text-blue-600 hover:underline dark:text-blue-400"
+          >
             Login
           </Link>
         </p>
-
       </form>
     </AuthLayout>
   );

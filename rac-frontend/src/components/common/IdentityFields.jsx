@@ -12,6 +12,7 @@ export default function IdentityFields({ form, errors, handleChange }) {
         value={form.dob}
         onChange={handleChange}
         error={errors.dob}
+        className="dark:[color-scheme:dark]" 
       />
 
       {/* Roll + Year */}

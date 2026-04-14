@@ -1,56 +1,61 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/Button";
+import ThemeToggle from "../common/ThemeToggle";
 
 export default function Header() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
-  const [dark, setDark] = useState(
-    localStorage.getItem("theme") === "dark"
-  );
-
-  useEffect(() => {
-    if (dark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [dark]);
-
   return (
-    <div className="flex justify-between items-center bg-white dark:bg-gray-800 px-6 py-3 shadow-sm">
-
+    <header className="flex flex-col gap-4 bg-white px-6 py-4 shadow-sm transition-colors dark:bg-gray-800 sm:flex-row sm:items-center sm:justify-between">
+      {/* Left */}
       <div>
-        <h1 className="font-semibold text-lg dark:text-white">
-          Recruitment & Assessment Centre (RAC)
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Recruitment &amp; Assessment Centre (RAC)
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-300">
           DRDO, Government of India
         </p>
       </div>
 
-      <div className="flex items-center gap-4 text-sm">
+      {/* Right */}
+      <div className="flex flex-wrap items-center gap-3 text-sm">
+        {/* Language Switcher */}
+        <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-1 dark:border-gray-700 dark:bg-gray-900">
+          <button
+            type="button"
+            onClick={() => i18n.changeLanguage("en")}
+            className={`rounded-md px-3 py-1 transition ${
+              i18n.language === "en"
+                ? "bg-blue-600 text-white"
+                : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+            }`}
+          >
+            EN
+          </button>
 
-        {/* Language */}
-        <div className="flex gap-2">
-          <button onClick={() => i18n.changeLanguage("en")} className="hover:underline dark:text-white">EN</button>
-          <button onClick={() => i18n.changeLanguage("hi")} className="hover:underline dark:text-white">हिंदी</button>
+          <button
+            type="button"
+            onClick={() => i18n.changeLanguage("hi")}
+            className={`rounded-md px-3 py-1 transition ${
+              i18n.language === "hi"
+                ? "bg-blue-600 text-white"
+                : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+            }`}
+          >
+            हिंदी
+          </button>
         </div>
 
-        {/* Theme */}
-        <button onClick={() => setDark(!dark)} className="dark:text-white">
-          {dark ? "☀️" : "🌙"}
-        </button>
+        {/* Theme Toggle */}
+        <ThemeToggle />
 
+        {/* Login Button */}
         <Button onClick={() => navigate("/login")}>
           {t("login")}
         </Button>
-
       </div>
-    </div>
+    </header>
   );
 }
