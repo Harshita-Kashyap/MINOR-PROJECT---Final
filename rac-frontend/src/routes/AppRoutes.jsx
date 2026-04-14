@@ -20,6 +20,7 @@ import DirectRecruitment from "../pages/DirectRecruitment";
 import DRDS from "../pages/DRDS";
 import FAQs from "../pages/FAQs";
 import Grahpatrika from "../pages/Grahpatrika";
+import CertificateFormats from "../pages/CertificateFormats";
 
 // ================= ADMIN PAGES =================
 import AdminDashboard from "../pages/AdminDashboard";
@@ -68,6 +69,7 @@ function AppRoutes() {
         <Route path="/drds" element={<DRDS />} />
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/grahpatrika" element={<Grahpatrika />} />
+        <Route path="/certificate-formats" element={<CertificateFormats />} />
 
         {/* ================= ADMIN ROUTES ================= */}
         <Route
