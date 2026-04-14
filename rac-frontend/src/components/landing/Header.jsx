@@ -1,4 +1,4 @@
-@266404305571929 
+
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/Button";
