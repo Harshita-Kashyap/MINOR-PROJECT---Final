@@ -3,27 +3,23 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../features/auth/pages/Login";
 import Register from "../features/auth/pages/Register";
 
-import AdminDashboard from "../pages/AdminDashboard";
-import ApplicantDashboard from "../pages/ApplicantDashboard";
-import SelectorDashboard from "../pages/SelectorDashboard";
-
-// 🔵 Admin Pages
-import VacancyManagement from "../pages/VacancyManagement";
-import CreateVacancy from "../pages/CreateVacancy";
-import EditVacancy from "../pages/EditVacancy";
-import ApplicationsManagement from "../pages/ApplicationsManagement";
-import Shortlisting from "../pages/Shortlisting";
-import AdminAnalytics from "../pages/AdminAnalytics";
-import FinalMeritList from "../pages/FinalMeritList";
-
-// (Optional future pages for others)
-// import ApplicantVacancies from "../pages/ApplicantVacancies";
-// import SelectorCandidates from "../pages/SelectorCandidates";
-
 import ProtectedRoute from "./ProtectedRoute";
-
 import Landing from "../pages/Landing";
 
+// ================= ADMIN PAGES =================
+// ❌ REMOVE admin folder
+import AdminDashboard from "../pages/AdminDashboard";
+import VacancyManagement from "../pages/VacancyManagement";
+import CreateVacancy from "../pages/CreateVacancy";
+import ApplicationsManagement from "../pages/ApplicationsManagement";
+import Shortlisting from "../pages/Shortlisting";
+import FinalMeritList from "../pages/FinalMeritList";
+import EditVacancy from "../pages/EditVacancy";
+
+
+
+// ================= APPLICANT =================
+import ApplicantDashboard from "../pages/ApplicantDashboard";
 import ApplicantVacancies from "../pages/ApplicantVacancies";
 import MyApplications from "../pages/MyApplications";
 import TechnicalTest from "../pages/TechnicalTest";
@@ -31,19 +27,20 @@ import PersonalityTest from "../pages/PersonalityTest";
 import ApplicantProfile from "../pages/ApplicantProfile";
 import ApplicantVacancyDetails from "../pages/ApplicantVacancyDetails";
 
-import ProtectedRoute from "./ProtectedRoute";
+// ================= SELECTOR =================
+import SelectorDashboard from "../pages/SelectorDashboard";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* 🌐 Public Routes */}
+        {/* 🌐 PUBLIC */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* ================= ADMIN ROUTES ================= */}
+        {/* ================= ADMIN ================= */}
         <Route
           path="/admin"
           element={
@@ -58,10 +55,6 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <VacancyManagement />
-          path="/selector"
-          element={
-            <ProtectedRoute allowedRoles={["selector"]}>
-              <SelectorDashboard />
             </ProtectedRoute>
           }
         />
@@ -103,16 +96,7 @@ function AppRoutes() {
         />
 
         <Route
-          path="/admin/analytics"
-          element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <AdminAnalytics />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin/merit-list"
+          path="/admin/results"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <FinalMeritList />
@@ -120,7 +104,7 @@ function AppRoutes() {
           }
         />
 
-        {/* ================= APPLICANT ROUTES ================= */}
+        {/* ================= APPLICANT ================= */}
         <Route
           path="/applicant"
           element={
@@ -130,7 +114,6 @@ function AppRoutes() {
           }
         />
 
-        {/* ================= SELECTOR ROUTES ================= */}
         <Route
           path="/applicant/vacancies"
           element={
@@ -185,8 +168,19 @@ function AppRoutes() {
           }
         />
 
-        {/* ❌ Fallback Route */}
+        {/* ================= SELECTOR ================= */}
+        <Route
+          path="/selector"
+          element={
+            <ProtectedRoute allowedRoles={["selector"]}>
+              <SelectorDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ❌ FALLBACK */}
         <Route path="*" element={<Landing />} />
+
       </Routes>
     </BrowserRouter>
   );

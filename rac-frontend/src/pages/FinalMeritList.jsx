@@ -1,16 +1,31 @@
 import { useEffect, useState } from "react";
-import API from "../services/api";
+import AdminNavbar from "../components/admin/AdminNavbar";
 
 function FinalMeritList() {
-  const [data, setData] = useState([]);
+  const [candidates, setCandidates] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // 🔹 Fetch merit list
+  // 🔥 Fetch merit list
   const fetchMeritList = async () => {
     try {
-      const res = await API.get("/admin/merit-list"); // backend API
-      setData(res.data);
+      setLoading(true);
+
+      // 👉 CHANGE THIS API LATER (when backend ready)
+      const res = await fetch("http://localhost:5000/api/merit-list");
+      const data = await res.json();
+
+      setCandidates(data);
     } catch (error) {
       console.error("Error fetching merit list:", error);
+
+      // 🔴 TEMP DUMMY DATA (REMOVE LATER)
+      setCandidates([
+        { id: 1, name: "Rahul Sharma", email: "rahul@gmail.com", score: 92 },
+        { id: 2, name: "Priya Verma", email: "priya@gmail.com", score: 88 },
+        { id: 3, name: "Amit Singh", email: "amit@gmail.com", score: 84 },
+      ]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -19,44 +34,71 @@ function FinalMeritList() {
   }, []);
 
   return (
-    <div className="p-6 ml-64">
-      <h2 className="text-2xl font-bold mb-4">Final Merit List</h2>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
+      <AdminNavbar />
 
-      <table className="w-full bg-white shadow rounded">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="p-3">Rank</th>
-            <th className="p-3">Candidate Name</th>
-            <th className="p-3">Vacancy</th>
-            <th className="p-3">Final Score</th>
-            <th className="p-3">Status</th>
-          </tr>
-        </thead>
+      <div className="p-6 space-y-6">
 
-        <tbody>
-          {data.length === 0 ? (
-            <tr>
-              <td colSpan="5" className="text-center p-4">
-                No data available
-              </td>
-            </tr>
+        {/* 🔥 HEADER */}
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
+          Final Merit List
+        </h2>
+
+        {/* 📊 CONTENT */}
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow">
+
+          {loading ? (
+            <p className="text-center text-gray-500">
+              Loading merit list...
+            </p>
+          ) : candidates.length === 0 ? (
+            <p className="text-center text-gray-500">
+              No candidates selected yet
+            </p>
           ) : (
-            data.map((item, index) => (
-              <tr key={item.id} className="border-t text-center">
-                <td className="p-3">{index + 1}</td>
-                <td className="p-3">{item.name}</td>
-                <td className="p-3">{item.vacancy}</td>
-                <td className="p-3">{item.score}</td>
-                <td className="p-3">
-                  <span className="px-2 py-1 bg-green-500 text-white rounded">
-                    {item.status}
-                  </span>
-                </td>
-              </tr>
-            ))
+            <table className="w-full text-left">
+
+              <thead className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                <tr>
+                  <th className="p-3">Rank</th>
+                  <th className="p-3">Name</th>
+                  <th className="p-3">Email</th>
+                  <th className="p-3">Score</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {candidates
+                  .sort((a, b) => b.score - a.score)
+                  .map((c, index) => (
+                    <tr
+                      key={c.id}
+                      className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      <td className="p-3 font-bold text-blue-600">
+                        #{index + 1}
+                      </td>
+
+                      <td className="p-3 text-gray-800 dark:text-gray-100">
+                        {c.name}
+                      </td>
+
+                      <td className="p-3 text-gray-700 dark:text-gray-300">
+                        {c.email}
+                      </td>
+
+                      <td className="p-3 text-green-600 font-semibold">
+                        {c.score}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+
+            </table>
           )}
-        </tbody>
-      </table>
+        </div>
+
+      </div>
     </div>
   );
 }

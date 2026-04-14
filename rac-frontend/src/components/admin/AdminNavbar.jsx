@@ -10,74 +10,56 @@ function AdminNavbar() {
     navigate("/login");
   };
 
-  const linkStyle =
-    "px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700";
-
-  const activeStyle =
-    "bg-blue-600 text-white hover:bg-blue-700";
+  const linkClass = ({ isActive }) =>
+    `px-3 py-2 rounded-md text-sm font-medium ${
+      isActive
+        ? "bg-blue-600 text-white"
+        : "text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
+    }`;
 
   return (
-    <nav className="flex items-center justify-between px-6 py-4 bg-white dark:bg-gray-900 shadow">
+    <nav className="flex justify-between items-center px-6 py-3 bg-white dark:bg-gray-900 shadow">
       
-      {/* LOGO */}
-      <h1 className="text-xl font-bold text-gray-800 dark:text-white">
+      {/* LEFT */}
+      <h1 className="text-lg font-bold text-gray-800 dark:text-white">
         Admin Panel
       </h1>
 
-      {/* MENU */}
-      <div className="flex items-center gap-4">
-        <NavLink
-          to="/admin"
-          className={({ isActive }) =>
-            `${linkStyle} ${isActive ? activeStyle : "text-gray-700 dark:text-gray-200"}`
-          }
-        >
+      {/* CENTER MENU */}
+      <div className="flex gap-4">
+        <NavLink to="/admin" className={linkClass}>
           Dashboard
         </NavLink>
 
-        <NavLink
-          to="/admin/vacancies"
-          className={({ isActive }) =>
-            `${linkStyle} ${isActive ? activeStyle : "text-gray-700 dark:text-gray-200"}`
-          }
-        >
+        <NavLink to="/admin/vacancies" className={linkClass}>
           Vacancies
         </NavLink>
 
-        <NavLink
-          to="/admin/applications"
-          className={({ isActive }) =>
-            `${linkStyle} ${isActive ? activeStyle : "text-gray-700 dark:text-gray-200"}`
-          }
-        >
+        <NavLink to="/admin/applications" className={linkClass}>
           Applications
         </NavLink>
 
-        <NavLink
-          to="/admin/results"
-          className={({ isActive }) =>
-            `${linkStyle} ${isActive ? activeStyle : "text-gray-700 dark:text-gray-200"}`
-          }
-        >
+        <NavLink to="/admin/shortlisting" className={linkClass}>
+          Shortlisting
+        </NavLink>
+
+        <NavLink to="/admin/results" className={linkClass}>
           Results
         </NavLink>
       </div>
 
-      {/* RIGHT SIDE */}
+      {/* RIGHT */}
       <div className="flex items-center gap-3">
-        
-        {/* THEME TOGGLE */}
         <button
           onClick={toggleTheme}
-          className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-sm"
+          className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded"
         >
-          {theme === "dark" ? "☀ Light" : "🌙 Dark"}
+          {theme === "dark" ? "☀️" : "🌙"}
         </button>
 
-        {/* LOGOUT */}
         <button
           onClick={handleLogout}
-          className="px-3 py-1 bg-red-500 text-white rounded text-sm"
+          className="bg-red-600 text-white px-3 py-1 rounded"
         >
           Logout
         </button>
