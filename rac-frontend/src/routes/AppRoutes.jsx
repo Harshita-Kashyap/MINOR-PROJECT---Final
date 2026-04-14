@@ -58,23 +58,41 @@ function AppRoutes() {
           }
         />
 
-        {/* 👇 NESTED SELECTOR ROUTES */}
-        <Route
-          path="/selector/candidates"
-          element={<SelectorCandidates />}
-        />
-        <Route
-          path="/selector/candidate/:id"
-          element={<SelectorCandidateDetail />}
-        />
-        <Route
-          path="/selector/evaluation/:id"
-          element={<SelectorEvaluation />}
-        />
-        <Route
-          path="/selector/analytics"
-          element={<SelectorAnalytics />}
-        />
+       <Route
+  path="/selector/candidates"
+  element={
+    <ProtectedRoute allowedRoles={["selector"]}>
+      <SelectorCandidates />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/selector/candidate/:id"
+  element={
+    <ProtectedRoute allowedRoles={["selector"]}>
+      <SelectorCandidateDetail />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/selector/evaluation/:id"
+  element={
+    <ProtectedRoute allowedRoles={["selector"]}>
+      <SelectorEvaluation />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/selector/analytics"
+  element={
+    <ProtectedRoute allowedRoles={["selector"]}>
+      <SelectorAnalytics />
+    </ProtectedRoute>
+  }
+/>
 
         {/* Default */}
         <Route path="*" element={<Landing />} />
