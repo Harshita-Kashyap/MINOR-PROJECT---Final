@@ -9,11 +9,9 @@ import Captcha from "../../../components/ui/Captcha";
 import IdentityFields from "../../../components/common/IdentityFields";
 import AuthSection from "../../../components/common/AuthSection";
 
-import { useAuth } from "../useAuth";
 import { validateLogin } from "../validation";
 
 function Login() {
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [loginType, setLoginType] = useState("mobile");
@@ -26,7 +24,6 @@ function Login() {
     year: "",
     password: "",
     captcha: "",
-    role: "applicant",
   });
 
   const [errors, setErrors] = useState({});
@@ -50,9 +47,12 @@ function Login() {
     else loginId = form.roll;
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      // ✅ FIXED API URL
+      const response = await fetch("http://localhost:5000/api/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           loginId,
           password: form.password,
@@ -63,14 +63,27 @@ function Login() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        login(loginId, form.password, form.role);
-        navigate("/applicant");
+        console.log("✅ Login Success:", data);
+
+        // ✅ STORE USER
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        const role = data.user.role;
+
+        // ✅ ROLE BASED REDIRECT
+        if (role === "admin") {
+          navigate("/admin");
+        } else if (role === "selector") {
+          navigate("/selector");
+        } else {
+          navigate("/applicant");
+        }
       } else {
-        alert(data.message || "You are not registered or credentials invalid.");
+        alert(data.message || "Invalid credentials");
       }
     } catch (err) {
-      console.error("Login Error:", err);
-      alert("Database connection failed. Is the server running?");
+      console.error("❌ Login Error:", err);
+      alert("Server error. Please check backend.");
     }
   };
 
@@ -78,49 +91,40 @@ function Login() {
     <AuthLayout>
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-colors dark:border-gray-700 dark:bg-gray-800"
+        className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm"
       >
-        {/* HEADER */}
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Login
-          </h2>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-            Access your account securely
-          </p>
+          <h2 className="text-2xl font-semibold">Login</h2>
         </div>
 
         {/* LOGIN TYPE */}
         <AuthSection title="Select Login Method">
-          <div className="space-y-3 text-sm text-gray-700 dark:text-gray-200">
-            <label className="flex items-center gap-2 cursor-pointer">
+          <div className="space-y-3 text-sm">
+            <label>
               <input
                 type="radio"
                 checked={loginType === "mobile"}
                 onChange={() => setLoginType("mobile")}
-                className="h-4 w-4 accent-blue-600"
               />
-              <span>Mobile</span>
+              Mobile
             </label>
 
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label>
               <input
                 type="radio"
                 checked={loginType === "email"}
                 onChange={() => setLoginType("email")}
-                className="h-4 w-4 accent-blue-600"
               />
-              <span>Email</span>
+              Email
             </label>
 
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label>
               <input
                 type="radio"
                 checked={loginType === "identity"}
                 onChange={() => setLoginType("identity")}
-                className="h-4 w-4 accent-blue-600"
               />
-              <span>Identity</span>
+              Identity
             </label>
           </div>
         </AuthSection>
@@ -129,11 +133,10 @@ function Login() {
         <div className="space-y-4">
           {loginType === "mobile" && (
             <Input
-              label="Mobile Number"
+              label="Mobile"
               name="mobile"
               value={form.mobile}
               onChange={handleChange}
-              error={errors.mobile}
             />
           )}
 
@@ -143,18 +146,11 @@ function Login() {
               name="email"
               value={form.email}
               onChange={handleChange}
-              error={errors.email}
             />
           )}
 
           {loginType === "identity" && (
-            <AuthSection>
-              <IdentityFields
-                form={form}
-                errors={errors}
-                handleChange={handleChange}
-              />
-            </AuthSection>
+            <IdentityFields form={form} handleChange={handleChange} />
           )}
 
           <Input
@@ -163,40 +159,22 @@ function Login() {
             name="password"
             value={form.password}
             onChange={handleChange}
-            error={errors.password}
           />
 
-          <div className="flex flex-col sm:flex-row gap-3 w-full">
-            <div className="flex-1">
-              <Captcha setCaptchaText={setCaptchaText} />
-            </div>
+          <Captcha setCaptchaText={setCaptchaText} />
 
-            <div className="flex-1">
-              <Input
-                label="Enter Captcha"
-                type="text"
-                name="captcha"
-                value={form.captcha}
-                onChange={handleChange}
-                error={errors.captcha}
-              />
-            </div>
-          </div>
+          <Input
+            label="Enter Captcha"
+            name="captcha"
+            value={form.captcha}
+            onChange={handleChange}
+          />
 
-          <Button type="submit" fullWidth>
-            Login
-          </Button>
+          <Button type="submit">Login</Button>
         </div>
 
-        {/* FOOTER */}
-        <p className="text-sm text-center text-gray-600 dark:text-gray-300">
-          Don’t have an account?{" "}
-          <Link
-            to="/register"
-            className="font-medium text-blue-600 hover:underline dark:text-blue-400"
-          >
-            Register
-          </Link>
+        <p className="text-sm text-center">
+          Don’t have an account? <Link to="/register">Register</Link>
         </p>
       </form>
     </AuthLayout>
