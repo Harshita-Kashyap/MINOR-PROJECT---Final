@@ -1,8 +1,8 @@
-// src/components/applicant/ApplicantRibbon.jsx
 import { NavLink } from "react-router-dom";
 
 const links = [
   { name: "Dashboard", path: "/applicant" },
+  { name: "Profile", path: "/applicant/profile" },
   { name: "Vacancies", path: "/applicant/vacancies" },
   { name: "My Applications", path: "/applicant/applications" },
   { name: "Technical Test", path: "/applicant/technical-test" },

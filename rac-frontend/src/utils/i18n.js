@@ -6,6 +6,7 @@ i18n.use(initReactI18next).init({
     en: {
       translation: {
         login: "Login",
+        logout: "Logout",
         vacancies: "Vacancies",
         notices: "Notices",
         disclaimer: "Disclaimer",
@@ -35,6 +36,7 @@ i18n.use(initReactI18next).init({
     hi: {
       translation: {
         login: "लॉगिन",
+        logout: "लॉगआउट",
         vacancies: "रिक्तियां",
         notices: "सूचनाएं",
         disclaimer: "अस्वीकरण",
