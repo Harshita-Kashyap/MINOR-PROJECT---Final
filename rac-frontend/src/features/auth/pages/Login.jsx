@@ -36,7 +36,7 @@ function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => { // Added async
     e.preventDefault();
 
     const validationErrors = validateLogin(form, captchaText, loginType);
@@ -47,25 +47,46 @@ function Login() {
     let loginId = "";
     if (loginType === "mobile") loginId = form.mobile;
     else if (loginType === "email") loginId = form.email;
-    else loginId = form.roll;
+    else loginId = form.roll; // Using roll for identity-based lookup
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      // Sending login request to the backend
+      const response = await fetch("http://localhost:5000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           loginId,
           password: form.password,
-          loginType,
+          loginType
         }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        login(loginId, form.password, form.role);
-        navigate("/applicant");
+        // If MySQL returns success, update the local Auth state
+        if (response.ok && data.role) {
+
+  // 🔥 Save full user data (IMPORTANT)
+  localStorage.setItem("user", JSON.stringify(data));
+
+  // 🔥 Update auth state (optional but fine)
+  login(loginId, form.password, data.role);
+
+  // 🔥 ROLE BASED REDIRECT
+  if (data.role === "admin") {
+    navigate("/admin");
+  } else if (data.role === "selector") {
+    navigate("/selector");
+  } else {
+    navigate("/applicant");
+  }
+
+} else {
+  alert(data.message || "Invalid credentials");
+}
       } else {
+        // If MySQL returns no user found or wrong password
         alert(data.message || "You are not registered or credentials invalid.");
       }
     } catch (err) {
@@ -76,57 +97,36 @@ function Login() {
 
   return (
     <AuthLayout>
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-colors dark:border-gray-700 dark:bg-gray-800"
-      >
+      <form onSubmit={handleSubmit} className="space-y-6">
+
         {/* HEADER */}
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Login
-          </h2>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-            Access your account securely
-          </p>
+          <h2 className="text-2xl font-semibold">Login</h2>
         </div>
 
         {/* LOGIN TYPE */}
         <AuthSection title="Select Login Method">
-          <div className="space-y-3 text-sm text-gray-700 dark:text-gray-200">
+          <div className="space-y-2 text-sm">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                checked={loginType === "mobile"}
-                onChange={() => setLoginType("mobile")}
-                className="h-4 w-4 accent-blue-600"
-              />
-              <span>Mobile</span>
+              <input type="radio" checked={loginType === "mobile"} onChange={() => setLoginType("mobile")} />
+              Mobile
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                checked={loginType === "email"}
-                onChange={() => setLoginType("email")}
-                className="h-4 w-4 accent-blue-600"
-              />
-              <span>Email</span>
+              <input type="radio" checked={loginType === "email"} onChange={() => setLoginType("email")} />
+              Email
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                checked={loginType === "identity"}
-                onChange={() => setLoginType("identity")}
-                className="h-4 w-4 accent-blue-600"
-              />
-              <span>Identity</span>
+              <input type="radio" checked={loginType === "identity"} onChange={() => setLoginType("identity")} />
+              Identity
             </label>
           </div>
         </AuthSection>
 
         {/* FORM */}
         <div className="space-y-4">
+
           {loginType === "mobile" && (
             <Input
               label="Mobile Number"
@@ -148,7 +148,7 @@ function Login() {
           )}
 
           {loginType === "identity" && (
-            <AuthSection>
+            <AuthSection >
               <IdentityFields
                 form={form}
                 errors={errors}
@@ -166,38 +166,41 @@ function Login() {
             error={errors.password}
           />
 
-          <div className="flex flex-col sm:flex-row gap-3 w-full">
-            <div className="flex-1">
-              <Captcha setCaptchaText={setCaptchaText} />
-            </div>
+         <div className="flex flex-col sm:flex-row gap-3 w-full">
 
-            <div className="flex-1">
-              <Input
-                label="Enter Captcha"
-                type="text"
-                name="captcha"
-                value={form.captcha}
-                onChange={handleChange}
-                error={errors.captcha}
-              />
-            </div>
+          {/* Captcha Display */}
+          <div className="flex-1">
+            <Captcha setCaptchaText={setCaptchaText} />
           </div>
+
+          {/* Input */}
+          <div className="flex-1">
+            <Input
+              label="Enter Captcha"
+              type="text"
+              name="captcha"
+              value={form.captcha}
+              onChange={handleChange}
+              error={errors.captcha}
+            />
+          </div>
+
+        </div>
 
           <Button type="submit" fullWidth>
             Login
           </Button>
+
         </div>
 
         {/* FOOTER */}
-        <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+        <p className="text-sm text-center">
           Don’t have an account?{" "}
-          <Link
-            to="/register"
-            className="font-medium text-blue-600 hover:underline dark:text-blue-400"
-          >
+          <Link to="/register" className="text-blue-600 hover:underline">
             Register
           </Link>
         </p>
+
       </form>
     </AuthLayout>
   );
