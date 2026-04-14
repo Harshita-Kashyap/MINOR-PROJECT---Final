@@ -9,7 +9,7 @@ const SelectorCandidateDetail = () => {
   const [decision, setDecision] = useState("");
   const [remarks, setRemarks] = useState("");
 
-  // 🔥 Dummy parsed data (replace with backend later)
+  // Dummy parsed data
   const candidate = {
     cid: "RAC/2026/CS/001",
     name: "Aditi Sharma",
@@ -34,88 +34,158 @@ const SelectorCandidateDetail = () => {
       <Header />
       <SelectorRibbon />
 
-      <div className="p-6 bg-gray-50 min-h-screen space-y-6">
+      <div className="min-h-screen space-y-6 bg-gray-50 p-6 text-gray-900 transition-colors dark:bg-gray-900 dark:text-gray-100">
+        {/* HEADER */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+              Candidate Detail
+            </h1>
+            <p className="mt-1 text-gray-500 dark:text-gray-400">
+              ID: {candidate.cid}
+            </p>
+          </div>
 
-        {/* 🔷 HEADER */}
-        <div>
-          <h1 className="text-3xl font-bold">Candidate Detail</h1>
-          <p className="text-gray-500">ID: {candidate.cid}</p>
+          <div className="flex flex-wrap gap-2">
+            <Badge text="Interview Stage" color="blue" />
+            <Badge text="Verified Profile" color="green" />
+            <Badge text={`Match Score: 80%`} color="purple" />
+          </div>
         </div>
 
-        {/* 🔷 PROFILE */}
-        <Section title="Candidate Profile">
-          <p>Name: {candidate.name}</p>
-          <p>Email: {candidate.email}</p>
-          <p>Phone: {candidate.phone}</p>
-        </Section>
+        {/* TOP SUMMARY */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <div className="xl:col-span-2 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/30">
+            <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
+              Candidate Profile
+            </h2>
 
-        {/* 🔷 PARSED RESUME */}
-        <Section title="Parsed Resume Data">
-          <p><b>Skills:</b> {candidate.skills.join(", ")}</p>
-          <p><b>Education:</b> {candidate.education}</p>
-          <p><b>Experience:</b> {candidate.experience}</p>
-          <p><b>Projects:</b> {candidate.projects}</p>
-        </Section>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <InfoCard label="Name" value={candidate.name} />
+              <InfoCard label="Email" value={candidate.email} />
+              <InfoCard label="Phone" value={candidate.phone} />
+              <InfoCard label="Education" value={candidate.education} />
+            </div>
+          </div>
 
-        {/* 🔷 ELIGIBILITY */}
-        <Section title="Eligibility Check">
-          <p>GATE Qualified: ✅</p>
-          <p>Minimum CGPA: ✅</p>
-          <p>Age Criteria: ✅</p>
-        </Section>
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/30">
+            <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
+              Score Snapshot
+            </h2>
 
-        {/* 🔷 SKILL MATCHING */}
-        <Section title="Vacancy Matching">
-          <p>Required Skills: React, Node, AI</p>
-          <p>Matched Skills: React, Node</p>
-          <p>Match Score: 80%</p>
-        </Section>
-
-        {/* 🔷 PROGRESS */}
-        <Section title="Selection Progress">
-          <Progress stage={candidate.stage} />
-        </Section>
-
-        {/* 🔷 SCORES */}
-        <Section title="Evaluation Scores">
-          <p>GATE Score: {candidate.gate}</p>
-          <p>Technical Score: {candidate.technical}</p>
-          <p>Personality Score: {candidate.personality}</p>
-        </Section>
-
-        {/* 🔷 VERIFICATION */}
-        <Section title="Resume Verification">
-          <p>Verification Score: {candidate.verificationScore}</p>
-          <p>Status: <span className="text-green-600">Verified</span></p>
-        </Section>
-
-        {/* 🔷 DECISION PANEL */}
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h2 className="font-semibold mb-3 text-lg">Final Decision</h2>
-
-          <select
-            className="border p-2 rounded w-full"
-            value={decision}
-            onChange={(e) => setDecision(e.target.value)}
-          >
-            <option>Select Decision</option>
-            <option>Recommended for Selection</option>
-            <option>Not Recommended</option>
-            <option>Hold</option>
-          </select>
-
-          <textarea
-            placeholder="Enter remarks..."
-            className="w-full border p-3 rounded mt-4"
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
-          />
-
-          <button className="mt-4 bg-blue-600 text-white px-6 py-2 rounded">
-            Submit Decision
-          </button>
+            <div className="space-y-4">
+              <ScoreRow label="GATE" value={candidate.gate} color="blue" />
+              <ScoreRow
+                label="Technical"
+                value={candidate.technical}
+                color="green"
+              />
+              <ScoreRow
+                label="Personality"
+                value={candidate.personality}
+                color="purple"
+              />
+              <ScoreRow
+                label="Verification"
+                value={`${candidate.verificationScore}%`}
+                color="amber"
+              />
+            </div>
+          </div>
         </div>
 
+        {/* MAIN DETAIL GRID */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <Section title="Parsed Resume Data">
+            <DetailItem label="Skills">
+              <div className="flex flex-wrap gap-2">
+                {candidate.skills.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </DetailItem>
+            <DetailItem label="Education">{candidate.education}</DetailItem>
+            <DetailItem label="Experience">{candidate.experience}</DetailItem>
+            <DetailItem label="Projects">{candidate.projects}</DetailItem>
+          </Section>
+
+          <Section title="Eligibility Check">
+            <ChecklistItem label="GATE Qualified" status="success" />
+            <ChecklistItem label="Minimum CGPA" status="success" />
+            <ChecklistItem label="Age Criteria" status="success" />
+          </Section>
+
+          <Section title="Vacancy Matching">
+            <DetailItem label="Required Skills">React, Node, AI</DetailItem>
+            <DetailItem label="Matched Skills">React, Node</DetailItem>
+            <DetailItem label="Match Score">
+              <span className="font-semibold text-purple-600 dark:text-purple-400">
+                80%
+              </span>
+            </DetailItem>
+          </Section>
+
+          <Section title="Selection Progress">
+            <Progress stage={candidate.stage} />
+          </Section>
+
+          <Section title="Evaluation Scores">
+            <DetailItem label="GATE Score">{candidate.gate}</DetailItem>
+            <DetailItem label="Technical Score">{candidate.technical}</DetailItem>
+            <DetailItem label="Personality Score">{candidate.personality}</DetailItem>
+          </Section>
+
+          <Section title="Resume Verification">
+            <DetailItem label="Verification Score">
+              <span className="font-semibold text-blue-600 dark:text-blue-400">
+                {candidate.verificationScore}%
+              </span>
+            </DetailItem>
+            <DetailItem label="Status">
+              <span className="font-semibold text-green-600 dark:text-green-400">
+                Verified
+              </span>
+            </DetailItem>
+          </Section>
+        </div>
+
+        {/* FINAL DECISION */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/30">
+          <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
+            Final Decision
+          </h2>
+
+          <div className="grid grid-cols-1 gap-4">
+            <select
+              className="w-full rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+              value={decision}
+              onChange={(e) => setDecision(e.target.value)}
+            >
+              <option value="">Select Decision</option>
+              <option>Recommended for Selection</option>
+              <option>Not Recommended</option>
+              <option>Hold</option>
+            </select>
+
+            <textarea
+              placeholder="Enter remarks..."
+              className="min-h-[140px] w-full rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-900"
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+            />
+
+            <div className="flex justify-end">
+              <button className="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">
+                Submit Decision
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );
@@ -123,31 +193,113 @@ const SelectorCandidateDetail = () => {
 
 export default SelectorCandidateDetail;
 
-
-
-/* 🔹 SECTION COMPONENT */
+/* SECTION */
 const Section = ({ title, children }) => (
-  <div className="bg-white p-6 rounded-2xl shadow">
-    <h2 className="font-semibold mb-3 text-lg">{title}</h2>
-    {children}
+  <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/30">
+    <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
+      {title}
+    </h2>
+    <div className="space-y-4">{children}</div>
   </div>
 );
 
+/* INFO CARD */
+const InfoCard = ({ label, value }) => (
+  <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-700/40">
+    <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+    <p className="mt-1 font-medium text-gray-800 dark:text-white">{value}</p>
+  </div>
+);
 
+/* DETAIL ITEM */
+const DetailItem = ({ label, children }) => (
+  <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-700/40">
+    <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+    <div className="mt-2 text-sm font-medium text-gray-800 dark:text-gray-100">
+      {children}
+    </div>
+  </div>
+);
 
-/* 🔹 PROGRESS */
-const Progress = ({ stage }) => {
-  const steps = ["Screening", "Technical", "Interview", "Final"];
+/* SCORE ROW */
+const ScoreRow = ({ label, value, color = "blue" }) => {
+  const colorMap = {
+    blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+    green:
+      "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+    purple:
+      "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+    amber:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+  };
 
   return (
-    <div className="flex gap-2 text-sm">
+    <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 dark:bg-gray-700/40">
+      <span className="text-sm text-gray-600 dark:text-gray-300">{label}</span>
+      <span
+        className={`rounded-full px-3 py-1 text-xs font-semibold ${colorMap[color]}`}
+      >
+        {value}
+      </span>
+    </div>
+  );
+};
+
+/* BADGE */
+const Badge = ({ text, color = "blue" }) => {
+  const colorMap = {
+    blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+    green:
+      "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+    purple:
+      "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+  };
+
+  return (
+    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${colorMap[color]}`}>
+      {text}
+    </span>
+  );
+};
+
+/* CHECKLIST ITEM */
+const ChecklistItem = ({ label, status = "success" }) => {
+  const statusMap = {
+    success: "text-green-600 dark:text-green-400",
+    warning: "text-yellow-600 dark:text-yellow-400",
+    danger: "text-red-600 dark:text-red-400",
+  };
+
+  const statusText = {
+    success: "Passed ✔",
+    warning: "Pending",
+    danger: "Failed",
+  };
+
+  return (
+    <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 dark:bg-gray-700/40">
+      <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
+      <span className={`text-sm font-semibold ${statusMap[status]}`}>
+        {statusText[status]}
+      </span>
+    </div>
+  );
+};
+
+/* PROGRESS */
+const Progress = ({ stage }) => {
+  const steps = ["Screening", "Technical", "Interview", "Final"];
+  const currentIndex = steps.indexOf(stage);
+
+  return (
+    <div className="flex flex-wrap gap-2">
       {steps.map((step, i) => (
         <span
           key={i}
-          className={`px-3 py-1 rounded ${
-            steps.indexOf(stage) >= i
-              ? "bg-green-500 text-white"
-              : "bg-gray-200"
+          className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
+            currentIndex >= i
+              ? "bg-green-500 text-white dark:bg-green-600"
+              : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
           }`}
         >
           {step}
