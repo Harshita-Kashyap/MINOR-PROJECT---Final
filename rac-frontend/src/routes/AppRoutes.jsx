@@ -1,4 +1,3 @@
-const user = JSON.parse(localStorage.getItem("user"));
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "../features/auth/pages/Login";
@@ -7,20 +6,24 @@ import Register from "../features/auth/pages/Register";
 import AdminDashboard from "../pages/AdminDashboard";
 import ApplicantDashboard from "../pages/ApplicantDashboard";
 import SelectorDashboard from "../pages/SelectorDashboard";
+import SelectorCandidates from "../pages/SelectorCandidates";
+import SelectorCandidateDetail from "../pages/SelectorCandidateDetail";
+import SelectorEvaluation from "../pages/SelectorEvaluation";
+import SelectorAnalytics from "../pages/SelectorAnalytics";
 
 import ProtectedRoute from "./ProtectedRoute";
-
 import Landing from "../pages/Landing";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+
         {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Role-based Routes */}
+        {/* Admin */}
         <Route
           path="/admin"
           element={
@@ -30,6 +33,7 @@ function AppRoutes() {
           }
         />
 
+        {/* Applicant */}
         <Route
           path="/applicant"
           element={
@@ -39,8 +43,9 @@ function AppRoutes() {
           }
         />
 
+        {/* 🔥 SELECTOR (UPDATED) */}
         <Route
-          path="/selector"
+          path="/selector/*"
           element={
             <ProtectedRoute allowedRoles={["selector"]}>
               <SelectorDashboard />
@@ -48,6 +53,25 @@ function AppRoutes() {
           }
         />
 
+        {/* 👇 NESTED SELECTOR ROUTES */}
+        <Route
+          path="/selector/candidates"
+          element={<SelectorCandidates />}
+        />
+        <Route
+          path="/selector/candidate/:id"
+          element={<SelectorCandidateDetail />}
+        />
+        <Route
+          path="/selector/evaluation/:id"
+          element={<SelectorEvaluation />}
+        />
+        <Route
+          path="/selector/analytics"
+          element={<SelectorAnalytics />}
+        />
+
+        {/* Default */}
         <Route path="*" element={<Landing />} />
 
       </Routes>
