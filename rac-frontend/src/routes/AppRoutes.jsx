@@ -15,8 +15,6 @@ import PersonalityTest from "../pages/PersonalityTest";
 import ApplicantProfile from "../pages/ApplicantProfile";
 import ApplicantVacancyDetails from "../pages/ApplicantVacancyDetails";
 
-<<<<<<< HEAD
-import Landing from "../pages/Landing";
 import Chairman from "../pages/Chairman";
 import Director from "../pages/Director";
 import Approach from "../pages/Approach";
@@ -31,21 +29,17 @@ import DRDS from "../pages/DRDS";
 import FAQs from "../pages/FAQs";
 import Grahpatrika from "../pages/Grahpatrika";
 
-=======
->>>>>>> 5dc9d00136eab0ad399b093c67808e1c0ba5ed5a
 import ProtectedRoute from "./ProtectedRoute";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-<<<<<<< HEAD
-        {/* Public pages */}
-        <Route path="/" element={<Landing />} />
         <Route path="/chairman" element={<Chairman />} />
         <Route path="/director" element={<Director />} />
         <Route path="/approach" element={<Approach />} />
@@ -60,9 +54,7 @@ function AppRoutes() {
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/grahpatrika" element={<Grahpatrika />} />
 
-        {/* Role-based Routes */}
-=======
->>>>>>> 5dc9d00136eab0ad399b093c67808e1c0ba5ed5a
+        {/* Admin routes */}
         <Route
           path="/admin"
           element={
@@ -72,6 +64,7 @@ function AppRoutes() {
           }
         />
 
+        {/* Selector routes */}
         <Route
           path="/selector"
           element={
@@ -81,6 +74,7 @@ function AppRoutes() {
           }
         />
 
+        {/* Applicant routes */}
         <Route
           path="/applicant"
           element={
