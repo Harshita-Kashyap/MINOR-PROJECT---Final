@@ -1,6 +1,5 @@
 // src/pages/ApplicantDashboard.jsx
 import Header from "../components/landing/Header";
-import LandingNavbar from "../components/landing/LandingNavbar";
 import ApplicantRibbon from "../components/applicant/ApplicantRibbon";
 import ApplicantStats from "../components/applicant/ApplicantStats";
 import VacancyCard from "../components/applicant/VacancyCard";
@@ -47,7 +46,6 @@ export default function ApplicantDashboard() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <Header />
-      <LandingNavbar />
       <ApplicantRibbon />
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
