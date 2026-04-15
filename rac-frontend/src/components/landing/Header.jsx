@@ -1,40 +1,58 @@
-import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Button from "../ui/Button";
 import ThemeToggle from "../common/ThemeToggle";
 
 export default function Header() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, i18n } = useTranslation();
 
-  const user = (() => {
-  try {
-      return JSON.parse(localStorage.getItem("user"));
+  const pathname = location.pathname;
+
+  const user = useMemo(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
     }
-  })();
+  }, [pathname]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
+  const isAuthPage = pathname === "/login" || pathname === "/register";
+
+  const isDashboardPage =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/applicant") ||
+    pathname.startsWith("/selector");
+
+  const isPublicPage = !isAuthPage && !isDashboardPage;
+
+  const handleLogin = () => {
     navigate("/login");
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/", { replace: true });
+  };
+
+  const roleLabel = user?.role
+    ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+    : "";
+
   return (
     <header className="flex flex-col gap-4 bg-white px-6 py-4 shadow-sm transition-colors dark:bg-gray-800 sm:flex-row sm:items-center sm:justify-between">
-      
-      {/* Left */}
-      <div className="flex items-center gap-3">
-        {/* Logo */}
+      <div className="flex min-w-0 items-center gap-3">
         <img
           src="https://rac.gov.in/images/rac_logo_2025_sm.png"
           alt="RAC Logo"
           className="h-12 w-auto object-contain"
         />
 
-        {/* Text */}
-        <div>
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="min-w-0">
+          <h1 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
             Recruitment &amp; Assessment Centre (RAC)
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-300">
@@ -43,10 +61,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Right */}
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        
-        {/* Language Switcher */}
         <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-1 dark:border-gray-700 dark:bg-gray-900">
           <button
             type="button"
@@ -73,19 +88,20 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Theme Toggle */}
         <ThemeToggle />
 
-        {/* Auth Section */}
-        {!user ? (
-          <Button onClick={() => navigate("/login")}>
+        {isPublicPage && (
+          <Button onClick={handleLogin}>
             {t("login")}
           </Button>
-        ) : (
+        )}
+
+        {isDashboardPage && user && (
           <div className="flex items-center gap-2">
-            <span className="rounded-lg bg-gray-100 px-3 py-2 text-sm capitalize text-gray-700 dark:bg-gray-700 dark:text-gray-200">
-              {user.role}
+            <span className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+              {roleLabel}
             </span>
+
             <Button variant="outline" onClick={handleLogout}>
               {t("logout")}
             </Button>

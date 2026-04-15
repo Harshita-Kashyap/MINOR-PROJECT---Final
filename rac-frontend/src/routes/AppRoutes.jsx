@@ -29,6 +29,8 @@ import ApplicationsManagement from "../pages/ApplicationsManagement";
 import Shortlisting from "../pages/Shortlisting";
 import FinalMeritList from "../pages/FinalMeritList";
 import EditVacancy from "../pages/EditVacancy";
+import AdminNavbar from "../components/admin/AdminNavbar";
+import AdminAnalytics from "../pages/AdminAnalytics";
 
 // ================= APPLICANT PAGES =================
 import ApplicantDashboard from "../pages/ApplicantDashboard";
@@ -123,6 +125,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <FinalMeritList />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/analytics"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminAnalytics />
             </ProtectedRoute>
           }
         />
