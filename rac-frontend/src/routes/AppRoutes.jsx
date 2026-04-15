@@ -20,10 +20,11 @@ import DirectRecruitment from "../pages/DirectRecruitment";
 import DRDS from "../pages/DRDS";
 import FAQs from "../pages/FAQs";
 import Grahpatrika from "../pages/Grahpatrika";
+import CertificateFormats from "../pages/CertificateFormats";
 
 // ================= ADMIN PAGES =================
 import AdminDashboard from "../pages/AdminDashboard";
-import VacancyManagement from "../pages/VacancyManagement";
+import VacancyManagement from "../pages/VacancyManagement"; // 🔥 THIS IS YOUR VACANCY PAGE
 import CreateVacancy from "../pages/CreateVacancy";
 import ApplicationsManagement from "../pages/ApplicationsManagement";
 import Shortlisting from "../pages/Shortlisting";
@@ -52,7 +53,8 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ================= PUBLIC ROUTES ================= */}
+
+        {/* ================= PUBLIC ================= */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -70,8 +72,9 @@ function AppRoutes() {
         <Route path="/drds" element={<DRDS />} />
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/grahpatrika" element={<Grahpatrika />} />
+        <Route path="/certificate-formats" element={<CertificateFormats />} />
 
-        {/* ================= ADMIN ROUTES ================= */}
+        {/* ================= ADMIN ================= */}
         <Route
           path="/admin"
           element={
@@ -80,14 +83,16 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/vacancies"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <VacancyManagement />
+              <VacancyManagement /> {/* 🔥 USE THIS */}
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/create-vacancy"
           element={
@@ -96,6 +101,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/edit-vacancy/:id"
           element={
@@ -104,6 +110,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/applications"
           element={
@@ -112,6 +119,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/shortlisting"
           element={
@@ -120,6 +128,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/results"
           element={
@@ -138,7 +147,7 @@ function AppRoutes() {
           }
         />
 
-        {/* ================= APPLICANT ROUTES ================= */}
+        {/* ================= APPLICANT ================= */}
         <Route
           path="/applicant"
           element={
@@ -147,6 +156,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/applicant/vacancies"
           element={
@@ -155,6 +165,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/applicant/vacancies/:id"
           element={
@@ -163,6 +174,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/applicant/applications"
           element={
@@ -171,6 +183,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/applicant/technical-test"
           element={
@@ -179,6 +192,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/applicant/personality-test"
           element={
@@ -187,6 +201,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/applicant/profile"
           element={
@@ -196,7 +211,7 @@ function AppRoutes() {
           }
         />
 
-        {/* ================= SELECTOR ROUTES ================= */}
+        {/* ================= SELECTOR ================= */}
         <Route
           path="/selector"
           element={
@@ -205,6 +220,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/selector/candidates"
           element={
@@ -213,6 +229,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/selector/candidate/:id"
           element={
@@ -221,6 +238,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/selector/evaluation/:id"
           element={
@@ -229,6 +247,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/selector/analytics"
           element={
@@ -240,6 +259,7 @@ function AppRoutes() {
 
         {/* ================= FALLBACK ================= */}
         <Route path="*" element={<Landing />} />
+
       </Routes>
     </BrowserRouter>
   );

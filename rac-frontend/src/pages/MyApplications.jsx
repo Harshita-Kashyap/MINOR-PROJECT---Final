@@ -1,67 +1,118 @@
-// src/pages/MyApplications.jsx
 import { useEffect, useState } from "react";
-import Header from "../components/landing/Header";
-import ApplicantRibbon from "../components/applicant/ApplicantRibbon";
-import Table from "../components/ui/Table";
-import Badge from "../components/ui/Badge";
-import { getApplications } from "../utils/applicationStorage";
+import axios from "axios";
 
-function getBadgeVariant(status) {
-  if (status === "Applied") return "info";
-  if (status === "Under Review") return "warning";
-  if (status === "Technical Test Assigned") return "warning";
-  if (status === "Technical Test Completed") return "success";
-  if (status === "Personality Test Assigned") return "warning";
-  if (status === "Selected") return "success";
-  if (status === "Rejected") return "danger";
-  return "default";
-}
-
-export default function MyApplications() {
+function MyApplications() {
   const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const API = "http://localhost:5000/api";
+
+  // 🔥 Fetch applications
+  const fetchApplications = async () => {
+    try {
+      const res = await axios.get(`${API}/my-applications/${user.userId}`);
+      setApplications(res.data);
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔥 Auto refresh every 3 sec
   useEffect(() => {
-    const storedApplications = getApplications();
+    fetchApplications();
 
-    const formattedApplications = storedApplications.map((item) => ({
-      vacancy: item.vacancy,
-      appliedDate: item.appliedDate,
-      stage: <Badge variant={getBadgeVariant(item.stage)}>{item.stage}</Badge>,
-      technical: (
-        <Badge variant={getBadgeVariant(item.technical)}>{item.technical}</Badge>
-      ),
-      personality: (
-        <Badge variant={getBadgeVariant(item.personality)}>
-          {item.personality}
-        </Badge>
-      ),
-      final: <Badge variant={getBadgeVariant(item.final)}>{item.final}</Badge>,
-    }));
-
-    setApplications(formattedApplications);
+    const interval = setInterval(fetchApplications, 3000);
+    return () => clearInterval(interval);
   }, []);
 
-  const columns = [
-    "Vacancy",
-    "Applied Date",
-    "Current Stage",
-    "Technical Test",
-    "Personality Test",
-    "Final Status",
-  ];
+  // 🎨 Status styles
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case "Selected":
+        return "bg-green-100 text-green-700";
+      case "Rejected":
+        return "bg-red-100 text-red-700";
+      case "Shortlisted":
+        return "bg-yellow-100 text-yellow-700";
+      default:
+        return "bg-blue-100 text-blue-700";
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Header />
-      <ApplicantRibbon />
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-800 p-6">
+      
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">
+        My Applications
+      </h2>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        <h1 className="text-xl font-bold text-gray-800 dark:text-white">
-          My Applications
-        </h1>
+      {/* 🔄 Loading */}
+      {loading ? (
+        <p className="text-gray-500">Loading...</p>
+      ) : applications.length === 0 ? (
+        <p className="text-gray-500">No applications found</p>
+      ) : (
+        <div className="space-y-4">
+          {applications.map((app) => (
+            <div
+              key={app.id}
+              className="bg-white dark:bg-gray-900 p-5 rounded-xl shadow"
+            >
+              {/* Job Title */}
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                {app.title}
+              </h3>
 
-        <Table columns={columns} data={applications} />
-      </main>
+              {/* Department */}
+              <p className="text-sm text-gray-500">
+                {app.department}
+              </p>
+
+              {/* Status */}
+              <div className="mt-3">
+                <span
+                  className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusStyle(
+                    app.status
+                  )}`}
+                >
+                  {app.status}
+                </span>
+
+                {/* 🔥 EXTRA MESSAGE */}
+                {app.status === "Selected" && (
+                  <p className="text-green-600 font-semibold mt-2">
+                    🎉 Congratulations! You are selected
+                  </p>
+                )}
+
+                {app.status === "Rejected" && (
+                  <p className="text-red-500 mt-2">
+                    ❌ Better luck next time
+                  </p>
+                )}
+
+                {app.status === "Applied" && (
+                  <p className="text-blue-500 mt-2">
+                    ⏳ Your application is under review
+                  </p>
+                )}
+              </div>
+
+              {/* Applied Date */}
+              <p className="text-xs text-gray-400 mt-3">
+                Applied on:{" "}
+                {new Date(app.applied_at).toLocaleDateString()}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
+
+export default MyApplications;
