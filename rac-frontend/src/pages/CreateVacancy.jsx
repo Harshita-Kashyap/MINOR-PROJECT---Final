@@ -1,7 +1,7 @@
 import { useState } from "react";
 import AdminNavbar from "../components/admin/AdminNavbar";
 import { useNavigate } from "react-router-dom";
-import { createVacancy } from "../services/vacancyService";
+import axios from "axios";
 
 function CreateVacancy() {
   const navigate = useNavigate();
@@ -16,8 +16,9 @@ function CreateVacancy() {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
 
-  // ✅ Handle input change
+  // ✅ Handle input
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -26,11 +27,16 @@ function CreateVacancy() {
   const validate = () => {
     const newErrors = {};
 
-    if (!form.title) newErrors.title = "Title is required";
-    if (!form.department) newErrors.department = "Department is required";
-    if (!form.description) newErrors.description = "Description is required";
-    if (!form.eligibility) newErrors.eligibility = "Eligibility is required";
+    if (!form.title.trim()) newErrors.title = "Title is required";
+    if (!form.department.trim()) newErrors.department = "Department is required";
+    if (!form.description.trim()) newErrors.description = "Description is required";
+    if (!form.eligibility.trim()) newErrors.eligibility = "Eligibility is required";
     if (!form.deadline) newErrors.deadline = "Deadline is required";
+
+    // 🔥 Deadline should not be past date
+    if (form.deadline && new Date(form.deadline) < new Date()) {
+      newErrors.deadline = "Deadline must be a future date";
+    }
 
     return newErrors;
   };
@@ -46,11 +52,26 @@ function CreateVacancy() {
 
     try {
       setLoading(true);
+      setSuccess("");
 
-      await createVacancy(form);
+      await axios.post("http://localhost:5000/api/vacancies", form);
 
-      alert("✅ Vacancy created successfully!");
-      navigate("/admin/vacancies");
+      setSuccess("✅ Vacancy created successfully!");
+
+      // Reset form
+      setForm({
+        title: "",
+        department: "",
+        description: "",
+        eligibility: "",
+        deadline: "",
+      });
+
+      // Redirect after 1.5 sec
+      setTimeout(() => {
+        navigate("/admin/vacancies");
+      }, 1500);
+
     } catch (error) {
       console.error("Create error:", error);
       alert("❌ Failed to create vacancy");
@@ -69,6 +90,13 @@ function CreateVacancy() {
         <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">
           Create Vacancy
         </h2>
+
+        {/* ✅ SUCCESS MESSAGE */}
+        {success && (
+          <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">
+            {success}
+          </div>
+        )}
 
         {/* 📄 FORM */}
         <form
@@ -111,8 +139,8 @@ function CreateVacancy() {
               placeholder="Job Description"
               value={form.description}
               onChange={handleChange}
-              className="w-full p-2 border rounded dark:bg-gray-800 dark:text-white"
               rows="4"
+              className="w-full p-2 border rounded dark:bg-gray-800 dark:text-white"
             />
             {errors.description && (
               <p className="text-red-500 text-sm">{errors.description}</p>
@@ -151,9 +179,9 @@ function CreateVacancy() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2 rounded text-white ${
+            className={`w-full py-2 rounded text-white transition ${
               loading
-                ? "bg-gray-400"
+                ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700"
             }`}
           >

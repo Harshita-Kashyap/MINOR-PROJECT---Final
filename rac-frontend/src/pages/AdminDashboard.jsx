@@ -1,5 +1,6 @@
 import AdminNavbar from "../components/admin/AdminNavbar";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -11,13 +12,37 @@ function AdminDashboard() {
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    // 🔥 Later connect with backend APIs
-    setStats({
-      vacancies: 10,
-      applications: 45,
-      shortlisted: 12,
-    });
+    fetchDashboardData();
   }, []);
+
+  // 🔥 FETCH REAL DATA FROM BACKEND
+  const fetchDashboardData = async () => {
+    try {
+      const vacancyRes = await axios.get(
+        "http://localhost:5000/api/vacancies"
+      );
+
+      const applicationRes = await axios.get(
+        "http://localhost:5000/api/applications"
+      );
+
+      const vacancies = vacancyRes.data.length;
+      const applications = applicationRes.data.length;
+
+      // Count shortlisted candidates
+      const shortlisted = applicationRes.data.filter(
+        (app) => app.status === "Shortlisted" || app.status === "Selected"
+      ).length;
+
+      setStats({
+        vacancies,
+        applications,
+        shortlisted,
+      });
+    } catch (err) {
+      console.error("Dashboard Error:", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
@@ -109,16 +134,16 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* 📋 RECENT ACTIVITY (DUMMY FOR NOW) */}
+        {/* 📋 RECENT ACTIVITY (Dynamic basic version) */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow">
           <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
             Recent Activity
           </h3>
 
           <ul className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
-            <li>✅ New vacancy created for Software Engineer</li>
-            <li>📥 5 new applications received</li>
-            <li>⭐ 2 candidates shortlisted</li>
+            <li>📊 {stats.vacancies} vacancies available</li>
+            <li>📥 {stats.applications} applications received</li>
+            <li>⭐ {stats.shortlisted} candidates shortlisted</li>
           </ul>
         </div>
 
