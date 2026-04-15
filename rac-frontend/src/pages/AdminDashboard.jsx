@@ -151,7 +151,7 @@ function AdminDashboard() {
             <li>📥 {stats.applications} applications received</li>
             <li>⭐ {stats.shortlisted} candidates shortlisted</li>
           </ul>
-        </section>
+        </div>
       </main>
     </div>
   );
