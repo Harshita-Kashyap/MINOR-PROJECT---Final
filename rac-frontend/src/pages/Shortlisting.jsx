@@ -1,4 +1,4 @@
-import Header from "../components/common/Header";
+import Header from "../components/landing/Header";
 import AdminNavbar from "../components/admin/AdminNavbar";
 
 function Shortlisting() {

@@ -19,11 +19,11 @@ function Input({
   const isPassword = type === "password";
 
   return (
-    <div className="flex flex-col gap-1 w-full">
+    <div className="flex w-full flex-col gap-1.5">
       {label && (
         <label
           htmlFor={id}
-          className="text-sm font-medium text-gray-700 dark:text-gray-200"
+          className="text-sm font-medium text-gray-700 dark:text-gray-300"
         >
           {label}
         </label>
@@ -39,22 +39,29 @@ function Input({
           placeholder={placeholder}
           disabled={disabled}
           className={`
-            w-full rounded-xl border px-3 py-2 text-sm
+            w-full rounded-xl border px-3 py-2.5 text-sm
             bg-white text-gray-900 placeholder:text-gray-400
             dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500
+
             ${isPassword ? "pr-12" : ""}
+
             ${
               error
                 ? "border-red-500 dark:border-red-400"
                 : "border-gray-300 dark:border-gray-600"
             }
-            focus:outline-none focus:ring-2 focus:ring-blue-500
-            transition
+
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+            dark:focus:ring-blue-400 dark:focus:border-blue-400
+
+            transition duration-150
+
             ${
               disabled
                 ? "opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-800"
                 : ""
             }
+
             ${className}
           `}
           {...props}

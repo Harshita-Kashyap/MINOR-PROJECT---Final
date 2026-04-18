@@ -2,14 +2,18 @@ export default function Card({
   children,
   className = "",
   hover = false,
+  padding = "p-5",
 }) {
   return (
     <div
-      className={`bg-white dark:bg-gray-800 
-      border border-gray-200 dark:border-gray-700 
-      p-4 rounded-xl shadow-sm 
-      ${hover ? "hover:shadow-md transition" : ""}
-      ${className}`}
+      className={`
+        bg-white dark:bg-gray-800 
+        border border-gray-200 dark:border-gray-700 
+        rounded-2xl shadow-sm
+        ${padding}
+        ${hover ? "hover:shadow-md transition duration-200" : ""}
+        ${className}
+      `}
     >
       {children}
     </div>

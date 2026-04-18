@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Header from "../components/common/Header";
+import Header from "../components/landing/Header";
 import AdminNavbar from "../components/admin/AdminNavbar";
 import { useNavigate } from "react-router-dom";
 import { createVacancy } from "../services/vacancyService";

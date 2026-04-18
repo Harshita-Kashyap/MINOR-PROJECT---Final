@@ -16,6 +16,8 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     const root = document.documentElement;
 
+    root.classList.add("theme-changing");
+
     if (dark) {
       root.classList.add("dark");
       localStorage.setItem("theme", "dark");
@@ -23,6 +25,12 @@ export function ThemeProvider({ children }) {
       root.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
+
+    const timer = setTimeout(() => {
+      root.classList.remove("theme-changing");
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, [dark]);
 
   const toggleTheme = () => {
