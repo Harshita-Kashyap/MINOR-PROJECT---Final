@@ -26,14 +26,12 @@ db.getConnection((err, connection) => {
   }
 });
 
-
 // ================= REGISTER ROUTE =================
 app.post("/register", (req, res) => {
   const { name, email, phone, dob, roll, year, password } = req.body;
 
   console.log("📩 Register Data:", req.body);
 
-  // Check required fields
   if (!name || !email || !phone || !password) {
     return res.status(400).json({
       success: false,
@@ -41,7 +39,6 @@ app.post("/register", (req, res) => {
     });
   }
 
-  // Check Email
   db.query("SELECT * FROM users WHERE email = ?", [email], (err, emailResult) => {
     if (err) {
       console.error(err);
@@ -55,7 +52,6 @@ app.post("/register", (req, res) => {
       });
     }
 
-    // Check Phone
     db.query("SELECT * FROM users WHERE phone = ?", [phone], (err, phoneResult) => {
       if (err) {
         console.error(err);
@@ -69,7 +65,6 @@ app.post("/register", (req, res) => {
         });
       }
 
-      // Check Roll
       db.query("SELECT * FROM users WHERE roll = ?", [roll], (err, rollResult) => {
         if (err) {
           console.error(err);
@@ -83,7 +78,6 @@ app.post("/register", (req, res) => {
           });
         }
 
-        // Insert User
         const insertQuery = `
           INSERT INTO users (name, email, phone, dob, roll, year, password)
           VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -113,7 +107,6 @@ app.post("/register", (req, res) => {
   });
 });
 
-
 // ================= LOGIN ROUTE =================
 app.post("/api/login", (req, res) => {
   const { loginId, password, loginType } = req.body;
@@ -138,14 +131,14 @@ app.post("/api/login", (req, res) => {
     if (result.length > 0) {
       console.log("✅ Login Successful");
 
-     const user = result[0];
+      const user = result[0];
 
-res.status(200).json({
-  success: true,
-  message: "Login successful",
-  role: user.role,   // 🔥 VERY IMPORTANT
-  name: user.name
-});
+      res.status(200).json({
+        success: true,
+        message: "Login successful",
+        role: user.role,
+        name: user.name,
+      });
     } else {
       console.log("❌ Invalid credentials");
 
@@ -157,6 +150,36 @@ res.status(200).json({
   });
 });
 
+// ================= PDF PROXY ROUTE =================
+app.get("/api/pdf-proxy", async (req, res) => {
+  try {
+    const fileUrl = req.query.url;
+
+    if (!fileUrl) {
+      return res.status(400).send("Missing PDF url");
+    }
+
+    const response = await fetch(fileUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        Accept: "application/pdf,*/*",
+      },
+    });
+
+    if (!response.ok) {
+      return res.status(500).send("Failed to fetch PDF");
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline");
+    res.send(buffer);
+  } catch (error) {
+    console.error("❌ PDF Proxy Error:", error);
+    res.status(500).send("Server error while loading PDF");
+  }
+});
 
 // ================= SERVER START =================
 app.listen(5000, () => {
