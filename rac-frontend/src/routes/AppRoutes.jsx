@@ -6,7 +6,6 @@ import Register from "../features/auth/pages/Register";
 import ProtectedRoute from "./ProtectedRoute";
 import Landing from "../pages/Landing";
 
-// ================= PUBLIC PAGES =================
 import Chairman from "../pages/Chairman";
 import Director from "../pages/Director";
 import Approach from "../pages/Approach";
@@ -21,8 +20,8 @@ import DRDS from "../pages/DRDS";
 import FAQs from "../pages/FAQs";
 import Grahpatrika from "../pages/Grahpatrika";
 import CertificateFormats from "../pages/CertificateFormats";
+import PdfViewerPage from "../pages/PdfViewerPage";
 
-// ================= ADMIN PAGES =================
 import AdminDashboard from "../pages/AdminDashboard";
 import VacancyManagement from "../pages/VacancyManagement";
 import CreateVacancy from "../pages/CreateVacancy";
@@ -31,7 +30,6 @@ import Shortlisting from "../pages/Shortlisting";
 import FinalMeritList from "../pages/FinalMeritList";
 import EditVacancy from "../pages/EditVacancy";
 
-// ================= APPLICANT PAGES =================
 import ApplicantDashboard from "../pages/ApplicantDashboard";
 import ApplicantVacancies from "../pages/ApplicantVacancies";
 import MyApplications from "../pages/MyApplications";
@@ -40,7 +38,6 @@ import PersonalityTest from "../pages/PersonalityTest";
 import ApplicantProfile from "../pages/ApplicantProfile";
 import ApplicantVacancyDetails from "../pages/ApplicantVacancyDetails";
 
-// ================= SELECTOR PAGES =================
 import SelectorDashboard from "../pages/SelectorDashboard";
 import SelectorCandidates from "../pages/SelectorCandidates";
 import SelectorCandidateDetail from "../pages/SelectorCandidateDetail";
@@ -51,7 +48,6 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ================= PUBLIC ROUTES ================= */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -70,8 +66,8 @@ function AppRoutes() {
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/grahpatrika" element={<Grahpatrika />} />
         <Route path="/certificate-formats" element={<CertificateFormats />} />
+        <Route path="/certificate-formats/:pdfKey" element={<PdfViewerPage />} />
 
-        {/* ================= ADMIN ROUTES ================= */}
         <Route
           path="/admin"
           element={
@@ -129,7 +125,6 @@ function AppRoutes() {
           }
         />
 
-        {/* ================= APPLICANT ROUTES ================= */}
         <Route
           path="/applicant"
           element={
@@ -187,7 +182,6 @@ function AppRoutes() {
           }
         />
 
-        {/* ================= SELECTOR ROUTES ================= */}
         <Route
           path="/selector"
           element={
@@ -229,7 +223,6 @@ function AppRoutes() {
           }
         />
 
-        {/* ================= FALLBACK ================= */}
         <Route path="*" element={<Landing />} />
       </Routes>
     </BrowserRouter>

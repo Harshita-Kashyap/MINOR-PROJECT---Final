@@ -3,19 +3,14 @@ import LandingLayout from "../layouts/LandingLayout";
 export default function About() {
   return (
     <LandingLayout>
-      <div className="w-full rounded-sm border border-sky-300 bg-white px-6 py-6 shadow-sm">
-        
-        {/* TITLE */}
-        <h1 className="mb-6 text-4xl font-bold text-amber-900">
+      <div className="w-full rounded-sm border border-sky-300 bg-white px-6 py-6 shadow-sm dark:border-sky-900 dark:bg-gray-800">
+        <h1 className="mb-6 text-4xl font-bold text-amber-900 dark:text-amber-400">
           About Us
         </h1>
 
-        {/* CONTENT */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[320px_1fr]">
-          
-          {/* IMAGE */}
           <div>
-            <div className="inline-block border border-gray-300 bg-white p-2 shadow-md">
+            <div className="inline-block border border-gray-300 bg-white p-2 shadow-md dark:border-gray-700 dark:bg-gray-900">
               <img
                 src="https://rac.gov.in/images/content/rac-building.jpg"
                 alt="RAC Building"
@@ -24,8 +19,7 @@ export default function About() {
             </div>
           </div>
 
-          {/* TEXT */}
-          <div className="space-y-5 text-[15px] leading-8 text-gray-800">
+          <div className="space-y-5 text-[15px] leading-8 text-gray-800 dark:text-gray-200">
             <p>
               RAC, the <strong>Recruitment and Assessment Centre</strong> of
               DRDO was set up on 23 July 1985 after getting exemption from the
@@ -41,8 +35,7 @@ export default function About() {
               through duly constituted Assessment Boards/Peer Committee.
             </p>
 
-            {/* RESPONSIBILITIES */}
-            <h3 className="mt-4 text-lg font-semibold text-red-600">
+            <h3 className="mt-4 text-lg font-semibold text-red-600 dark:text-red-400">
               The primary responsibilities of RAC
             </h3>
 
@@ -62,11 +55,10 @@ export default function About() {
               </li>
               <li>
                 Any other assignment specified by Secretary, Department of
-                Defence R&D and Chairman, DRDO
+                Defence R&amp;D and Chairman, DRDO
               </li>
             </ol>
           </div>
-
         </div>
       </div>
     </LandingLayout>

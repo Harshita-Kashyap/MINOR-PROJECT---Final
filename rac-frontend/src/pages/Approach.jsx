@@ -3,16 +3,15 @@ import LandingLayout from "../layouts/LandingLayout";
 export default function Approach() {
   return (
     <LandingLayout>
-      <div className="w-full rounded-sm border border-sky-300 bg-white shadow-sm px-6 py-6">
-
-        {/* TITLE */}
-        <h1 className="text-4xl font-bold text-amber-900 mb-6">
+      <div className="w-full rounded-sm border border-sky-300 bg-white px-6 py-6 shadow-sm dark:border-sky-900 dark:bg-gray-800 dark:text-gray-200">
+        <h1 className="mb-6 text-4xl font-bold text-amber-900 dark:text-amber-400">
           Our Approach
         </h1>
 
-        {/* VISION */}
         <section className="mb-6">
-          <h2 className="text-2xl font-semibold mb-2">Vision</h2>
+          <h2 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">
+            Vision
+          </h2>
           <p className="mb-2">To become a centre of excellence and</p>
 
           <ul className="list-disc pl-6 space-y-1">
@@ -22,9 +21,10 @@ export default function Approach() {
           </ul>
         </section>
 
-        {/* MISSION */}
         <section className="mb-6">
-          <h2 className="text-2xl font-semibold mb-2">Mission</h2>
+          <h2 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">
+            Mission
+          </h2>
           <p className="mb-2">To realise the vision by</p>
 
           <ul className="list-disc pl-6 space-y-1">
@@ -36,17 +36,19 @@ export default function Approach() {
           </ul>
         </section>
 
-        {/* MOTTO */}
         <section className="mb-6">
-          <h2 className="text-2xl font-semibold mb-2">Motto</h2>
+          <h2 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">
+            Motto
+          </h2>
           <ul className="list-disc pl-6">
             <li>Acting with Accuracy, Confidentiality and Timeliness</li>
           </ul>
         </section>
 
-        {/* QUALITY POLICY */}
         <section className="mb-6">
-          <h2 className="text-2xl font-semibold mb-2">Quality Policy</h2>
+          <h2 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">
+            Quality Policy
+          </h2>
 
           <p className="mb-2">
             We are committed to provide quality services to DRDO in terms of
@@ -68,9 +70,8 @@ export default function Approach() {
           </p>
         </section>
 
-        {/* QUALITY OBJECTIVES */}
         <section>
-          <h2 className="text-2xl font-semibold mb-2">
+          <h2 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">
             Quality Objectives
           </h2>
 
@@ -87,7 +88,6 @@ export default function Approach() {
             <li>To minimise &amp; rectify the customer complaints</li>
           </ul>
         </section>
-
       </div>
     </LandingLayout>
   );

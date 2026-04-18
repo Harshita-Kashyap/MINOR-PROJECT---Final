@@ -52,13 +52,11 @@ const payData = [
 export default function DRDS() {
   return (
     <LandingLayout>
-      <div className="w-full rounded-sm border border-sky-300 bg-white px-6 py-6 shadow-sm text-gray-800">
-        {/* TITLE */}
-        <h1 className="mb-6 text-4xl font-bold text-amber-900">
+      <div className="w-full rounded-sm border border-sky-300 bg-white px-6 py-6 shadow-sm text-gray-800 dark:border-sky-900 dark:bg-gray-800 dark:text-gray-200">
+        <h1 className="mb-6 text-4xl font-bold text-amber-900 dark:text-amber-400">
           DRDS (Defence Research and Development Services)
         </h1>
 
-        {/* INTRO */}
         <div className="space-y-5 text-[15px] leading-8">
           <p>
             In pursuit of self-reliance in critical technologies relevant to
@@ -73,11 +71,10 @@ export default function DRDS() {
           </p>
         </div>
 
-        {/* TABLE */}
         <div className="mt-6 overflow-x-auto">
           <table className="w-full border-collapse text-left text-[15px]">
             <thead>
-              <tr className="bg-gray-200 text-gray-900">
+              <tr className="bg-gray-200 text-gray-900 dark:bg-gray-900 dark:text-white">
                 <th className="px-4 py-3 font-medium">Grade</th>
                 <th className="px-4 py-3 font-medium">Level in Pay Matrix</th>
                 <th className="px-4 py-3 font-medium">
@@ -89,7 +86,11 @@ export default function DRDS() {
               {payData.map((row, index) => (
                 <tr
                   key={row.grade}
-                  className={index % 2 === 0 ? "bg-gray-100" : "bg-gray-200/60"}
+                  className={
+                    index % 2 === 0
+                      ? "bg-gray-100 dark:bg-gray-700"
+                      : "bg-gray-200/60 dark:bg-gray-900/70"
+                  }
                 >
                   <td className="px-4 py-3">{row.grade}</td>
                   <td className="px-4 py-3">{row.level}</td>
@@ -100,9 +101,10 @@ export default function DRDS() {
           </table>
         </div>
 
-        {/* SALIENT FEATURES */}
         <section className="mt-8">
-          <h2 className="mb-4 text-2xl font-medium">Salient features of DRDS</h2>
+          <h2 className="mb-4 text-2xl font-medium text-gray-900 dark:text-white">
+            Salient features of DRDS
+          </h2>
 
           <div className="space-y-5 text-[15px] leading-8">
             <p>
@@ -133,9 +135,8 @@ export default function DRDS() {
           </div>
         </section>
 
-        {/* HIGHER QUALIFICATION */}
         <section className="mt-8">
-          <h2 className="mb-4 text-2xl font-medium">
+          <h2 className="mb-4 text-2xl font-medium text-gray-900 dark:text-white">
             Facility for Higher Qualification &amp; Training
           </h2>
 

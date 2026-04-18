@@ -3,11 +3,11 @@ import LandingLayout from "../layouts/LandingLayout";
 export default function Assessment() {
   return (
     <LandingLayout>
-      <div className="w-full rounded-sm border border-sky-300 bg-white px-6 py-6 shadow-sm text-gray-800">
-        {/* TITLE */}
-        <h1 className="mb-6 text-4xl font-bold text-amber-900">Assessment</h1>
+      <div className="w-full rounded-sm border border-sky-300 bg-white px-6 py-6 shadow-sm text-gray-800 dark:border-sky-900 dark:bg-gray-800 dark:text-gray-200">
+        <h1 className="mb-6 text-4xl font-bold text-amber-900 dark:text-amber-400">
+          Assessment
+        </h1>
 
-        {/* INTRO */}
         <div className="space-y-5 text-[15px] leading-8">
           <p>
             Assessment Boards for promotion of DRDS Scientists in the grades
@@ -35,9 +35,10 @@ export default function Assessment() {
           </p>
         </div>
 
-        {/* PROCEDURE FOR INTERVIEW */}
         <section className="mt-8">
-          <h2 className="mb-4 text-2xl font-medium">Procedure for Interview</h2>
+          <h2 className="mb-4 text-2xl font-medium text-gray-900 dark:text-white">
+            Procedure for Interview
+          </h2>
 
           <div className="space-y-5 text-[15px] leading-8">
             <p>
@@ -94,9 +95,10 @@ export default function Assessment() {
           </div>
         </section>
 
-        {/* PEER REVIEW */}
         <section className="mt-8">
-          <h2 className="mb-4 text-2xl font-medium">Peer Review</h2>
+          <h2 className="mb-4 text-2xl font-medium text-gray-900 dark:text-white">
+            Peer Review
+          </h2>
 
           <div className="space-y-5 text-[15px] leading-8">
             <p>

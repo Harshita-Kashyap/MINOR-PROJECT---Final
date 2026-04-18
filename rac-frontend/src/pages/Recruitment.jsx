@@ -3,11 +3,11 @@ import LandingLayout from "../layouts/LandingLayout";
 export default function Recruitment() {
   return (
     <LandingLayout>
-      <div className="w-full rounded-sm border border-sky-300 bg-white shadow-sm px-6 py-6 text-gray-800">
-        {/* TITLE */}
-        <h1 className="mb-6 text-4xl font-bold text-amber-900">Recruitment</h1>
+      <div className="w-full rounded-sm border border-sky-300 bg-white shadow-sm px-6 py-6 text-gray-800 dark:border-sky-900 dark:bg-gray-800 dark:text-gray-200">
+        <h1 className="mb-6 text-4xl font-bold text-amber-900 dark:text-amber-400">
+          Recruitment
+        </h1>
 
-        {/* INTRO */}
         <div className="space-y-5 text-[15px] leading-8">
           <p>
             Every year RAC recruits Scientists in DRDS mostly at entry level
@@ -29,19 +29,20 @@ export default function Recruitment() {
 
           <p>
             For more information visit{" "}
-            <span className="font-medium text-blue-700 underline">
+            <span className="font-medium text-blue-700 underline dark:text-blue-400">
               ADA website www.ada.gov.in
             </span>
           </p>
         </div>
 
-        {/* SCIENCE / ENGINEERING */}
         <section className="mt-6">
-          <h2 className="mb-3 text-2xl font-medium">
+          <h2 className="mb-3 text-2xl font-medium text-gray-900 dark:text-white">
             Induction of Scientists in Science/ Engineering category
           </h2>
 
-          <h3 className="mb-2 text-[20px] font-medium">Essential Qualifications</h3>
+          <h3 className="mb-2 text-[20px] font-medium text-gray-900 dark:text-white">
+            Essential Qualifications
+          </h3>
           <ol className="list-decimal space-y-2 pl-8 text-[15px] leading-8">
             <li>
               At least first class Master&apos;s Degree in Science Subjects,
@@ -58,7 +59,7 @@ export default function Recruitment() {
             </li>
           </ol>
 
-          <h3 className="mb-2 mt-6 text-[20px] font-medium">
+          <h3 className="mb-2 mt-6 text-[20px] font-medium text-gray-900 dark:text-white">
             Desirable qualifications
           </h3>
           <ol className="list-decimal space-y-2 pl-8 text-[15px] leading-8">
@@ -76,18 +77,19 @@ export default function Recruitment() {
             as per AICTE guidelines
           </p>
 
-          <div className="mt-2 text-right text-[15px] font-medium">
+          <div className="mt-2 text-right text-[15px] font-medium text-gray-900 dark:text-gray-100">
             (Source: AICTE website)
           </div>
         </section>
 
-        {/* MEDICAL / VETERINARY */}
         <section className="mt-8">
-          <h2 className="mb-3 text-2xl font-medium">
+          <h2 className="mb-3 text-2xl font-medium text-gray-900 dark:text-white">
             Induction of Scientists in Medical/ Veterinary Science category
           </h2>
 
-          <h3 className="mb-2 text-[20px] font-medium">Essential qualifications</h3>
+          <h3 className="mb-2 text-[20px] font-medium text-gray-900 dark:text-white">
+            Essential qualifications
+          </h3>
 
           <ol className="list-decimal space-y-3 pl-8 text-[15px] leading-8">
             <li>
@@ -134,9 +136,10 @@ export default function Recruitment() {
           </ol>
         </section>
 
-        {/* AGE LIMIT */}
         <section className="mt-8">
-          <h2 className="mb-3 text-2xl font-medium">Age Limit</h2>
+          <h2 className="mb-3 text-2xl font-medium text-gray-900 dark:text-white">
+            Age Limit
+          </h2>
 
           <ol className="list-decimal space-y-2 pl-8 text-[15px] leading-8">
             <li>For Scientist &apos;B&apos;: not exceeding 28 years</li>

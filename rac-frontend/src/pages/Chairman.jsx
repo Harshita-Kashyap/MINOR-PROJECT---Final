@@ -6,20 +6,20 @@ export default function Chairman() {
 
   return (
     <LandingLayout>
-      <div className="w-full rounded-sm border border-sky-300 bg-white shadow-sm">
-        {/* Page Title */}
-        <div className="border-b border-gray-200 px-6 py-5">
-          <h1 className="text-4xl font-bold text-amber-900">Chairman</h1>
+      <div className="w-full rounded-sm border border-sky-300 bg-white shadow-sm dark:border-sky-900 dark:bg-gray-800">
+        <div className="border-b border-gray-200 px-6 py-5 dark:border-gray-700">
+          <h1 className="text-4xl font-bold text-amber-900 dark:text-amber-400">
+            Chairman
+          </h1>
         </div>
 
-        {/* Tabs */}
         <div className="px-6 pt-4">
-          <div className="flex flex-wrap border border-gray-300 bg-gray-50">
+          <div className="flex flex-wrap border border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
             <button
-              className={`border-r border-gray-300 px-5 py-3 text-base ${
+              className={`border-r border-gray-300 px-5 py-3 text-base dark:border-gray-700 ${
                 activeTab === "brief"
-                  ? "bg-white text-gray-900"
-                  : "bg-gray-50 text-blue-600 hover:bg-white"
+                  ? "bg-white text-gray-900 dark:bg-gray-800 dark:text-white"
+                  : "bg-gray-50 text-blue-600 hover:bg-white dark:bg-gray-900 dark:text-blue-400 dark:hover:bg-gray-800"
               }`}
               onClick={() => setActiveTab("brief")}
             >
@@ -29,8 +29,8 @@ export default function Chairman() {
             <button
               className={`px-5 py-3 text-base ${
                 activeTab === "former"
-                  ? "bg-white text-gray-900"
-                  : "bg-gray-50 text-blue-600 hover:bg-white"
+                  ? "bg-white text-gray-900 dark:bg-gray-800 dark:text-white"
+                  : "bg-gray-50 text-blue-600 hover:bg-white dark:bg-gray-900 dark:text-blue-400 dark:hover:bg-gray-800"
               }`}
               onClick={() => setActiveTab("former")}
             >
@@ -39,8 +39,7 @@ export default function Chairman() {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="px-6 py-5 text-[15px] leading-8 text-gray-800">
+        <div className="px-6 py-5 text-[15px] leading-8 text-gray-800 dark:text-gray-200">
           {activeTab === "brief" ? (
             <div className="space-y-4">
               <p>

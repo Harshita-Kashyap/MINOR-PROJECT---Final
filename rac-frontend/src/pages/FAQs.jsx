@@ -35,7 +35,7 @@ const faqItems = [
           <p>Lucknow Road, Timarpur</p>
           <p>Delhi 110054</p>
           <p className="mt-3">Telefax: +91-011-23812690, +91-011-23817833</p>
-          <p className="text-blue-800 font-semibold text-2xl italic mt-2">
+          <p className="mt-2 text-2xl font-semibold italic text-blue-800 dark:text-blue-400">
             director.rac@gov.in
           </p>
         </div>
@@ -54,7 +54,7 @@ const faqItems = [
           <div>
             <p>Public Relation Officer (PRO)</p>
             <p>Ph No. +91-011-2383-0599</p>
-            <p className="text-blue-800 font-semibold text-2xl italic mt-2">
+            <p className="mt-2 text-2xl font-semibold italic text-blue-800 dark:text-blue-400">
               pro.recruitment@gov.in
             </p>
           </div>
@@ -124,54 +124,54 @@ const faqItems = [
           application. Typical limits are:
         </p>
         <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-300 text-left text-sm">
-            <thead className="bg-blue-50">
+          <table className="min-w-full border border-gray-300 text-left text-sm dark:border-gray-700">
+            <thead className="bg-blue-50 dark:bg-gray-900">
               <tr>
-                <th className="border border-gray-300 px-3 py-2">Category</th>
-                <th className="border border-gray-300 px-3 py-2">Sc 'B'</th>
-                <th className="border border-gray-300 px-3 py-2">Sc 'C'</th>
-                <th className="border border-gray-300 px-3 py-2">Sc 'D'</th>
-                <th className="border border-gray-300 px-3 py-2">Sc 'E'</th>
-                <th className="border border-gray-300 px-3 py-2">Sc 'F'</th>
-                <th className="border border-gray-300 px-3 py-2">Sc 'G'</th>
+                <th className="border border-gray-300 px-3 py-2 dark:border-gray-700">Category</th>
+                <th className="border border-gray-300 px-3 py-2 dark:border-gray-700">Sc 'B'</th>
+                <th className="border border-gray-300 px-3 py-2 dark:border-gray-700">Sc 'C'</th>
+                <th className="border border-gray-300 px-3 py-2 dark:border-gray-700">Sc 'D'</th>
+                <th className="border border-gray-300 px-3 py-2 dark:border-gray-700">Sc 'E'</th>
+                <th className="border border-gray-300 px-3 py-2 dark:border-gray-700">Sc 'F'</th>
+                <th className="border border-gray-300 px-3 py-2 dark:border-gray-700">Sc 'G'</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="border border-gray-300 px-3 py-2">Unreserved</td>
-                <td className="border border-gray-300 px-3 py-2">35</td>
-                <td className="border border-gray-300 px-3 py-2">40</td>
-                <td className="border border-gray-300 px-3 py-2">50</td>
-                <td className="border border-gray-300 px-3 py-2">50</td>
-                <td className="border border-gray-300 px-3 py-2">50</td>
-                <td className="border border-gray-300 px-3 py-2">50</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">Unreserved</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">35</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">40</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">50</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">50</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">50</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">50</td>
               </tr>
               <tr>
-                <td className="border border-gray-300 px-3 py-2">EWS</td>
-                <td className="border border-gray-300 px-3 py-2">35</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">EWS</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">35</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
               </tr>
               <tr>
-                <td className="border border-gray-300 px-3 py-2">OBC</td>
-                <td className="border border-gray-300 px-3 py-2">38</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">OBC</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">38</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
               </tr>
               <tr>
-                <td className="border border-gray-300 px-3 py-2">SC/ST</td>
-                <td className="border border-gray-300 px-3 py-2">40</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
-                <td className="border border-gray-300 px-3 py-2">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">SC/ST</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">40</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
+                <td className="border border-gray-300 px-3 py-2 dark:border-gray-700">N.A.</td>
               </tr>
             </tbody>
           </table>
@@ -201,14 +201,14 @@ const faqItems = [
     answer: (
       <>
         <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-300 text-left text-sm">
-            <thead className="bg-blue-50">
+          <table className="min-w-full border border-gray-300 text-left text-sm dark:border-gray-700">
+            <thead className="bg-blue-50 dark:bg-gray-900">
               <tr>
-                <th className="border border-gray-300 px-3 py-2">Post</th>
-                <th className="border border-gray-300 px-3 py-2">
+                <th className="border border-gray-300 px-3 py-2 dark:border-gray-700">Post</th>
+                <th className="border border-gray-300 px-3 py-2 dark:border-gray-700">
                   Science / Engineering / Technical
                 </th>
-                <th className="border border-gray-300 px-3 py-2">Medical</th>
+                <th className="border border-gray-300 px-3 py-2 dark:border-gray-700">Medical</th>
               </tr>
             </thead>
             <tbody>
@@ -222,7 +222,7 @@ const faqItems = [
               ].map((row) => (
                 <tr key={row[0]}>
                   {row.map((cell) => (
-                    <td key={cell} className="border border-gray-300 px-3 py-2">
+                    <td key={cell} className="border border-gray-300 px-3 py-2 dark:border-gray-700">
                       {cell}
                     </td>
                   ))}
@@ -372,7 +372,7 @@ const faqItems = [
           Suggestions for adding questions or revising the FAQ may be sent to
           Director RAC.
         </p>
-        <p className="text-blue-800 font-semibold text-2xl italic">
+        <p className="text-2xl font-semibold italic text-blue-800 dark:text-blue-400">
           director.rac@gov.in
         </p>
       </>
@@ -411,10 +411,12 @@ export default function FAQs() {
 
   return (
     <LandingLayout>
-      <div className="w-full rounded-sm border border-sky-300 bg-white px-6 py-6 shadow-sm text-gray-900">
-        <h1 className="mb-6 text-4xl font-bold text-amber-900">FAQs</h1>
+      <div className="w-full rounded-sm border border-sky-300 bg-white px-6 py-6 shadow-sm text-gray-900 dark:border-sky-900 dark:bg-gray-800 dark:text-gray-100">
+        <h1 className="mb-6 text-4xl font-bold text-amber-900 dark:text-amber-400">
+          FAQs
+        </h1>
 
-        <h2 className="mb-8 text-5xl font-normal tracking-wide text-gray-800">
+        <h2 className="mb-8 text-5xl font-normal tracking-wide text-gray-800 dark:text-gray-100">
           Frequently Asked Questions (FAQs)
         </h2>
 
@@ -423,19 +425,19 @@ export default function FAQs() {
             const isOpen = openIndex === index;
 
             return (
-              <div key={index} className="border-b border-gray-200 pb-4">
+              <div key={index} className="border-b border-gray-200 pb-4 dark:border-gray-700">
                 <button
                   type="button"
                   onClick={() => toggleFaq(index)}
                   className="w-full text-left"
                 >
-                  <p className="text-[15px] font-semibold leading-8 hover:text-blue-700 transition">
+                  <p className="text-[15px] font-semibold leading-8 transition hover:text-blue-700 dark:hover:text-blue-400">
                     . {item.question}
                   </p>
                 </button>
 
                 {isOpen && (
-                  <div className="mt-2 pl-4 text-[15px] leading-8 text-gray-800">
+                  <div className="mt-2 pl-4 text-[15px] leading-8 text-gray-800 dark:text-gray-200">
                     {item.answer}
                   </div>
                 )}

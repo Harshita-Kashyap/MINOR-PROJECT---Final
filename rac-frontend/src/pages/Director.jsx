@@ -6,22 +6,20 @@ export default function Director() {
 
   return (
     <LandingLayout>
-      <div className="w-full rounded-sm border border-sky-300 bg-white shadow-sm">
-        
-        {/* TITLE */}
-        <div className="border-b border-gray-200 px-6 py-5">
-          <h1 className="text-4xl font-bold text-amber-900">Director</h1>
+      <div className="w-full rounded-sm border border-sky-300 bg-white shadow-sm dark:border-sky-900 dark:bg-gray-800">
+        <div className="border-b border-gray-200 px-6 py-5 dark:border-gray-700">
+          <h1 className="text-4xl font-bold text-amber-900 dark:text-amber-400">
+            Director
+          </h1>
         </div>
 
-        {/* TABS */}
         <div className="px-6 pt-4">
-          <div className="flex border border-gray-300 bg-gray-50">
-            
+          <div className="flex border border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
             <button
-              className={`border-r border-gray-300 px-5 py-3 ${
+              className={`border-r border-gray-300 px-5 py-3 dark:border-gray-700 ${
                 activeTab === "brief"
-                  ? "bg-white text-gray-900"
-                  : "text-blue-600 hover:bg-white"
+                  ? "bg-white text-gray-900 dark:bg-gray-800 dark:text-white"
+                  : "text-blue-600 hover:bg-white dark:text-blue-400 dark:hover:bg-gray-800"
               }`}
               onClick={() => setActiveTab("brief")}
             >
@@ -31,26 +29,21 @@ export default function Director() {
             <button
               className={`px-5 py-3 ${
                 activeTab === "former"
-                  ? "bg-white text-gray-900"
-                  : "text-blue-600 hover:bg-white"
+                  ? "bg-white text-gray-900 dark:bg-gray-800 dark:text-white"
+                  : "text-blue-600 hover:bg-white dark:text-blue-400 dark:hover:bg-gray-800"
               }`}
               onClick={() => setActiveTab("former")}
             >
               Former Director
             </button>
-
           </div>
         </div>
 
-        {/* CONTENT */}
-        <div className="px-6 py-5 text-[15px] leading-8 text-gray-800">
-          
+        <div className="px-6 py-5 text-[15px] leading-8 text-gray-800 dark:text-gray-200">
           {activeTab === "brief" ? (
             <div className="space-y-4">
               <p>
-                <span className="font-bold">
-                  Smt. KV Prabha, Scientist H
-                </span>{" "}
+                <span className="font-bold">Smt. KV Prabha, Scientist H</span>{" "}
                 took over as Director RAC on 1st Mar 2023. She is a post
                 graduate in Computer Science and MPhil in Computer Science
                 with Data Mining as specialization.
@@ -104,7 +97,6 @@ export default function Director() {
               </ul>
             </div>
           )}
-
         </div>
       </div>
     </LandingLayout>
