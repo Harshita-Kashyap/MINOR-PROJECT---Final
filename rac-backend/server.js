@@ -86,7 +86,7 @@ app.post("/register", (req, res) => {
         db.query(
           insertQuery,
           [name, email, phone, dob, roll, year, password],
-          (err, result) => {
+          (err) => {
             if (err) {
               console.error("❌ Insert Error:", err);
               return res.status(500).json({

@@ -3,9 +3,22 @@
 @tailwind utilities;
 
 html {
-  @apply transition-colors duration-300;
+  scroll-behavior: smooth;
 }
 
 body {
-  @apply bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300;
+  @apply bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100;
+}
+
+/* Smooth theme transition for most UI elements */
+html.theme-changing *,
+html.theme-changing *::before,
+html.theme-changing *::after {
+  transition:
+    background-color 400ms ease,
+    border-color 400ms ease,
+    color 400ms ease,
+    fill 400ms ease,
+    stroke 400ms ease,
+    box-shadow 400ms ease;
 }

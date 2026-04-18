@@ -50,7 +50,7 @@ function Login() {
     else loginId = form.roll;
 
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetch("http://localhost:5000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -63,9 +63,8 @@ function Login() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        if (response.ok && data.role) {
+        if (data.role) {
           localStorage.setItem("user", JSON.stringify(data));
-
           login(loginId, form.password, data.role);
 
           if (data.role === "admin") {
@@ -90,7 +89,6 @@ function Login() {
   return (
     <AuthLayout>
       <form onSubmit={handleSubmit} className="space-y-6">
-
         {/* HEADER WITH LOGO */}
         <div className="flex items-center justify-center gap-3">
           <img
@@ -135,7 +133,6 @@ function Login() {
 
         {/* FORM */}
         <div className="space-y-4">
-
           {loginType === "mobile" && (
             <Input
               label="Mobile Number"
@@ -176,7 +173,6 @@ function Login() {
           />
 
           <div className="flex flex-col sm:flex-row gap-3 w-full">
-
             <div className="flex-1">
               <Captcha setCaptchaText={setCaptchaText} />
             </div>
@@ -191,13 +187,11 @@ function Login() {
                 error={errors.captcha}
               />
             </div>
-
           </div>
 
           <Button type="submit" fullWidth>
             Login
           </Button>
-
         </div>
 
         {/* FOOTER */}
@@ -207,7 +201,6 @@ function Login() {
             Register
           </Link>
         </p>
-
       </form>
     </AuthLayout>
   );

@@ -1,5 +1,7 @@
-import AdminNavbar from "../components/admin/AdminNavbar";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Header from "../components/landing/Header";
+import AdminNavbar from "../components/admin/AdminNavbar";
 
 function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -8,7 +10,14 @@ function AdminDashboard() {
     shortlisted: 0,
   });
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = (() => {
+    try {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  })();
 
   useEffect(() => {
     // 🔥 Later connect with backend APIs
@@ -19,95 +28,117 @@ function AdminDashboard() {
     });
   }, []);
 
+  // 🔥 FETCH REAL DATA FROM BACKEND
+  const fetchDashboardData = async () => {
+    try {
+      const vacancyRes = await axios.get(
+        "http://localhost:5000/api/vacancies"
+      );
+
+      const applicationRes = await axios.get(
+        "http://localhost:5000/api/applications"
+      );
+
+      const vacancies = vacancyRes.data.length;
+      const applications = applicationRes.data.length;
+
+      // Count shortlisted candidates
+      const shortlisted = applicationRes.data.filter(
+        (app) => app.status === "Shortlisted" || app.status === "Selected"
+      ).length;
+
+      setStats({
+        vacancies,
+        applications,
+        shortlisted,
+      });
+    } catch (err) {
+      console.error("Dashboard Error:", err);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-950">
+      <Header />
       <AdminNavbar />
 
-      <div className="p-6 space-y-6">
-
-        {/* 🔥 WELCOME SECTION */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-xl shadow">
+      <main className="p-6 space-y-6">
+        {/* Welcome Section */}
+        <section className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white shadow">
           <h2 className="text-2xl font-bold">
             Welcome, {user?.name || "Admin"} 👋
           </h2>
-          <p className="mt-1 text-sm opacity-90">
-            Manage vacancies, applications, and recruitment process efficiently.
+          <p className="mt-2 text-sm text-blue-100">
+            Manage vacancies, applications, and recruitment workflows from one place.
           </p>
-        </div>
+        </section>
 
-        {/* 📊 STATS CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-          {/* Vacancies */}
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow hover:scale-105 transition">
-            <p className="text-gray-500 dark:text-gray-400">
+        {/* Stats */}
+        <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 dark:bg-gray-900">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Total Vacancies
             </p>
-            <h3 className="text-3xl font-bold text-blue-600 mt-2">
+            <h3 className="mt-2 text-3xl font-bold text-blue-600">
               {stats.vacancies}
             </h3>
           </div>
 
-          {/* Applications */}
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow hover:scale-105 transition">
-            <p className="text-gray-500 dark:text-gray-400">
+          <div className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 dark:bg-gray-900">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Applications
             </p>
-            <h3 className="text-3xl font-bold text-green-600 mt-2">
+            <h3 className="mt-2 text-3xl font-bold text-green-600">
               {stats.applications}
             </h3>
           </div>
 
-          {/* Shortlisted */}
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow hover:scale-105 transition">
-            <p className="text-gray-500 dark:text-gray-400">
+          <div className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 dark:bg-gray-900">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Shortlisted
             </p>
-            <h3 className="text-3xl font-bold text-yellow-500 mt-2">
+            <h3 className="mt-2 text-3xl font-bold text-amber-500">
               {stats.shortlisted}
             </h3>
           </div>
+        </section>
 
-        </div>
-
-        {/* ⚡ QUICK ACTIONS */}
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+        {/* Quick Actions */}
+        <section className="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-900">
+          <h3 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
             Quick Actions
           </h3>
 
           <div className="flex flex-wrap gap-4">
-
-            <a
-              href="/admin/create-vacancy"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            <Link
+              to="/admin/create-vacancy"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
             >
               + Create Vacancy
-            </a>
+            </Link>
 
-            <a
-              href="/admin/vacancies"
-              className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 transition"
+            <Link
+              to="/admin/vacancies"
+              className="rounded-lg bg-gray-700 px-4 py-2 text-white transition hover:bg-gray-800"
             >
               Manage Vacancies
-            </a>
+            </Link>
 
-            <a
-              href="/admin/applications"
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+            <Link
+              to="/admin/applications"
+              className="rounded-lg bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
             >
               View Applications
-            </a>
+            </Link>
 
-            <a
-              href="/admin/shortlisting"
-              className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition"
+            <Link
+              to="/admin/shortlisting"
+              className="rounded-lg bg-amber-500 px-4 py-2 text-white transition hover:bg-amber-600"
             >
               Shortlist Candidates
-            </a>
-
+            </Link>
           </div>
-        </div>
+        </section>
 
         {/* 📋 RECENT ACTIVITY (DUMMY FOR NOW) */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow">
@@ -116,13 +147,12 @@ function AdminDashboard() {
           </h3>
 
           <ul className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
-            <li>✅ New vacancy created for Software Engineer</li>
-            <li>📥 5 new applications received</li>
-            <li>⭐ 2 candidates shortlisted</li>
+            <li>📊 {stats.vacancies} vacancies available</li>
+            <li>📥 {stats.applications} applications received</li>
+            <li>⭐ {stats.shortlisted} candidates shortlisted</li>
           </ul>
         </div>
-
-      </div>
+      </main>
     </div>
   );
 }
