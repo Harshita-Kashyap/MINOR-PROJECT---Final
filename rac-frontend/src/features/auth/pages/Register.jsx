@@ -88,10 +88,7 @@ function Register() {
 
   return (
     <AuthLayout>
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-colors dark:border-gray-700 dark:bg-gray-800"
-      >
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* HEADER */}
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
@@ -114,6 +111,7 @@ function Register() {
 
           <Input
             label="Email"
+            type="email"
             name="email"
             value={form.email}
             onChange={handleChange}
@@ -122,6 +120,7 @@ function Register() {
 
           <Input
             label="Mobile Number"
+            type="tel"
             name="phone"
             value={form.phone}
             onChange={handleChange}
@@ -160,7 +159,7 @@ function Register() {
         </div>
 
         {/* CAPTCHA */}
-        <div className="flex flex-col sm:flex-row gap-3 w-full">
+        <div className="flex w-full flex-col gap-3 sm:flex-row">
           <div className="flex-1">
             <Captcha setCaptchaText={setCaptchaText} />
           </div>
@@ -182,7 +181,7 @@ function Register() {
         </Button>
 
         {/* FOOTER */}
-        <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+        <p className="text-center text-sm text-gray-600 dark:text-gray-300">
           Already have an account?{" "}
           <Link
             to="/login"

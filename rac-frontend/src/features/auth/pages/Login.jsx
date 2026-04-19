@@ -16,7 +16,7 @@ function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [loginType, setLoginType] = useState("mobile");
+  const [loginType, setLoginType] = useState("email");
 
   const [form, setForm] = useState({
     mobile: "",
@@ -89,29 +89,15 @@ function Login() {
   return (
     <AuthLayout>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* HEADER WITH LOGO */}
+        {/* HEADER */}
         <div className="flex items-center justify-center gap-3">
-          <img
-            src="https://rac.gov.in/images/rac_logo_2025_sm.png"
-            alt="RAC Logo"
-            className="w-12 h-12 object-contain"
-          />
           <h2 className="text-2xl font-semibold">Login</h2>
         </div>
 
         {/* LOGIN TYPE */}
         <AuthSection title="Select Login Method">
           <div className="space-y-2 text-sm">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                checked={loginType === "mobile"}
-                onChange={() => setLoginType("mobile")}
-              />
-              Mobile
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex cursor-pointer items-center gap-2">
               <input
                 type="radio"
                 checked={loginType === "email"}
@@ -120,7 +106,16 @@ function Login() {
               Email
             </label>
 
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex cursor-pointer items-center gap-2">
+              <input
+                type="radio"
+                checked={loginType === "mobile"}
+                onChange={() => setLoginType("mobile")}
+              />
+              Mobile
+            </label>
+
+            <label className="flex cursor-pointer items-center gap-2">
               <input
                 type="radio"
                 checked={loginType === "identity"}
@@ -146,6 +141,7 @@ function Login() {
           {loginType === "email" && (
             <Input
               label="Email"
+              type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
@@ -172,7 +168,7 @@ function Login() {
             error={errors.password}
           />
 
-          <div className="flex flex-col sm:flex-row gap-3 w-full">
+          <div className="flex w-full flex-col gap-3 sm:flex-row">
             <div className="flex-1">
               <Captcha setCaptchaText={setCaptchaText} />
             </div>
@@ -195,7 +191,7 @@ function Login() {
         </div>
 
         {/* FOOTER */}
-        <p className="text-sm text-center">
+        <p className="text-center text-sm">
           Don’t have an account?{" "}
           <Link to="/register" className="text-blue-600 hover:underline">
             Register
