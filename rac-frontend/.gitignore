@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 
 rac-frontend/src/assets/rac-video.mp4
+src/assets/rac-video.mp4
