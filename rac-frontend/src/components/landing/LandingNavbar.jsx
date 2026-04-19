@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import DropdownMenu from "./DropdownMenu";
 import "./dropdown.css";
 
@@ -8,22 +9,23 @@ export default function LandingNavbar() {
   const location = useLocation();
   const navRef = useRef(null);
   const [activeMenu, setActiveMenu] = useState(null);
+  const { t } = useTranslation();
 
   const navItems = [
-    { label: "Home", type: "link", path: "/?notice=open" },
-    { label: "About RAC", type: "dropdown", key: "about" },
-    { label: "Programmes", type: "dropdown", key: "programmes" },
-    { label: "Career Opportunity", type: "dropdown", key: "career" },
-    { label: "DRDS", type: "link", path: "/drds" },
-    { label: "FAQs", type: "link", path: "/faqs" },
-    { label: "गृहपत्रिका", type: "link", path: "/grahpatrika" },
+    { label: t("home"), type: "link", path: "/?notice=open" },
+    { label: t("navAboutRac"), type: "dropdown", key: "about" },
+    { label: t("navProgrammes"), type: "dropdown", key: "programmes" },
+    { label: t("navCareer"), type: "dropdown", key: "career" },
+    { label: t("drds"), type: "link", path: "/drds" },
+    { label: t("faqs"), type: "link", path: "/faqs" },
+    { label: t("grahpatrika"), type: "link", path: "/grahpatrika" },
   ];
 
   const handleItemClick = (item) => {
     if (item.type === "link") {
       setActiveMenu(null);
 
-      if (item.label === "Home") {
+      if (item.path === "/?notice=open") {
         navigate("/?notice=open");
         return;
       }

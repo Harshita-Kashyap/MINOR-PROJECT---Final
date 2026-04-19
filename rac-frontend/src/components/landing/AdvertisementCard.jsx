@@ -4,50 +4,55 @@ import Button from "../ui/Button";
 import Badge from "../ui/Badge";
 
 export default function AdvertisementCard({
-  title = "Junior Research Fellow (JRF)",
+  title,
   deadline = "15 Aug 2024",
-  eligibility = "B.Tech / M.Tech",
-  selection = "Interview",
-  status = "Open",
+  eligibility,
+  selection,
+  status,
 }) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
 
-  return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 rounded-xl shadow-sm hover:shadow-md transition">
+  const finalTitle = title || t("adTitle");
+  const finalEligibility = eligibility || t("adEligibility");
+  const finalSelection = selection || t("adSelection");
+  const finalStatus = status || t("adStatus");
 
-      <div className="flex justify-between items-start">
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+      <div className="flex items-start justify-between">
         <div>
-          <h4 className="font-semibold text-lg dark:text-white">
-            {title}
+          <h4 className="text-lg font-semibold dark:text-white">
+            {finalTitle}
           </h4>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {t("deadline")}: {deadline}
           </p>
 
           <div className="mt-2">
-            <Badge>{status}</Badge>
+            <Badge>{finalStatus}</Badge>
           </div>
         </div>
 
         <button
           onClick={() => setOpen(!open)}
-          className="text-blue-700 dark:text-blue-400 text-sm font-medium hover:underline"
+          className="text-sm font-medium text-blue-700 hover:underline dark:text-blue-400"
         >
           {open ? t("hide") : t("view")}
         </button>
       </div>
 
       {open && (
-        <div className="mt-4 border-t border-gray-200 dark:border-gray-600 pt-3 text-sm text-gray-600 dark:text-gray-300 space-y-2">
+        <div className="mt-4 space-y-2 border-t border-gray-200 pt-3 text-sm text-gray-600 dark:border-gray-600 dark:text-gray-300">
+          <p>
+            <b>{t("eligibility")}:</b> {finalEligibility}
+          </p>
+          <p>
+            <b>{t("selection")}:</b> {finalSelection}
+          </p>
 
-          <p><b>{t("eligibility")}:</b> {eligibility}</p>
-          <p><b>{t("selection")}:</b> {selection}</p>
-
-          <Button className="mt-2 w-full">
-            {t("applyNow")}
-          </Button>
+          <Button className="mt-2 w-full">{t("applyNow")}</Button>
         </div>
       )}
     </div>

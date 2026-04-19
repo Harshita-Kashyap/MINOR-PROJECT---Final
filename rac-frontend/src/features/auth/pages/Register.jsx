@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import AuthLayout from "../../../layouts/AuthLayout";
 import Input from "../../../components/ui/Input";
@@ -13,6 +14,7 @@ import { validateRegister } from "../validation";
 
 function Register() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [form, setForm] = useState({
     name: "",
@@ -51,8 +53,6 @@ function Register() {
     setLoading(true);
 
     try {
-      console.log("📤 Sending Data:", form);
-
       const response = await fetch("http://localhost:5000/register", {
         method: "POST",
         headers: {
@@ -70,7 +70,6 @@ function Register() {
       });
 
       const data = await response.json();
-      console.log("📥 Server Response:", data);
 
       if (response.ok && data.success) {
         alert("✅ Registration Successful!");
@@ -89,20 +88,18 @@ function Register() {
   return (
     <AuthLayout>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* HEADER */}
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Register
+            {t("register")}
           </h2>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-            Create your applicant account
+            {t("createApplicantAccount")}
           </p>
         </div>
 
-        {/* BASIC DETAILS */}
         <div className="space-y-4">
           <Input
-            label="Full Name"
+            label={t("fullName")}
             name="name"
             value={form.name}
             onChange={handleChange}
@@ -110,7 +107,7 @@ function Register() {
           />
 
           <Input
-            label="Email"
+            label={t("email")}
             type="email"
             name="email"
             value={form.email}
@@ -119,7 +116,7 @@ function Register() {
           />
 
           <Input
-            label="Mobile Number"
+            label={t("mobileNumber")}
             type="tel"
             name="phone"
             value={form.phone}
@@ -128,8 +125,7 @@ function Register() {
           />
         </div>
 
-        {/* IDENTITY SECTION */}
-        <AuthSection title="Identity Details">
+        <AuthSection title={t("identityDetails")}>
           <IdentityFields
             form={form}
             errors={errors}
@@ -137,10 +133,9 @@ function Register() {
           />
         </AuthSection>
 
-        {/* PASSWORD */}
         <div className="space-y-4">
           <Input
-            label="Password"
+            label={t("password")}
             type="password"
             name="password"
             value={form.password}
@@ -149,7 +144,7 @@ function Register() {
           />
 
           <Input
-            label="Confirm Password"
+            label={t("confirmPassword")}
             type="password"
             name="confirmPassword"
             value={form.confirmPassword}
@@ -158,7 +153,6 @@ function Register() {
           />
         </div>
 
-        {/* CAPTCHA */}
         <div className="flex w-full flex-col gap-3 sm:flex-row">
           <div className="flex-1">
             <Captcha setCaptchaText={setCaptchaText} />
@@ -166,7 +160,7 @@ function Register() {
 
           <div className="flex-1">
             <Input
-              label="Enter Captcha"
+              label={t("enterCaptcha")}
               name="captcha"
               value={form.captcha}
               onChange={handleChange}
@@ -175,19 +169,17 @@ function Register() {
           </div>
         </div>
 
-        {/* BUTTON */}
         <Button type="submit" fullWidth disabled={loading} loading={loading}>
-          {loading ? "Registering..." : "Register"}
+          {loading ? t("registering") : t("register")}
         </Button>
 
-        {/* FOOTER */}
         <p className="text-center text-sm text-gray-600 dark:text-gray-300">
-          Already have an account?{" "}
+          {t("alreadyAccount")}{" "}
           <Link
             to="/login"
             className="font-medium text-blue-600 hover:underline dark:text-blue-400"
           >
-            Login
+            {t("login")}
           </Link>
         </p>
       </form>

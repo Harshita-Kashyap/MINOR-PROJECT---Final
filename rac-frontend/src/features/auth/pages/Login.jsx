@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import AuthLayout from "../../../layouts/AuthLayout";
 import Input from "../../../components/ui/Input";
@@ -15,6 +16,7 @@ import { validateLogin } from "../validation";
 function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [loginType, setLoginType] = useState("email");
 
@@ -89,13 +91,11 @@ function Login() {
   return (
     <AuthLayout>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* HEADER */}
         <div className="flex items-center justify-center gap-3">
-          <h2 className="text-2xl font-semibold">Login</h2>
+          <h2 className="text-2xl font-semibold">{t("loginTitle")}</h2>
         </div>
 
-        {/* LOGIN TYPE */}
-        <AuthSection title="Select Login Method">
+        <AuthSection title={t("loginSelectMethod")}>
           <div className="space-y-2 text-sm">
             <label className="flex cursor-pointer items-center gap-2">
               <input
@@ -103,7 +103,7 @@ function Login() {
                 checked={loginType === "email"}
                 onChange={() => setLoginType("email")}
               />
-              Email
+              {t("loginMethodEmail")}
             </label>
 
             <label className="flex cursor-pointer items-center gap-2">
@@ -112,7 +112,7 @@ function Login() {
                 checked={loginType === "mobile"}
                 onChange={() => setLoginType("mobile")}
               />
-              Mobile
+              {t("loginMethodMobile")}
             </label>
 
             <label className="flex cursor-pointer items-center gap-2">
@@ -121,16 +121,15 @@ function Login() {
                 checked={loginType === "identity"}
                 onChange={() => setLoginType("identity")}
               />
-              Identity
+              {t("loginMethodIdentity")}
             </label>
           </div>
         </AuthSection>
 
-        {/* FORM */}
         <div className="space-y-4">
           {loginType === "mobile" && (
             <Input
-              label="Mobile Number"
+              label={t("mobileNumber")}
               name="mobile"
               value={form.mobile}
               onChange={handleChange}
@@ -140,7 +139,7 @@ function Login() {
 
           {loginType === "email" && (
             <Input
-              label="Email"
+              label={t("email")}
               type="email"
               name="email"
               value={form.email}
@@ -160,7 +159,7 @@ function Login() {
           )}
 
           <Input
-            label="Password"
+            label={t("password")}
             type="password"
             name="password"
             value={form.password}
@@ -175,7 +174,7 @@ function Login() {
 
             <div className="flex-1">
               <Input
-                label="Enter Captcha"
+                label={t("enterCaptcha")}
                 type="text"
                 name="captcha"
                 value={form.captcha}
@@ -186,15 +185,14 @@ function Login() {
           </div>
 
           <Button type="submit" fullWidth>
-            Login
+            {t("login")}
           </Button>
         </div>
 
-        {/* FOOTER */}
         <p className="text-center text-sm">
-          Don’t have an account?{" "}
+          {t("noAccount")}{" "}
           <Link to="/register" className="text-blue-600 hover:underline">
-            Register
+            {t("register")}
           </Link>
         </p>
       </form>

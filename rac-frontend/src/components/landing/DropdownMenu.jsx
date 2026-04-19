@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "./dropdown.css";
 
 export default function DropdownMenu({ type, onClose }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const go = (path) => {
     navigate(path);
@@ -12,34 +14,32 @@ export default function DropdownMenu({ type, onClose }) {
   const content = {
     about: [
       {
-        title: "About RAC",
+        title: t("dropdownAboutTitle"),
         items: [
-          { name: "Chairman", path: "/chairman" },
-          { name: "Director", path: "/director" },
-          { name: "Our Approach", path: "/approach" },
-          { name: "About Us", path: "/about" },
+          { name: t("dropdownChairman"), path: "/chairman" },
+          { name: t("dropdownDirector"), path: "/director" },
+          { name: t("dropdownApproach"), path: "/approach" },
+          { name: t("dropdownAboutUs"), path: "/about" },
         ],
       },
     ],
-
     programmes: [
       {
-        title: "Programmes",
+        title: t("dropdownProgrammesTitle"),
         items: [
-          { name: "Recruitment", path: "/programmes/recruitment" },
-          { name: "Assessment", path: "/programmes/assessment" },
-          { name: "Selection for PG", path: "/programmes/selection-pg" },
-          { name: "LDCE", path: "/programmes/ldce" },
+          { name: t("dropdownRecruitment"), path: "/programmes/recruitment" },
+          { name: t("dropdownAssessment"), path: "/programmes/assessment" },
+          { name: t("dropdownSelectionPg"), path: "/programmes/selection-pg" },
+          { name: t("dropdownLdce"), path: "/programmes/ldce" },
         ],
       },
     ],
-
     career: [
       {
-        title: "Career Opportunity",
+        title: t("dropdownCareerTitle"),
         items: [
-          { name: "Lateral Entry", path: "/lateral" },
-          { name: "Direct Recruitment", path: "/direct-recruitment" },
+          { name: t("dropdownLateral"), path: "/lateral" },
+          { name: t("dropdownDirectRecruitment"), path: "/direct-recruitment" },
         ],
       },
     ],

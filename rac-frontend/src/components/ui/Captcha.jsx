@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function generateCaptcha() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -11,6 +12,7 @@ function generateCaptcha() {
 
 function Captcha({ setCaptchaText }) {
   const [captcha, setCaptcha] = useState("");
+  const { t } = useTranslation();
 
   const refresh = () => {
     const newCaptcha = generateCaptcha();
@@ -26,7 +28,7 @@ function Captcha({ setCaptchaText }) {
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
-          CAPTCHA
+          {t("captchaLabel")}
         </label>
 
         <button
@@ -34,7 +36,7 @@ function Captcha({ setCaptchaText }) {
           onClick={refresh}
           className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
         >
-          Refresh
+          {t("refresh")}
         </button>
       </div>
 

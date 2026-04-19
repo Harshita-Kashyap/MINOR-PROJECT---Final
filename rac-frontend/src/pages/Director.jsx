@@ -1,15 +1,17 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import LandingLayout from "../layouts/LandingLayout";
 
 export default function Director() {
   const [activeTab, setActiveTab] = useState("brief");
+  const { t } = useTranslation();
 
   return (
     <LandingLayout>
       <div className="w-full rounded-sm border border-sky-300 bg-white shadow-sm dark:border-sky-900 dark:bg-gray-800">
         <div className="border-b border-gray-200 px-6 py-5 dark:border-gray-700">
           <h1 className="text-4xl font-bold text-amber-900 dark:text-amber-400">
-            Director
+            {t("directorTitle")}
           </h1>
         </div>
 
@@ -23,7 +25,7 @@ export default function Director() {
               }`}
               onClick={() => setActiveTab("brief")}
             >
-              Brief Profile
+              {t("briefProfile")}
             </button>
 
             <button
@@ -34,7 +36,7 @@ export default function Director() {
               }`}
               onClick={() => setActiveTab("former")}
             >
-              Former Director
+              {t("formerDirector")}
             </button>
           </div>
         </div>
@@ -42,54 +44,17 @@ export default function Director() {
         <div className="px-6 py-5 text-[15px] leading-8 text-gray-800 dark:text-gray-200">
           {activeTab === "brief" ? (
             <div className="space-y-4">
-              <p>
-                <span className="font-bold">Smt. KV Prabha, Scientist H</span>{" "}
-                took over as Director RAC on 1st Mar 2023. She is a post
-                graduate in Computer Science and MPhil in Computer Science
-                with Data Mining as specialization.
-              </p>
-
-              <p>
-                She has undergone training in Advanced Leadership courses in
-                IIM(A) and ASCI. She joined DRDO in the year 1990 at DRDL
-                Hyderabad and has extensively contributed to knowledge
-                management initiatives and institutional development.
-              </p>
-
-              <p>
-                She has contributed to various non-IT and IT initiatives such
-                as knowledge sharing platforms, surveys, technical forums,
-                document management systems, and innovation programs across
-                DRDO labs.
-              </p>
-
-              <p>
-                She played a major role in process re-engineering and
-                implementation of workflow-based approvals, improving
-                efficiency in project execution, procurement, testing, and
-                administration.
-              </p>
-
-              <p>
-                She also led initiatives for cluster-level online clearances,
-                monitoring systems, and has experience in ISO, CMMI, and
-                Information Security Management Systems.
-              </p>
-
-              <p>
-                At RAC, she has established modern infrastructure including
-                data centers, structured LAN systems, and has contributed to
-                recruitment automation using AI-based systems.
-              </p>
-
-              <p>
-                She has received recognition including National Science Day
-                award for her contributions.
-              </p>
+              <p>{t("directorP1")}</p>
+              <p>{t("directorP2")}</p>
+              <p>{t("directorP3")}</p>
+              <p>{t("directorP4")}</p>
+              <p>{t("directorP5")}</p>
+              <p>{t("directorP6")}</p>
+              <p>{t("directorP7")}</p>
             </div>
           ) : (
             <div className="space-y-3">
-              <p>List of former Directors can be added here.</p>
+              <p>{t("formerDirectorText")}</p>
               <ul className="list-disc pl-6">
                 <li>Former Director 1</li>
                 <li>Former Director 2</li>

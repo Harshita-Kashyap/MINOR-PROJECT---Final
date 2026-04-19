@@ -1,25 +1,24 @@
+import { useTranslation } from "react-i18next";
 import Input from "../ui/Input";
 
 export default function IdentityFields({ form, errors, handleChange }) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-4">
-
-      {/* DOB */}
       <Input
-        label="Date of Birth"
+        label={t("dob")}
         type="date"
         name="dob"
         value={form.dob}
         onChange={handleChange}
         error={errors.dob}
-        className="dark:[color-scheme:dark]" 
+        className="dark:[color-scheme:dark]"
       />
 
-      {/* Roll + Year */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Input
-          label="10th Roll Number"
+          label={t("rollNumber10")}
           name="roll"
           value={form.roll}
           onChange={handleChange}
@@ -27,7 +26,7 @@ export default function IdentityFields({ form, errors, handleChange }) {
         />
 
         <Input
-          label="10th Passing Year"
+          label={t("passingYear10")}
           name="year"
           value={form.year}
           onChange={(e) => {
@@ -37,9 +36,7 @@ export default function IdentityFields({ form, errors, handleChange }) {
           }}
           error={errors.year}
         />
-
       </div>
-
     </div>
   );
 }
