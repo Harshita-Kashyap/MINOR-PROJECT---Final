@@ -8,7 +8,11 @@ const userSchema = new mongoose.Schema({
   roll: String,
   year: String,
   password: String,
+  role: {
+    type: String,
+    enum: ["admin", "selector", "applicant"],
+    default: "applicant"
+  }
 });
 
-// 🔥 FORCE collection name = "users"
 module.exports = mongoose.model("User", userSchema, "users");
