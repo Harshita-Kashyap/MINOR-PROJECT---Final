@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Header from "../components/landing/Header";
+import ApplicantRibbon from "../components/applicant/ApplicantRibbon"; 
 
 function MyApplications() {
   const [applications, setApplications] = useState([]);
@@ -33,84 +35,94 @@ function MyApplications() {
   const getStatusStyle = (status) => {
     switch (status) {
       case "Selected":
-        return "bg-green-100 text-green-700";
+        return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
       case "Rejected":
-        return "bg-red-100 text-red-700";
+        return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
       case "Shortlisted":
-        return "bg-yellow-100 text-yellow-700";
+        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
       default:
-        return "bg-blue-100 text-blue-700";
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-800 p-6">
-      
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">
-        My Applications
-      </h2>
+    <div className="min-h-screen bg-gray-100 transition-colors dark:bg-gray-900">
+      {/* HEADER */}
+      <Header />
 
-      {/* 🔄 Loading */}
-      {loading ? (
-        <p className="text-gray-500">Loading...</p>
-      ) : applications.length === 0 ? (
-        <p className="text-gray-500">No applications found</p>
-      ) : (
-        <div className="space-y-4">
-          {applications.map((app) => (
-            <div
-              key={app.id}
-              className="bg-white dark:bg-gray-900 p-5 rounded-xl shadow"
-            >
-              {/* Job Title */}
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                {app.title}
-              </h3>
+      {/* APPLICANT RIBBON */}
+      <ApplicantRibbon />
 
-              {/* Department */}
-              <p className="text-sm text-gray-500">
-                {app.department}
-              </p>
+      {/* CONTENT */}
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+        <h2 className="mb-6 text-2xl font-semibold text-gray-800 dark:text-white">
+          My Applications
+        </h2>
 
-              {/* Status */}
-              <div className="mt-3">
-                <span
-                  className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusStyle(
-                    app.status
-                  )}`}
-                >
-                  {app.status}
-                </span>
+        {/* 🔄 Loading */}
+        {loading ? (
+          <p className="text-gray-500 dark:text-gray-400">Loading...</p>
+        ) : applications.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400">
+            No applications found
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {applications.map((app) => (
+              <div
+                key={app.id}
+                className="rounded-xl bg-white p-5 shadow-sm transition-colors dark:bg-gray-800"
+              >
+                {/* Job Title */}
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                  {app.title}
+                </h3>
 
-                {/* 🔥 EXTRA MESSAGE */}
-                {app.status === "Selected" && (
-                  <p className="text-green-600 font-semibold mt-2">
-                    🎉 Congratulations! You are selected
-                  </p>
-                )}
+                {/* Department */}
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {app.department}
+                </p>
 
-                {app.status === "Rejected" && (
-                  <p className="text-red-500 mt-2">
-                    ❌ Better luck next time
-                  </p>
-                )}
+                {/* Status */}
+                <div className="mt-3">
+                  <span
+                    className={`rounded-full px-4 py-1 text-sm font-medium ${getStatusStyle(
+                      app.status
+                    )}`}
+                  >
+                    {app.status}
+                  </span>
 
-                {app.status === "Applied" && (
-                  <p className="text-blue-500 mt-2">
-                    ⏳ Your application is under review
-                  </p>
-                )}
+                  {/* EXTRA MESSAGE */}
+                  {app.status === "Selected" && (
+                    <p className="mt-2 font-semibold text-green-600 dark:text-green-400">
+                      🎉 Congratulations! You are selected
+                    </p>
+                  )}
+
+                  {app.status === "Rejected" && (
+                    <p className="mt-2 text-red-500 dark:text-red-400">
+                      ❌ Better luck next time
+                    </p>
+                  )}
+
+                  {app.status === "Applied" && (
+                    <p className="mt-2 text-blue-500 dark:text-blue-400">
+                      ⏳ Your application is under review
+                    </p>
+                  )}
+                </div>
+
+                {/* Applied Date */}
+                <p className="mt-3 text-xs text-gray-400 dark:text-gray-500">
+                  Applied on:{" "}
+                  {new Date(app.applied_at).toLocaleDateString()}
+                </p>
               </div>
-
-              {/* Applied Date */}
-              <p className="text-xs text-gray-400 mt-3">
-                Applied on:{" "}
-                {new Date(app.applied_at).toLocaleDateString()}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
