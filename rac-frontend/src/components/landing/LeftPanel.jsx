@@ -1,7 +1,5 @@
 import Card from "../ui/Card";
-import Input from "../ui/Input";
 import { useTranslation } from "react-i18next";
-import racVideo from "../../assets/rac-video.mp4";
 
 export default function LeftPanel() {
   const { t } = useTranslation();
@@ -10,30 +8,20 @@ export default function LeftPanel() {
     <div className="space-y-5">
       {/* Video Section */}
       <Card className="overflow-hidden p-0">
-        <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
-          <h3 className="text-sm font-semibold tracking-wide text-gray-900 dark:text-white">
-            {t("featuredVideo", "Featured Video")}
-          </h3>
-        </div>
+        <div className="flex h-56 w-full items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700">
 
-        <div className="bg-black">
-          <video
-            className="h-56 w-full object-cover"
-            controls
-            preload="metadata"
-          >
-            <source src={racVideo} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
+          <div className="text-center px-4">
+            <div className="mb-2 text-3xl">🎥</div>
 
-        <div className="px-4 py-3">
-          <p className="text-sm leading-6 text-gray-600 dark:text-gray-300">
-            {t(
-              "videoText",
-              "Watch the overview video to understand the purpose and flow of this selector–applicant simulation portal."
-            )}
-          </p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
+              Video Placeholder
+            </p>
+
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Add RAC overview video here
+            </p>
+          </div>
+
         </div>
       </Card>
 
