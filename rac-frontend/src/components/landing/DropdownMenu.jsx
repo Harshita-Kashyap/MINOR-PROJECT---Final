@@ -49,19 +49,24 @@ export default function DropdownMenu({ type, onClose }) {
 
   return (
     <div className="dropdown-overlay" onClick={onClose}>
-      <div
-        className="dropdown-panel"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="dropdown-panel" onClick={(e) => e.stopPropagation()}>
         <div className="dropdown-columns">
           {content[type].map((col, i) => (
-            <div key={i}>
+            <div key={i} className="dropdown-column">
               <h4>{col.title}</h4>
-              {col.items.map((item, idx) => (
-                <p key={idx} onClick={() => go(item.path)}>
-                  {item.name}
-                </p>
-              ))}
+
+              <div className="dropdown-items">
+                {col.items.map((item, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="dropdown-link"
+                    onClick={() => go(item.path)}
+                  >
+                    {item.name}
+                  </button>
+                ))}
+              </div>
             </div>
           ))}
         </div>

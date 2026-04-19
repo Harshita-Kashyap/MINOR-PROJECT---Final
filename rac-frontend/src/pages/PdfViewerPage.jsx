@@ -1,4 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
+import Header from "../components/landing/Header";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
 
 const pdfMap = {
   bonafideCertificate: {
@@ -95,15 +98,26 @@ function PdfViewerPage() {
 
   if (!pdfData) {
     return (
-      <div className="min-h-screen bg-[#f3f3f3] p-8 dark:bg-gray-900">
-        <p className="text-xl text-red-600 dark:text-red-400">PDF not found.</p>
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="mt-4 text-blue-700 hover:underline dark:text-blue-400"
-        >
-          Back
-        </button>
+      <div className="min-h-screen bg-gray-100 transition-colors dark:bg-gray-900">
+        <Header />
+
+        <main className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 lg:px-8">
+          <Card>
+            <h1 className="text-2xl font-bold text-red-600 dark:text-red-400">
+              PDF not found
+            </h1>
+            <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300">
+              The requested document could not be located. Please go back and
+              select a valid certificate or declaration format.
+            </p>
+
+            <div className="mt-6">
+              <Button variant="outline" onClick={() => navigate(-1)}>
+                ← Back
+              </Button>
+            </div>
+          </Card>
+        </main>
       </div>
     );
   }
@@ -113,61 +127,102 @@ function PdfViewerPage() {
   )}`;
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] dark:bg-gray-900">
-      <div className="bg-white dark:bg-gray-800">
-        <div className="mx-auto flex max-w-[1600px] items-center gap-4 px-8 py-6">
-          <img
-            src="https://rac.gov.in/images/rac_logo_2025_sm.png"
-            alt="RAC Logo"
-            className="h-24 w-24 object-contain"
-          />
+    <div className="min-h-screen bg-gray-100 transition-colors dark:bg-gray-900">
+      <Header />
 
-          <div className="leading-tight text-black dark:text-white">
-            <h1 className="text-2xl font-bold uppercase">
-              Recruitment &amp; Assessment Centre
-            </h1>
-            <p className="text-[2rem]">DRDO, Ministry of Defence</p>
-            <p className="text-[2rem]">Delhi, India</p>
-          </div>
-        </div>
-      </div>
+      {/* PAGE TITLE BAND */}
+      <section className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+        <div className="mx-auto max-w-[1450px] px-4 py-8 sm:px-6 lg:px-8">
+          <p className="text-sm font-medium uppercase tracking-wider text-blue-700 dark:text-blue-400">
+            Document Viewer
+          </p>
 
-      <div
-        className="relative z-0 h-[210px] border-b-4 border-orange-400 bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "url('https://rac.gov.in/assets/img/slider/slider1.jpg')",
-        }}
-      >
-        <div className="absolute inset-0 bg-blue-900/55" />
-        <div className="relative mx-auto flex h-full max-w-[1600px] items-start justify-end px-10 py-12">
-          <p className="text-3xl text-white">{pdfData.title}</p>
-        </div>
-      </div>
-
-      <div className="relative z-10 mx-auto mt-6 max-w-[1500px] rounded-md bg-white px-6 py-6 shadow dark:bg-gray-800">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
+          <h1 className="mt-2 text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
             {pdfData.title}
-          </h2>
+          </h1>
 
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="text-sm text-blue-700 hover:underline dark:text-blue-400"
-          >
-            Back
-          </button>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-gray-600 dark:text-gray-300 sm:text-base">
+            Review the selected certificate or declaration format below. You may
+            go back to the previous page to choose another document.
+          </p>
         </div>
+      </section>
 
-        <div className="h-[80vh] w-full overflow-hidden rounded border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-900">
-          <iframe
-            src={`${proxiedPdfUrl}#toolbar=0`}
-            title={pdfData.title}
-            className="h-full w-full"
-          />
+      {/* MAIN CONTENT */}
+      <main className="mx-auto max-w-[1450px] px-4 py-8 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+          {/* PDF VIEWER */}
+          <section className="xl:col-span-9">
+            <Card className="overflow-hidden p-0">
+              <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/50">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {pdfData.title}
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                    Embedded PDF preview
+                  </p>
+                </div>
+
+                <Button variant="outline" onClick={() => navigate(-1)}>
+                  ← Back
+                </Button>
+              </div>
+
+              <div className="h-[78vh] w-full bg-gray-100 dark:bg-gray-900">
+                <iframe
+                  src={`${proxiedPdfUrl}#toolbar=0`}
+                  title={pdfData.title}
+                  className="h-full w-full"
+                />
+              </div>
+            </Card>
+          </section>
+
+          {/* SIDE INFO */}
+          <aside className="xl:col-span-3">
+            <div className="space-y-6">
+              <Card>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Document Information
+                </h3>
+
+                <div className="mt-4 space-y-3 text-sm leading-7 text-gray-600 dark:text-gray-300">
+                  <p>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      Title:
+                    </span>{" "}
+                    {pdfData.title}
+                  </p>
+
+                  <p>
+                    This page displays the selected RAC certificate or
+                    declaration format for review and reference.
+                  </p>
+                </div>
+              </Card>
+
+              <Card className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30">
+                <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-300">
+                  Instructions
+                </h3>
+
+                <div className="mt-3 space-y-3 text-sm leading-7 text-blue-900/80 dark:text-blue-200/90">
+                  <p>
+                    Read the document carefully before using it for any official
+                    submission purpose.
+                  </p>
+
+                  <p>
+                    Ensure that the selected format matches your applicable
+                    category, advertisement, or declaration requirement.
+                  </p>
+                </div>
+              </Card>
+            </div>
+          </aside>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
