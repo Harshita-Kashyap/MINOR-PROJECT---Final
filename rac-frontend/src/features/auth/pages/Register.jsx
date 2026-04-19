@@ -3,14 +3,14 @@ import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import AuthLayout from "../../../layouts/AuthLayout";
-import Input from "../../../components/ui/Input";
-import Button from "../../../components/ui/Button";
-import Captcha from "../../../components/ui/Captcha";
+import Input from "../../../shared/components/ui/Input";
+import Button from "../../../shared/components/ui/Button";
+import Captcha from "../../../shared/components/ui/Captcha";
 
-import AuthSection from "../../../components/common/AuthSection";
-import IdentityFields from "../../../components/common/IdentityFields";
+import AuthSection from "../components/AuthSection";
+import IdentityFields from "../../../shared/components/forms/IdentityFields";
 
-import { validateRegister } from "../validation";
+import { validateRegister } from "../utils/validation";
 
 function Register() {
   const navigate = useNavigate();
