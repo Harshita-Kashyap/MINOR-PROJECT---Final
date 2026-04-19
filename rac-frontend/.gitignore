@@ -22,3 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+rac-frontend/src/assets/rac-video.mp4
