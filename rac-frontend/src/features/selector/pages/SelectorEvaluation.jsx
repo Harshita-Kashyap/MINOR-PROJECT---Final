@@ -2,6 +2,7 @@ import Header from "../../landing/components/Header";
 import SelectorRibbon from "../components/SelectorRibbon";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 
 const SelectorEvaluation = () => {

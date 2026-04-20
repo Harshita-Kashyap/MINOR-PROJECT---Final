@@ -1,130 +1,152 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../landing/components/Header";
 import ApplicantRibbon from "../components/ApplicantRibbon";
+import Card from "../../../shared/components/ui/Card";
+import Button from "../../../shared/components/ui/Button";
+import Badge from "../../../shared/components/ui/Badge";
+import { getApplications } from "../../../shared/utils/applicationStorage";
+import {
+  getNextAction,
+  getStageLabel,
+  getStageTone,
+} from "../utils/applicantHelpers";
 
-function MyApplications() {
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
+function formatDate(dateValue) {
+  if (!dateValue) return "-";
+  return new Date(dateValue).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  const API = "http://localhost:5000/api";
-
-  // 🔥 Fetch applications
-  const fetchApplications = async () => {
-    try {
-      const res = await axios.get(`${API}/my-applications/${user.userId}`);
-      setApplications(res.data);
-    } catch (error) {
-      console.error("Error fetching applications:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 🔥 Auto refresh every 3 sec
-  useEffect(() => {
-    fetchApplications();
-
-    const interval = setInterval(fetchApplications, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // 🎨 Status styles
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case "Selected":
-        return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
-      case "Rejected":
-        return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
-      case "Shortlisted":
-        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
-      default:
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
-    }
-  };
+export default function MyApplications() {
+  const navigate = useNavigate();
+  const applications = useMemo(() => getApplications(), []);
 
   return (
-    <div className="min-h-screen bg-gray-100 transition-colors dark:bg-gray-900">
-      {/* HEADER */}
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 transition-colors dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       <Header />
-
-      {/* APPLICANT RIBBON */}
       <ApplicantRibbon />
 
-      {/* CONTENT */}
-      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-        <h2 className="mb-6 text-2xl font-semibold text-gray-800 dark:text-white">
-          My Applications
-        </h2>
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="space-y-6">
+          <section className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                My Applications
+              </h1>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Monitor every application stage, status update, and decision reason.
+              </p>
+            </div>
 
-        {/* 🔄 Loading */}
-        {loading ? (
-          <p className="text-gray-500 dark:text-gray-400">Loading...</p>
-        ) : applications.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400">
-            No applications found
-          </p>
-        ) : (
-          <div className="space-y-4">
-            {applications.map((app) => (
-              <div
-                key={app.id}
-                className="rounded-xl bg-white p-5 shadow-sm transition-colors dark:bg-gray-800"
-              >
-                {/* Job Title */}
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                  {app.title}
-                </h3>
+            <Button variant="outline" onClick={() => navigate("/applicant/vacancies")}>
+              Browse Vacancies
+            </Button>
+          </section>
 
-                {/* Department */}
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {app.department}
-                </p>
-
-                {/* Status */}
-                <div className="mt-3">
-                  <span
-                    className={`rounded-full px-4 py-1 text-sm font-medium ${getStatusStyle(
-                      app.status
-                    )}`}
-                  >
-                    {app.status}
-                  </span>
-
-                  {/* EXTRA MESSAGE */}
-                  {app.status === "Selected" && (
-                    <p className="mt-2 font-semibold text-green-600 dark:text-green-400">
-                      🎉 Congratulations! You are selected
-                    </p>
-                  )}
-
-                  {app.status === "Rejected" && (
-                    <p className="mt-2 text-red-500 dark:text-red-400">
-                      ❌ Better luck next time
-                    </p>
-                  )}
-
-                  {app.status === "Applied" && (
-                    <p className="mt-2 text-blue-500 dark:text-blue-400">
-                      ⏳ Your application is under review
-                    </p>
-                  )}
-                </div>
-
-                {/* Applied Date */}
-                <p className="mt-3 text-xs text-gray-400 dark:text-gray-500">
-                  Applied on:{" "}
-                  {new Date(app.applied_at).toLocaleDateString()}
-                </p>
+          {applications.length === 0 ? (
+            <Card className="text-center">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                No applications found
+              </h2>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                Once you apply for a vacancy, you will be able to track its full progress here.
+              </p>
+              <div className="mt-5 flex justify-center">
+                <Button onClick={() => navigate("/applicant/vacancies")}>
+                  Explore Vacancies
+                </Button>
               </div>
-            ))}
-          </div>
-        )}
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {applications.map((app) => (
+                <Card
+                  key={app.id}
+                  className="border border-gray-200/80 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80"
+                >
+                  <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant={getStageTone(app.currentStage)}>
+                          {getStageLabel(app.currentStage)}
+                        </Badge>
+                      </div>
+
+                      <h3 className="mt-3 text-lg font-semibold text-gray-900 dark:text-white">
+                        {app.vacancyTitle}
+                      </h3>
+
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {app.department}
+                      </p>
+
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900/40">
+                          <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Applied On
+                          </p>
+                          <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
+                            {formatDate(app.appliedAt)}
+                          </p>
+                        </div>
+
+                        <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900/40">
+                          <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Last Updated
+                          </p>
+                          <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
+                            {formatDate(app.lastUpdatedAt)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3 dark:border-blue-900/50 dark:bg-blue-950/20">
+                        <p className="text-xs uppercase tracking-wide text-blue-700 dark:text-blue-400">
+                          Next Action
+                        </p>
+                        <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
+                          {getNextAction(app)}
+                        </p>
+                      </div>
+
+                      {(app.verificationReason || app.technicalRemarks || app.finalReason) && (
+                        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 dark:border-amber-900/60 dark:bg-amber-950/20">
+                          <p className="text-xs uppercase tracking-wide text-amber-700 dark:text-amber-400">
+                            Remark / Reason
+                          </p>
+                          <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">
+                            {app.finalReason || app.technicalRemarks || app.verificationReason}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex shrink-0 flex-col gap-2 lg:w-48">
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate("/applicant/applications")}
+                      >
+                        View Details
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        onClick={() => navigate("/applicant/dashboard")}
+                      >
+                        Back to Dashboard
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
 }
-
-export default MyApplications;

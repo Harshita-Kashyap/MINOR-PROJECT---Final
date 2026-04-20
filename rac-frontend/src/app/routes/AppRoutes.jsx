@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
@@ -150,6 +150,11 @@ function AppRoutes() {
         {/* ================= APPLICANT ROUTES ================= */}
         <Route
           path="/applicant"
+          element={<Navigate to="/applicant/dashboard" replace />}
+        />
+
+        <Route
+          path="/applicant/dashboard"
           element={
             <ProtectedRoute allowedRoles={["applicant"]}>
               <ApplicantDashboard />

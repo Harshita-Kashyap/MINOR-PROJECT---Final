@@ -14,7 +14,6 @@ export default function RightPanel() {
         pdf: "161.86 KB",
         text: t("rightNoticeText"),
         date: `${t("rightPublishedOn")} 27 Aug, 2025`,
-        bg: "bg-[#cfeff7]",
       },
       {
         type: "advertisement",
@@ -72,12 +71,12 @@ export default function RightPanel() {
     return (
       <button
         key={index}
-        className={`w-full rounded-md px-3 py-2 text-sm font-semibold shadow-sm transition ${
+        className={`rounded-xl px-3 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm ${
           isBlue
             ? "bg-blue-700 text-white hover:bg-blue-800"
             : isRed
             ? "bg-red-700 text-white hover:bg-red-800"
-            : "bg-gray-600 text-white hover:bg-gray-700"
+            : "bg-gray-700 text-white hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500"
         }`}
       >
         {label}
@@ -85,109 +84,136 @@ export default function RightPanel() {
     );
   };
 
+  const renderSimpleCard = (text, index) => (
+    <div
+      key={index}
+      className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4 text-sm leading-7 text-gray-700 shadow-sm transition-all duration-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-200"
+    >
+      {text}
+    </div>
+  );
+
+  const renderNoticeCard = (item, index) => (
+    <div
+      key={index}
+      className="overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+    >
+      <div className="border-b border-sky-100 bg-gradient-to-r from-sky-50 to-cyan-50 px-4 py-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-800">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-white">
+            {item.title}
+          </h3>
+
+          <div className="shrink-0 text-right">
+            <span className="inline-flex rounded-md bg-red-600 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+              PDF
+            </span>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {item.pdf}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 py-4">
+        <p className="text-sm font-medium leading-7 text-gray-800 dark:text-gray-100">
+          {item.text}
+        </p>
+      </div>
+
+      <div className="border-t border-gray-100 bg-gray-50 px-4 py-3 text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-400">
+        {item.date}
+      </div>
+    </div>
+  );
+
+  const renderAdvertisementCard = (item, index) => (
+    <div
+      key={index}
+      className="overflow-hidden rounded-2xl border border-amber-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+    >
+      <div className="border-b border-amber-200/70 bg-gradient-to-r from-amber-50 to-yellow-50 px-4 py-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-800">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-xl font-bold tracking-tight text-[#4b3d2f] dark:text-white">
+              {item.advNo}
+            </h3>
+            <p className="mt-2 text-xs font-medium uppercase tracking-wide text-amber-700 dark:text-amber-300">
+              Advertisement Update
+            </p>
+          </div>
+
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm text-amber-700 shadow-sm dark:bg-gray-700 dark:text-amber-300">
+            ⓘ
+          </span>
+        </div>
+
+        <p className="mt-4 text-xs font-medium leading-6 text-gray-600 dark:text-gray-300">
+          {item.updated}
+        </p>
+      </div>
+
+      <div className="px-4 py-5">
+        <div className="mb-5 flex flex-wrap gap-2">
+          {item.buttons.map((btn, btnIndex) => renderButton(btn, btnIndex))}
+        </div>
+
+        <h4 className="text-xl font-semibold leading-8 text-pink-700 dark:text-pink-400">
+          {item.title}
+        </h4>
+
+        <p className="mt-4 text-sm leading-7 text-gray-700 dark:text-gray-200">
+          <span className="font-semibold text-red-600 dark:text-red-400">
+            {t("rightClosingDate")}{" "}
+          </span>
+          {item.closing}
+        </p>
+      </div>
+
+      <div className="border-t border-gray-100 bg-gray-50 px-4 py-3 text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-400">
+        {item.published}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-      <div className="mb-3 flex flex-wrap gap-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActive(tab)}
-            className={`rounded-t-md border px-4 py-2 text-sm font-medium transition ${
-              active === tab
-                ? "border-pink-300 bg-white text-pink-600 shadow-sm dark:bg-gray-700 dark:text-pink-400"
-                : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-            }`}
-          >
-            {tab === "latest" && t("rightLatestTab")}
-            {tab === "status" && t("rightStatusTab")}
-            {tab === "notices" && t("rightNoticesTab")}
-            {tab === "queryStatus" && t("rightQueryStatusTab")}
-          </button>
-        ))}
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-gray-200 bg-white/80 p-3 shadow-sm backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/80">
+        <div className="flex flex-wrap gap-2">
+          {tabs.map((tab) => {
+            const isActive = active === tab;
+
+            return (
+              <button
+                key={tab}
+                onClick={() => setActive(tab)}
+                className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                  isActive
+                    ? "bg-blue-700 text-white shadow-sm"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                }`}
+              >
+                {tab === "latest" && t("rightLatestTab")}
+                {tab === "status" && t("rightStatusTab")}
+                {tab === "notices" && t("rightNoticesTab")}
+                {tab === "queryStatus" && t("rightQueryStatusTab")}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="space-y-4">
         {tabContent[active].map((item, index) => {
           if (item.simple) {
-            return (
-              <div
-                key={index}
-                className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-              >
-                {item.text}
-              </div>
-            );
+            return renderSimpleCard(item.text, index);
           }
 
           if (item.type === "notice") {
-            return (
-              <div
-                key={index}
-                className={`overflow-hidden rounded-lg border border-gray-200 shadow-sm dark:border-gray-600 ${item.bg}`}
-              >
-                <div className="flex items-center justify-between border-b border-gray-300 px-4 py-3">
-                  <h3 className="text-lg font-bold text-gray-800">{item.title}</h3>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                    <span className="rounded bg-red-600 px-2 py-0.5 text-xs text-white">
-                      PDF
-                    </span>
-                    <span>{item.pdf}</span>
-                  </div>
-                </div>
-
-                <div className="bg-white px-4 py-4 dark:bg-gray-800">
-                  <p className="text-base font-semibold leading-7 text-gray-800 dark:text-white">
-                    {item.text}
-                  </p>
-                </div>
-
-                <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                  {item.date}
-                </div>
-              </div>
-            );
+            return renderNoticeCard(item, index);
           }
 
-          return (
-            <div
-              key={index}
-              className="overflow-hidden rounded-lg border border-[#d8d1a6] bg-[#f7edbd] shadow-sm dark:border-gray-600 dark:bg-gray-700"
-            >
-              <div className="border-b border-gray-300 px-4 py-4">
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-2xl font-bold text-[#4b3d2f] dark:text-white">
-                    {item.advNo}
-                  </h3>
-                  <span className="text-xl text-[#4b3d2f] dark:text-white">ⓘ</span>
-                </div>
-
-                <p className="mt-3 text-right text-sm font-semibold tracking-wide text-[#4b3d2f] dark:text-gray-200">
-                  {item.updated}
-                </p>
-              </div>
-
-              <div className="bg-white px-4 py-5 dark:bg-gray-800">
-                <div className="mb-4 grid gap-3 sm:grid-cols-2">
-                  {item.buttons.map((btn, btnIndex) => renderButton(btn, btnIndex))}
-                </div>
-
-                <h4 className="mb-3 text-2xl font-bold leading-9 text-pink-600 dark:text-pink-400">
-                  {item.title}
-                </h4>
-
-                <p className="mb-4 text-base leading-8 text-gray-700 dark:text-gray-200">
-                  <span className="font-bold text-red-600">
-                    {t("rightClosingDate")}{" "}
-                  </span>
-                  {item.closing}
-                </p>
-              </div>
-
-              <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                {item.published}
-              </div>
-            </div>
-          );
+          return renderAdvertisementCard(item, index);
         })}
       </div>
     </div>

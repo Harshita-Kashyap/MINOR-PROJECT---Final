@@ -1,9 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Header from "../../landing/components/Header";
 import ApplicantRibbon from "../../applicant/components/ApplicantRibbon";
 import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
+import {
+  getLatestActiveApplication,
+  updateApplication,
+  appendApplicationTimeline,
+} from "../../../shared/utils/applicationStorage";
+import {
+  APPLICATION_STAGES,
+  canAccessPersonalityTest,
+  getStageLabel,
+} from "../../applicant/utils/applicantHelpers";
 
 const questions = [
   {
@@ -39,15 +49,35 @@ const questions = [
 ];
 
 export default function PersonalityTest() {
+  const application = getLatestActiveApplication();
   const [timeLeft, setTimeLeft] = useState(8 * 60);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
+  const isAllowed = canAccessPersonalityTest(application);
+
   useEffect(() => {
-    if (submitted) return;
+    if (!application || !isAllowed) return;
+
+    if (application.currentStage === APPLICATION_STAGES.PERSONALITY_TEST_ASSIGNED) {
+      updateApplication(application.id, {
+        currentStage: APPLICATION_STAGES.PERSONALITY_TEST_IN_PROGRESS,
+        personalityTestStatus: "IN_PROGRESS",
+      });
+
+      appendApplicationTimeline(application.id, {
+        stage: APPLICATION_STAGES.PERSONALITY_TEST_IN_PROGRESS,
+        label: "Personality Test In Progress",
+        note: "Applicant started the personality test.",
+      });
+    }
+  }, [application, isAllowed]);
+
+  useEffect(() => {
+    if (!isAllowed || submitted) return;
 
     if (timeLeft <= 0) {
-      setSubmitted(true);
+      handleSubmit();
       return;
     }
 
@@ -56,7 +86,7 @@ export default function PersonalityTest() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, submitted]);
+  }, [timeLeft, submitted, isAllowed]);
 
   const handleOptionChange = (questionId, option) => {
     setAnswers((prev) => ({
@@ -66,8 +96,31 @@ export default function PersonalityTest() {
   };
 
   const handleSubmit = () => {
+    if (!application) return;
+
+    const score = Object.keys(answers).length;
+
+    updateApplication(application.id, {
+      currentStage: APPLICATION_STAGES.FINAL_REVIEW,
+      personalityTestStatus: "SUBMITTED",
+      personalityScore: score,
+      personalityRemarks: "Personality assessment submitted successfully.",
+      finalStatus: "UNDER_REVIEW",
+    });
+
+    appendApplicationTimeline(application.id, {
+      stage: APPLICATION_STAGES.PERSONALITY_TEST_SUBMITTED,
+      label: "Personality Test Submitted",
+      note: "Personality assessment submitted successfully.",
+    });
+
+    appendApplicationTimeline(application.id, {
+      stage: APPLICATION_STAGES.FINAL_REVIEW,
+      label: "Final Review",
+      note: "Application moved to final review.",
+    });
+
     setSubmitted(true);
-    console.log("Personality Test Answers:", answers);
   };
 
   const formatTime = (seconds) => {
@@ -76,19 +129,45 @@ export default function PersonalityTest() {
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
+  if (!application || !isAllowed) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <Header />
+        <ApplicantRibbon />
+
+        <main className="mx-auto max-w-5xl px-4 py-6">
+          <Card className="text-center">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Personality Test
+            </h1>
+            <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300">
+              This stage is not available yet. The personality assessment is only
+              assigned after technical shortlisting.
+            </p>
+            {application && (
+              <div className="mt-4">
+                <Badge variant="info">{getStageLabel(application.currentStage)}</Badge>
+              </div>
+            )}
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <Header />
       <ApplicantRibbon />
 
-      <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <main className="mx-auto max-w-5xl px-4 py-6 space-y-6">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-800 dark:text-white">
               Personality Test
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Answer honestly. This test is part of the interview simulation stage.
+              Vacancy: {application.vacancyTitle}
             </p>
           </div>
 
@@ -103,7 +182,7 @@ export default function PersonalityTest() {
               Personality Test Submitted
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Your responses have been recorded successfully.
+              Your responses have been recorded. The application is now in final review.
             </p>
           </Card>
         ) : (
@@ -111,7 +190,7 @@ export default function PersonalityTest() {
             {questions.map((q, index) => (
               <Card key={q.id} className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                  <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
                     Question {index + 1}
                   </p>
                   <h2 className="text-base font-semibold text-gray-800 dark:text-white">
@@ -123,19 +202,21 @@ export default function PersonalityTest() {
                   {q.options.map((option) => (
                     <label
                       key={option}
-                      className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                      className="cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-3 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
                     >
-                      <input
-                        type="radio"
-                        name={`question-${q.id}`}
-                        value={option}
-                        checked={answers[q.id] === option}
-                        onChange={() => handleOptionChange(q.id, option)}
-                        className="accent-blue-700"
-                      />
-                      <span className="text-sm text-gray-700 dark:text-gray-200">
-                        {option}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="radio"
+                          name={`question-${q.id}`}
+                          value={option}
+                          checked={answers[q.id] === option}
+                          onChange={() => handleOptionChange(q.id, option)}
+                          className="accent-blue-700"
+                        />
+                        <span className="text-sm text-gray-700 dark:text-gray-200">
+                          {option}
+                        </span>
+                      </div>
                     </label>
                   ))}
                 </div>

@@ -42,13 +42,13 @@ export default function Header() {
     : "";
 
   return (
-    <header className="border-b border-gray-200 bg-white px-4 py-4 shadow-sm transition-colors dark:border-gray-700 dark:bg-gray-800 sm:px-6">
+    <header className="border-b border-gray-200 bg-white px-4 py-4 shadow-sm transition-colors duration-300 dark:border-gray-700 dark:bg-gray-800 sm:px-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 items-start gap-3 sm:gap-4">
           <img
             src="https://rac.gov.in/images/rac_logo_2025_sm.png"
             alt="RAC Logo"
-            className="h-20 w-auto shrink-0 object-contain sm:h-24"
+            className="h-20 w-auto shrink-0 object-contain transition-transform duration-300 hover:scale-[1.02] sm:h-24"
           />
 
           <div className="min-w-0">
@@ -81,7 +81,7 @@ export default function Header() {
 
               {isDashboardPage && user && (
                 <div className="flex items-center gap-2">
-                  <span className="rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                  <span className="rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 transition-colors duration-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
                     {roleLabel}
                   </span>
 
@@ -92,14 +92,14 @@ export default function Header() {
               )}
             </div>
 
-            <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2 py-1 dark:border-gray-700 dark:bg-gray-900">
+            <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2 py-1 transition-all duration-300 dark:border-gray-700 dark:bg-gray-900">
               <div className="flex">
                 <button
                   type="button"
                   onClick={() => i18n.changeLanguage("en")}
-                  className={`rounded-md px-2 py-1 text-xs transition ${
+                  className={`rounded-md px-2 py-1 text-xs transition-all duration-200 ${
                     i18n.language === "en"
-                      ? "bg-blue-600 text-white"
+                      ? "bg-blue-600 text-white shadow-sm"
                       : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
                   }`}
                 >
@@ -109,9 +109,9 @@ export default function Header() {
                 <button
                   type="button"
                   onClick={() => i18n.changeLanguage("hi")}
-                  className={`rounded-md px-2 py-1 text-xs transition ${
+                  className={`rounded-md px-2 py-1 text-xs transition-all duration-200 ${
                     i18n.language === "hi"
-                      ? "bg-blue-600 text-white"
+                      ? "bg-blue-600 text-white shadow-sm"
                       : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
                   }`}
                 >
@@ -124,7 +124,7 @@ export default function Header() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-2 shadow-sm dark:border-gray-700 dark:bg-gray-800/60">
+          <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-2 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700 dark:bg-gray-800/60">
             <img
               src={ashok}
               alt="National Emblem"

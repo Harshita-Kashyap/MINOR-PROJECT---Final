@@ -10,33 +10,34 @@ export default function LandingLayout({ children }) {
       <Header />
       <LandingNavbar />
 
-      {children ? (
-        <main className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-gray-200/70 bg-white/70 p-4 shadow-sm backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/60 sm:p-6">
+      <main className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+        {children ? (
+          <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 dark:border-gray-800 dark:bg-gray-900/70 sm:p-6">
             {children}
           </div>
-        </main>
-      ) : (
-        <main className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+        ) : (
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
             <aside className="xl:col-span-3">
-              <div className="xl:sticky xl:top-6">
+              <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 dark:border-gray-800 dark:bg-gray-900/70">
                 <LeftPanel />
               </div>
             </aside>
 
             <section className="xl:col-span-6">
-              <CenterPanel />
+              <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 dark:border-gray-800 dark:bg-gray-900/70">
+                <CenterPanel />
+              </div>
             </section>
 
             <aside className="xl:col-span-3">
-              <div className="xl:sticky xl:top-6">
+              <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 dark:border-gray-800 dark:bg-gray-900/70">
                 <RightPanel />
               </div>
             </aside>
           </div>
-        </main>
-      )}
+        )}
+      </main>
     </div>
   );
 }
+
