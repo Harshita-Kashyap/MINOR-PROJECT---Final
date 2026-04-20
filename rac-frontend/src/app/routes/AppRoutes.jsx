@@ -84,12 +84,18 @@ function AppRoutes() {
         {/* ================= ADMIN ROUTES ================= */}
         <Route
           path="/admin"
+          element={<Navigate to="/admin/dashboard" replace />}
+        />
+
+        <Route
+          path="/admin/dashboard"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminDashboard />
             </ProtectedRoute>
           }
         />
+        
         <Route
           path="/admin/analytics"
           element={
