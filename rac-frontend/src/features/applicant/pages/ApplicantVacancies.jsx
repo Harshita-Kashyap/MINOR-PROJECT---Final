@@ -3,9 +3,19 @@ import ApplicantRibbon from "../components/ApplicantRibbon";
 import VacancyCard from "../components/VacancyCard";
 import Button from "../../../shared/components/ui/Button";
 import { useNavigate } from "react-router-dom";
-
+import { applyToVacancy } from "../services/applicantService";
 export default function ApplicantVacancies() {
   const navigate = useNavigate();
+
+  // ✅ ADD THIS FUNCTION HERE
+  const handleApply = async (id) => {
+    try {
+      await applyToVacancy(id);
+      alert("Applied Successfully");
+    } catch (err) {
+      alert(err.response?.data?.message || "Error applying");
+    }
+  };
 
   const vacancies = [
     {
@@ -52,7 +62,11 @@ export default function ApplicantVacancies() {
 
           <div className="grid gap-4 md:grid-cols-2">
             {vacancies.map((vacancy) => (
-              <VacancyCard key={vacancy.id} vacancy={vacancy} />
+              <VacancyCard 
+  key={vacancy.id} 
+  vacancy={vacancy} 
+  onApply={handleApply}
+/>
             ))}
           </div>
         </div>

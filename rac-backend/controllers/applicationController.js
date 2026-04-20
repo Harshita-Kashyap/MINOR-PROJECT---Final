@@ -1,31 +1,45 @@
-const db = require("../config/db");
+const Application = require("../models/Application");
 
-// Apply for job
-exports.applyJob = (req, res) => {
-  const { user_id, vacancy_id } = req.body;
+// ✅ APPLY TO VACANCY
+exports.applyJob = async (req, res) => {
+  try {
+    const { vacancy_id } = req.body;
 
-  const sql = `
-    INSERT INTO applications (user_id, vacancy_id)
-    VALUES (?, ?)
-  `;
+    // prevent duplicate apply
+    const existing = await Application.findOne({
+      applicant: req.user.id,
+      vacancy: vacancy_id,
+    });
 
-  db.query(sql, [user_id, vacancy_id], (err) => {
-    if (err) return res.status(500).json(err);
-    res.json({ message: "Applied Successfully" });
-  });
+    if (existing) {
+      return res.status(400).json({ message: "Already applied" });
+    }
+
+    const application = await Application.create({
+      applicant: req.user.id,
+      vacancy: vacancy_id,
+    });
+
+    res.json({ message: "Applied Successfully", application });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
-// Get applications (Admin + Selector)
-exports.getApplications = (req, res) => {
-  const sql = `
-    SELECT a.id, u.name, u.email, v.title, a.status, a.score
-    FROM applications a
-    JOIN users u ON a.user_id = u.id
-    JOIN vacancies v ON a.vacancy_id = v.id
-  `;
 
-  db.query(sql, (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json(result);
-  });
+
+// ✅ GET APPLICATIONS
+exports.getApplications = async (req, res) => {
+  try {
+    const applications = await Application.find({
+      applicant: req.user.id   // ✅ only logged-in user
+    })
+    .populate("vacancy", "title description");
+
+    res.json(applications);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };

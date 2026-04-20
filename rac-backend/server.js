@@ -1,20 +1,12 @@
 require("dotenv").config();
-const express = require("express");
-const dotenv = require("dotenv");
-const connectDB = require("./config/db");
-const cors = require("cors");
 
-console.log("MONGO URI:", process.env.MONGO_URI);
-dotenv.config();
+const connectDB = require("./config/db");
+const app = require("./app");
+
 connectDB();
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const PORT = process.env.PORT || 5000;
 
-// Routes
-app.use("/", require("./routes/authRoutes"));
-
-app.listen(5000, () => {
-  console.log("Server running on port 5000 🚀");
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT} 🚀`);
 });

@@ -1108,11 +1108,7 @@ import Card from "../../../shared/components/ui/Card";
 import Input from "../../../shared/components/ui/Input";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
-import {
-  getApplicantProfile,
-  saveApplicantProfile,
-  setProfileComplete,
-} from "../../../shared/utils/profileStorage";
+import { saveApplicantProfile } from "../services/applicantService";
 
 const initialForm = {
   fullName: "",
@@ -1280,15 +1276,15 @@ export default function ApplicantProfile() {
   const [profileComplete, setProfileCompleteState] = useState(false);
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    const stored = getApplicantProfile();
-    if (stored) {
-      setForm((prev) => ({
-        ...prev,
-        ...stored,
-      }));
-    }
-  }, []);
+  // useEffect(() => {
+  //   const stored = getApplicantProfile();
+  //   if (stored) {
+  //     setForm((prev) => ({
+  //       ...prev,
+  //       ...stored,
+  //     }));
+  //   }
+  // }, []);
 
   const isIndian = form.nationality === "Indian";
   const needsGate = form.examType === "GATE";
@@ -1548,16 +1544,18 @@ export default function ApplicantProfile() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
-  const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
 
     const isValid = validateForm();
     const finalComplete = isValid && completionCheck;
-
-    saveApplicantProfile(form);
-    setProfileComplete(finalComplete);
-    setProfileCompleteState(finalComplete);
+try {
+  await saveApplicantProfile(form);
+  setProfileCompleteState(finalComplete);
+  setSaved(true);
+} catch (err) {
+  alert("Error saving profile");
+}
 
     setSaved(true);
   };

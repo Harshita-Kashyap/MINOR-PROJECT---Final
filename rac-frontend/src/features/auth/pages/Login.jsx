@@ -47,12 +47,12 @@ function Login() {
     if (Object.keys(validationErrors).length > 0) return;
 
     let loginId = "";
-    if (loginType === "mobile") loginId = form.mobile;
+    if (loginType === "mobile") loginId = form.phone;
     else if (loginType === "email") loginId = form.email;
     else loginId = form.roll;
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -65,18 +65,20 @@ function Login() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        if (data.role) {
-          localStorage.setItem("user", JSON.stringify(data));
-          login(loginId, form.password, data.role);
+        if (data.user && data.user.role) {
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("user", JSON.stringify(data.user));
 
-          if (data.role === "admin") {
-            navigate("/admin");
-          } else if (data.role === "selector") {
-            navigate("/selector");
-          } else {
-            navigate("/applicant");
-          }
-        } else {
+  login(loginId, form.password, data.user.role);
+
+  if (data.user.role === "admin") {
+    navigate("/admin");
+  } else if (data.user.role === "selector") {
+    navigate("/selector");
+  } else {
+    navigate("/applicant");
+  }
+} else {
           alert(data.message || "Invalid credentials");
         }
       } else {

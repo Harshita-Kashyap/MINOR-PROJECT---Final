@@ -3,10 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
-import {
-  applyToVacancy,
-  hasApplied,
-} from "../../../shared/utils/applicationStorage";
+import { applyToVacancy } from "../services/applicantService";
 import { isProfileComplete } from "../../../shared/utils/profileStorage";
 
 export default function VacancyCard({ vacancy }) {
@@ -14,23 +11,22 @@ export default function VacancyCard({ vacancy }) {
   const [applied, setApplied] = useState(false);
   const profileComplete = isProfileComplete();
 
-  useEffect(() => {
-    setApplied(hasApplied(vacancy.id));
-  }, [vacancy.id]);
 
-  const handleApply = () => {
-    if (!profileComplete) {
-      alert("Please complete your profile before applying for a vacancy.");
-      navigate("/applicant/profile");
-      return;
-    }
+const handleApply = async () => {
+  if (!profileComplete) {
+    alert("Please complete your profile before applying for a vacancy.");
+    navigate("/applicant/profile");
+    return;
+  }
 
-    const success = applyToVacancy(vacancy);
-    if (success) {
-      setApplied(true);
-    }
-  };
-
+  try {
+    await applyToVacancy(vacancy.id);
+    setApplied(true);
+    alert("Applied Successfully");
+  } catch (err) {
+    alert(err.response?.data?.message || "Error applying");
+  }
+};
   return (
     <Card className="group h-full border border-gray-200/80 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80">
       <div className="flex h-full flex-col justify-between space-y-4">
