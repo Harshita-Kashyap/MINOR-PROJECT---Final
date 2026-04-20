@@ -19,7 +19,7 @@ function PublicRoute() {
   }
 
   if (user?.role === "selector") {
-    return <Navigate to="/selector" replace />;
+    return <Navigate to="/selector/dashboard" replace />;
   }
 
   return <Outlet />;
