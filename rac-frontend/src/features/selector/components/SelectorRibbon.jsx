@@ -1,7 +1,7 @@
 import DashboardRibbon from "../../../shared/components/navigation/DashboardRibbon";
 
 const links = [
-  { name: "Dashboard", path: "/selector", end: true },
+  { name: "Dashboard", path: "/selector/dashboard", end: true },
   { name: "Candidates", path: "/selector/candidates" },
   { name: "Analytics", path: "/selector/analytics" },
   { name: "Evaluation", path: "/selector/evaluation/1" },

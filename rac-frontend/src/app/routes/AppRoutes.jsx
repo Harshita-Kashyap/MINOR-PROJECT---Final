@@ -84,12 +84,18 @@ function AppRoutes() {
         {/* ================= ADMIN ROUTES ================= */}
         <Route
           path="/admin"
+          element={<Navigate to="/admin/dashboard" replace />}
+        />
+
+        <Route
+          path="/admin/dashboard"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminDashboard />
             </ProtectedRoute>
           }
         />
+        
         <Route
           path="/admin/analytics"
           element={
@@ -213,6 +219,11 @@ function AppRoutes() {
         {/* ================= SELECTOR ROUTES ================= */}
         <Route
           path="/selector"
+          element={<Navigate to="/selector/dashboard" replace />}
+        />
+
+        <Route
+          path="/selector/dashboard"
           element={
             <ProtectedRoute allowedRoles={["selector"]}>
               <SelectorDashboard />
