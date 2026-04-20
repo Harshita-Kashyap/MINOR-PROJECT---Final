@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getVacancies, deleteVacancy } from "../services/vacancyService";
 import { useNavigate } from "react-router-dom";
 import AdminNavbar from "../components/AdminNavbar";
@@ -9,10 +9,10 @@ import Input from "../../../shared/components/ui/Input";
 
 function VacancyManagement() {
   const [vacancies, setVacancies] = useState([]);
-  const [filteredVacancies, setFilteredVacancies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
@@ -23,8 +23,8 @@ function VacancyManagement() {
       setError("");
 
       const res = await getVacancies();
-      setVacancies(res.data);
-      setFilteredVacancies(res.data);
+      const data = Array.isArray(res.data) ? res.data : [];
+      setVacancies(data);
     } catch (error) {
       console.error("Fetch error:", error);
       setError("Failed to load vacancies");
@@ -37,12 +37,27 @@ function VacancyManagement() {
     fetchVacancies();
   }, []);
 
-  useEffect(() => {
+  const formatDate = (date) => {
+    if (!date) return "-";
+    return new Date(date).toLocaleDateString();
+  };
+
+  const isExpired = (deadline) => {
+    if (!deadline) return false;
+    return new Date(deadline) < new Date();
+  };
+
+  const getVacancyStatus = (vacancy) => {
+    if (vacancy.status) return vacancy.status.toUpperCase();
+    return isExpired(vacancy.deadline) ? "EXPIRED" : "ACTIVE";
+  };
+
+  const filteredVacancies = useMemo(() => {
     let data = [...vacancies];
 
-    if (search) {
+    if (search.trim()) {
       data = data.filter((v) =>
-        v.title.toLowerCase().includes(search.toLowerCase())
+        v.title?.toLowerCase().includes(search.toLowerCase())
       );
     }
 
@@ -50,191 +65,272 @@ function VacancyManagement() {
       data = data.filter((v) => v.department === departmentFilter);
     }
 
-    setFilteredVacancies(data);
-  }, [search, departmentFilter, vacancies]);
+    if (statusFilter) {
+      data = data.filter((v) => getVacancyStatus(v) === statusFilter);
+    }
+
+    return data;
+  }, [vacancies, search, departmentFilter, statusFilter]);
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this vacancy?"
+    );
     if (!confirmDelete) return;
 
     try {
       await deleteVacancy(id);
-      setVacancies((prev) => prev.filter((v) => v.id !== id));
+      setVacancies((prev) => prev.filter((v) => v.id !== id && v._id !== id));
     } catch (error) {
       console.error("Delete error:", error);
       alert("Failed to delete vacancy");
     }
   };
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString();
-  };
+  const totalCount = vacancies.length;
+  const activeCount = vacancies.filter(
+    (v) => getVacancyStatus(v) === "ACTIVE" || getVacancyStatus(v) === "OPEN"
+  ).length;
+  const expiredCount = vacancies.filter(
+    (v) => getVacancyStatus(v) === "EXPIRED" || getVacancyStatus(v) === "CLOSED"
+  ).length;
+  const draftCount = vacancies.filter(
+    (v) => getVacancyStatus(v) === "DRAFT"
+  ).length;
 
-  const isExpired = (deadline) => {
-    return new Date(deadline) < new Date();
-  };
-
-  const activeCount = vacancies.filter((v) => !isExpired(v.deadline)).length;
-  const expiredCount = vacancies.filter((v) => isExpired(v.deadline)).length;
+  const departments = [...new Set(vacancies.map((v) => v.department).filter(Boolean))];
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       <Header />
+      <AdminNavbar />
 
-      <div className="min-h-screen bg-gray-50 transition dark:bg-gray-900">
-        <AdminNavbar />
-
-        <div className="space-y-6 p-6">
-          {/* PAGE HEADER */}
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="space-y-6">
+          <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
                 Vacancy Management
-              </h2>
+              </h1>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Manage vacancy listings, deadlines, and department-wise postings.
+                Manage vacancy lifecycle, monitor deadlines, and control recruitment postings.
               </p>
             </div>
 
             <Button onClick={() => navigate("/admin/create-vacancy")}>
-              + Add Vacancy
+              + Create Vacancy
             </Button>
-          </div>
+          </section>
 
-          {/* STATS */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <StatCard title="Total" value={vacancies.length} />
-            <StatCard title="Active" value={activeCount} color="green" />
-            <StatCard title="Expired" value={expiredCount} color="red" />
-          </div>
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricCard
+              title="Total Vacancies"
+              value={totalCount}
+              description="All vacancy records in the system."
+              tone="default"
+            />
+            <MetricCard
+              title="Active / Open"
+              value={activeCount}
+              description="Vacancies currently visible to applicants."
+              tone="success"
+            />
+            <MetricCard
+              title="Expired / Closed"
+              value={expiredCount}
+              description="Vacancies no longer accepting applications."
+              tone="danger"
+            />
+            <MetricCard
+              title="Draft"
+              value={draftCount}
+              description="Vacancies not yet ready for publication."
+              tone="warning"
+            />
+          </section>
 
-          {/* FILTERS */}
-          <Card className="p-4">
-            <div className="flex flex-col gap-4 md:flex-row">
+          <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <div className="grid gap-4 md:grid-cols-3">
               <Input
-                placeholder="Search by title..."
+                placeholder="Search by vacancy title..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex-1"
+                className="w-full"
               />
 
               <select
                 value={departmentFilter}
                 onChange={(e) => setDepartmentFilter(e.target.value)}
-                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
               >
                 <option value="">All Departments</option>
-                {[...new Set(vacancies.map((v) => v.department))].map((dep) => (
-                  <option key={dep}>{dep}</option>
+                {departments.map((dep) => (
+                  <option key={dep} value={dep}>
+                    {dep}
+                  </option>
                 ))}
+              </select>
+
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+              >
+                <option value="">All Status</option>
+                <option value="ACTIVE">Active</option>
+                <option value="OPEN">Open</option>
+                <option value="EXPIRED">Expired</option>
+                <option value="CLOSED">Closed</option>
+                <option value="DRAFT">Draft</option>
               </select>
             </div>
           </Card>
 
-          {/* ERROR */}
           {error && (
-            <div className="rounded-xl bg-red-100 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-300">
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
               {error}
             </div>
           )}
 
-          {/* TABLE */}
-          <Card className="overflow-hidden p-0">
+          <Card className="overflow-hidden border border-gray-200/80 p-0 shadow-sm dark:border-gray-700/80">
             {loading ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                 Loading vacancies...
               </div>
             ) : filteredVacancies.length === 0 ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                No vacancies found
+                No vacancies found for the selected filters.
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[820px] text-left">
-                  <thead className="bg-gray-100 text-sm text-gray-700 dark:bg-gray-700/60 dark:text-gray-200">
+                <table className="w-full min-w-[980px] text-left">
+                  <thead className="bg-gray-50 text-sm text-gray-700 dark:bg-gray-800/70 dark:text-gray-200">
                     <tr>
                       <th className="p-4 font-semibold">Title</th>
                       <th className="p-4 font-semibold">Department</th>
                       <th className="p-4 font-semibold">Deadline</th>
                       <th className="p-4 font-semibold">Status</th>
+                      <th className="p-4 font-semibold">Description</th>
                       <th className="p-4 text-center font-semibold">Actions</th>
                     </tr>
                   </thead>
 
                   <tbody>
-                    {filteredVacancies.map((v) => (
-                      <tr
-                        key={v.id}
-                        className="border-t border-gray-200 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/60"
-                      >
-                        <td className="p-4 font-medium text-gray-800 dark:text-white">
-                          {v.title}
-                        </td>
-                        <td className="p-4 text-gray-600 dark:text-gray-300">
-                          {v.department}
-                        </td>
-                        <td className="p-4 text-gray-600 dark:text-gray-300">
-                          {formatDate(v.deadline)}
-                        </td>
+                    {filteredVacancies.map((v) => {
+                      const id = v.id || v._id;
+                      const status = getVacancyStatus(v);
 
-                        <td className="p-4">
-                          {isExpired(v.deadline) ? (
-                            <span className="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-600 dark:bg-red-900/30 dark:text-red-300">
-                              Expired
+                      return (
+                        <tr
+                          key={id}
+                          className="border-t border-gray-200 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/60"
+                        >
+                          <td className="p-4 font-medium text-gray-800 dark:text-white">
+                            {v.title}
+                          </td>
+
+                          <td className="p-4 text-gray-600 dark:text-gray-300">
+                            {v.department || "-"}
+                          </td>
+
+                          <td className="p-4 text-gray-600 dark:text-gray-300">
+                            {formatDate(v.deadline)}
+                          </td>
+
+                          <td className="p-4">
+                            <StatusPill status={status} />
+                          </td>
+
+                          <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                            <span className="line-clamp-2">
+                              {v.description || "No description available"}
                             </span>
-                          ) : (
-                            <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-600 dark:bg-green-900/30 dark:text-green-300">
-                              Active
-                            </span>
-                          )}
-                        </td>
+                          </td>
 
-                        <td className="p-4">
-                          <div className="flex justify-center gap-2">
-                            <Button
-                              size="sm"
-                              className="bg-yellow-500 hover:bg-yellow-600 text-white dark:bg-yellow-600 dark:hover:bg-yellow-700"
-                              onClick={() => navigate(`/admin/edit-vacancy/${v.id}`)}
-                            >
-                              Edit
-                            </Button>
+                          <td className="p-4">
+                            <div className="flex justify-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => navigate(`/admin/edit-vacancy/${id}`)}
+                              >
+                                Edit
+                              </Button>
 
-                            <Button
-                              size="sm"
-                              variant="danger"
-                              onClick={() => handleDelete(v.id)}
-                            >
-                              Delete
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                              <Button
+                                size="sm"
+                                variant="danger"
+                                onClick={() => handleDelete(id)}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             )}
           </Card>
         </div>
-      </div>
-    </>
+      </main>
+    </div>
   );
 }
 
-const StatCard = ({ title, value, color }) => {
-  const colorMap = {
-    green: "text-green-600 dark:text-green-400",
-    red: "text-red-600 dark:text-red-400",
+function MetricCard({ title, value, description, tone }) {
+  const toneMap = {
+    default: "from-gray-50 to-white dark:from-gray-800 dark:to-gray-800",
+    success: "from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-gray-800",
+    danger: "from-red-50 to-rose-50 dark:from-red-950/20 dark:to-gray-800",
+    warning: "from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-gray-800",
   };
 
   return (
-    <Card className="p-5">
-      <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
-      <h3 className={`mt-1 text-2xl font-bold text-gray-800 dark:text-white ${colorMap[color] || ""}`}>
+    <Card
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${
+        toneMap[tone || "default"]
+      }`}
+    >
+      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+        {title}
+      </p>
+      <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
         {value}
       </h3>
+      <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
+        {description}
+      </p>
     </Card>
   );
-};
+}
+
+function StatusPill({ status }) {
+  const map = {
+    ACTIVE:
+      "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+    OPEN:
+      "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+    EXPIRED:
+      "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+    CLOSED:
+      "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+    DRAFT:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+  };
+
+  return (
+    <span
+      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+        map[status] ||
+        "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+      }`}
+    >
+      {status}
+    </span>
+  );
+}
 
 export default VacancyManagement;

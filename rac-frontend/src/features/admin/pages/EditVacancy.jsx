@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import Header from "../../landing/components/Header";
+import AdminNavbar from "../components/AdminNavbar";
 import { updateVacancy } from "../services/vacancyService";
 import API from "../../../shared/services/api";
-import Header from "../../landing/components/Header";
+import Card from "../../../shared/components/ui/Card";
+import Button from "../../../shared/components/ui/Button";
+import Input from "../../../shared/components/ui/Input";
 
 function EditVacancy() {
   const { id } = useParams();
@@ -11,32 +15,64 @@ function EditVacancy() {
   const [form, setForm] = useState({
     title: "",
     department: "",
+    location: "",
+    mode: "Online Application",
     description: "",
     eligibility: "",
+    experience: "",
+    discipline: "",
+    examTypeRequired: "",
+    minGraduationPercentage: "",
+    minTwelfthPercentage: "",
+    minTenthPercentage: "",
+    minGateScore: "",
     deadline: "",
+    status: "OPEN",
   });
 
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [pageError, setPageError] = useState("");
 
   useEffect(() => {
     const fetchVacancy = async () => {
       try {
-        const res = await API.get("/vacancies");
-        const vacancy = res.data.find((v) => v.id == id);
+        setLoading(true);
+        setPageError("");
 
-        if (vacancy) {
-          setForm({
-            title: vacancy.title || "",
-            department: vacancy.department || "",
-            description: vacancy.description || "",
-            eligibility: vacancy.eligibility || "",
-            deadline: vacancy.deadline?.split("T")[0] || "",
-          });
+        const res = await API.get("/vacancies");
+        const vacancy = res.data.find((v) => String(v.id || v._id) === String(id));
+
+        if (!vacancy) {
+          setPageError("Vacancy not found");
+          setLoading(false);
+          return;
         }
 
-        setLoading(false);
+        setForm({
+          title: vacancy.title || "",
+          department: vacancy.department || "",
+          location: vacancy.location || "",
+          mode: vacancy.mode || "Online Application",
+          description: vacancy.description || "",
+          eligibility: vacancy.eligibility || "",
+          experience: vacancy.experience || "",
+          discipline: vacancy.discipline || "",
+          examTypeRequired: vacancy.examTypeRequired || "",
+          minGraduationPercentage:
+            vacancy.minGraduationPercentage?.toString() || "",
+          minTwelfthPercentage: vacancy.minTwelfthPercentage?.toString() || "",
+          minTenthPercentage: vacancy.minTenthPercentage?.toString() || "",
+          minGateScore: vacancy.minGateScore?.toString() || "",
+          deadline: vacancy.deadline ? vacancy.deadline.split("T")[0] : "",
+          status: vacancy.status || "OPEN",
+        });
       } catch (error) {
-        console.error(error);
+        console.error("Fetch vacancy error:", error);
+        setPageError("Failed to load vacancy details");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -44,131 +80,402 @@ function EditVacancy() {
   }, [id]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!form.title.trim()) newErrors.title = "Vacancy title is required";
+    if (!form.department.trim()) newErrors.department = "Department is required";
+    if (!form.description.trim()) newErrors.description = "Description is required";
+    if (!form.eligibility.trim()) newErrors.eligibility = "Eligibility is required";
+    if (!form.deadline) newErrors.deadline = "Deadline is required";
+
+    if (form.deadline) {
+      const selectedDate = new Date(form.deadline);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (selectedDate < today) {
+        newErrors.deadline = "Deadline must be today or a future date";
+      }
+    }
+
+    if (
+      form.minGraduationPercentage &&
+      (Number(form.minGraduationPercentage) < 0 ||
+        Number(form.minGraduationPercentage) > 100)
+    ) {
+      newErrors.minGraduationPercentage =
+        "Graduation percentage must be between 0 and 100";
+    }
+
+    if (
+      form.minTwelfthPercentage &&
+      (Number(form.minTwelfthPercentage) < 0 ||
+        Number(form.minTwelfthPercentage) > 100)
+    ) {
+      newErrors.minTwelfthPercentage =
+        "12th percentage must be between 0 and 100";
+    }
+
+    if (
+      form.minTenthPercentage &&
+      (Number(form.minTenthPercentage) < 0 ||
+        Number(form.minTenthPercentage) > 100)
+    ) {
+      newErrors.minTenthPercentage =
+        "10th percentage must be between 0 and 100";
+    }
+
+    if (form.minGateScore && Number(form.minGateScore) < 0) {
+      newErrors.minGateScore = "GATE score cannot be negative";
+    }
+
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const validationErrors = validate();
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) return;
+
     try {
-      await updateVacancy(id, form);
-      alert("Updated successfully");
+      setSaving(true);
+
+      await updateVacancy(id, {
+        ...form,
+        minGraduationPercentage: form.minGraduationPercentage
+          ? Number(form.minGraduationPercentage)
+          : 0,
+        minTwelfthPercentage: form.minTwelfthPercentage
+          ? Number(form.minTwelfthPercentage)
+          : 0,
+        minTenthPercentage: form.minTenthPercentage
+          ? Number(form.minTenthPercentage)
+          : 0,
+        minGateScore: form.minGateScore ? Number(form.minGateScore) : 0,
+      });
+
+      alert("Vacancy updated successfully");
       navigate("/admin/vacancies");
     } catch (error) {
-      alert("Update failed");
+      console.error("Update vacancy error:", error);
+      alert("Failed to update vacancy");
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
-      <>
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
         <Header />
-        <div className="p-6 ml-64 dark:bg-gray-900 min-h-screen text-gray-800 dark:text-white">
-          Loading...
-        </div>
-      </>
+        <AdminNavbar />
+        <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+          <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Loading vacancy details...
+            </p>
+          </Card>
+        </main>
+      </div>
     );
+  }
+
+  if (pageError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+        <Header />
+        <AdminNavbar />
+        <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+          <Card className="border border-red-200 bg-red-50 shadow-sm dark:border-red-900/40 dark:bg-red-950/20">
+            <p className="text-sm text-red-600 dark:text-red-300">{pageError}</p>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       <Header />
+      <AdminNavbar />
 
-      <div className="ml-64 min-h-screen bg-gray-50 p-6 transition dark:bg-gray-900 dark:text-gray-100">
-        
-        {/* PAGE HEADER */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-            Edit Vacancy
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Update vacancy details for recruitment
-          </p>
-        </div>
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="space-y-6">
+          <section className="flex flex-col gap-2">
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              Edit Vacancy
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Update vacancy details, eligibility thresholds, and publication status.
+            </p>
+          </section>
 
-        {/* FORM CARD */}
-        <div className="max-w-3xl rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          
-          <form onSubmit={handleSubmit} className="space-y-5">
-
-            {/* TITLE */}
-            <div>
-              <label className="text-sm text-gray-600 dark:text-gray-300">
-                Title
-              </label>
-              <input
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-xl border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:ring-blue-900"
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+              <SectionTitle
+                title="Basic Vacancy Information"
+                subtitle="Core vacancy identity and applicant-facing details."
               />
-            </div>
 
-            {/* DEPARTMENT */}
-            <div>
-              <label className="text-sm text-gray-600 dark:text-gray-300">
-                Department
-              </label>
-              <input
-                name="department"
-                value={form.department}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-xl border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:ring-blue-900"
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <Input
+                  label="Vacancy Title"
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  placeholder="Scientist B - Computer Science"
+                  error={errors.title}
+                />
+
+                <Input
+                  label="Department"
+                  name="department"
+                  value={form.department}
+                  onChange={handleChange}
+                  placeholder="DRDO RAC"
+                  error={errors.department}
+                />
+
+                <Input
+                  label="Location"
+                  name="location"
+                  value={form.location}
+                  onChange={handleChange}
+                  placeholder="New Delhi"
+                />
+
+                <SelectField
+                  label="Application Mode"
+                  name="mode"
+                  value={form.mode}
+                  onChange={handleChange}
+                  options={["Online Application", "Hybrid", "Offline"]}
+                />
+
+                <div className="md:col-span-2">
+                  <TextAreaField
+                    label="Vacancy Description"
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                    placeholder="Describe the role, responsibilities, and purpose of the vacancy..."
+                    rows={5}
+                    error={errors.description}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+              <SectionTitle
+                title="Eligibility and Academic Rules"
+                subtitle="Update qualification rules and academic thresholds."
               />
-            </div>
 
-            {/* DESCRIPTION */}
-            <div>
-              <label className="text-sm text-gray-600 dark:text-gray-300">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                rows={4}
-                className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:ring-blue-900"
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <TextAreaField
+                    label="Eligibility Criteria"
+                    name="eligibility"
+                    value={form.eligibility}
+                    onChange={handleChange}
+                    placeholder="B.Tech / M.Tech in relevant discipline with required exam qualification..."
+                    rows={4}
+                    error={errors.eligibility}
+                  />
+                </div>
+
+                <Input
+                  label="Experience Requirement"
+                  name="experience"
+                  value={form.experience}
+                  onChange={handleChange}
+                  placeholder="Freshers can apply / 0-2 years preferred"
+                />
+
+                <Input
+                  label="Discipline"
+                  name="discipline"
+                  value={form.discipline}
+                  onChange={handleChange}
+                  placeholder="Computer Science / Mechanical / Electronics"
+                />
+
+                <SelectField
+                  label="Exam Type Required"
+                  name="examTypeRequired"
+                  value={form.examTypeRequired}
+                  onChange={handleChange}
+                  options={["", "GATE", "NET", "None"]}
+                />
+
+                <Input
+                  label="Minimum Graduation % / CGPA"
+                  name="minGraduationPercentage"
+                  value={form.minGraduationPercentage}
+                  onChange={handleChange}
+                  placeholder="Enter minimum graduation percentage"
+                  error={errors.minGraduationPercentage}
+                />
+
+                <Input
+                  label="Minimum 12th Percentage"
+                  name="minTwelfthPercentage"
+                  value={form.minTwelfthPercentage}
+                  onChange={handleChange}
+                  placeholder="Enter minimum 12th percentage"
+                  error={errors.minTwelfthPercentage}
+                />
+
+                <Input
+                  label="Minimum 10th Percentage"
+                  name="minTenthPercentage"
+                  value={form.minTenthPercentage}
+                  onChange={handleChange}
+                  placeholder="Enter minimum 10th percentage"
+                  error={errors.minTenthPercentage}
+                />
+
+                <Input
+                  label="Minimum GATE Score"
+                  name="minGateScore"
+                  value={form.minGateScore}
+                  onChange={handleChange}
+                  placeholder="Enter minimum GATE score"
+                  error={errors.minGateScore}
+                />
+              </div>
+            </Card>
+
+            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+              <SectionTitle
+                title="Publication and Deadline"
+                subtitle="Control vacancy availability and final application date."
               />
-            </div>
 
-            {/* ELIGIBILITY */}
-            <div>
-              <label className="text-sm text-gray-600 dark:text-gray-300">
-                Eligibility
-              </label>
-              <textarea
-                name="eligibility"
-                value={form.eligibility}
-                onChange={handleChange}
-                rows={3}
-                className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:ring-blue-900"
-              />
-            </div>
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <SelectField
+                  label="Vacancy Status"
+                  name="status"
+                  value={form.status}
+                  onChange={handleChange}
+                  options={["OPEN", "DRAFT", "CLOSED"]}
+                />
 
-            {/* DEADLINE */}
-            <div>
-              <label className="text-sm text-gray-600 dark:text-gray-300">
-                Deadline
-              </label>
-              <input
-                type="date"
-                name="deadline"
-                value={form.deadline}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-xl border border-gray-300 p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:ring-blue-900"
-              />
-            </div>
+                <Input
+                  label="Application Deadline"
+                  type="date"
+                  name="deadline"
+                  value={form.deadline}
+                  onChange={handleChange}
+                  error={errors.deadline}
+                />
+              </div>
+            </Card>
 
-            {/* BUTTON */}
-            <div className="pt-2">
-              <button className="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">
-                Update Vacancy
-              </button>
-            </div>
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate("/admin/vacancies")}
+              >
+                Cancel
+              </Button>
 
+              <Button type="submit" disabled={saving}>
+                {saving ? "Updating Vacancy..." : "Update Vacancy"}
+              </Button>
+            </div>
           </form>
         </div>
-      </div>
-    </>
+      </main>
+    </div>
+  );
+}
+
+function SectionTitle({ title, subtitle }) {
+  return (
+    <div className="border-b border-gray-200 pb-3 dark:border-gray-700">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        {title}
+      </h2>
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        {subtitle}
+      </p>
+    </div>
+  );
+}
+
+function SelectField({ label, name, value, onChange, options, error }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
+        {label}
+      </label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+      >
+        {options.map((option) => (
+          <option key={option || "empty"} value={option}>
+            {option || "Select"}
+          </option>
+        ))}
+      </select>
+      {error && (
+        <span className="text-sm text-red-500 dark:text-red-400">{error}</span>
+      )}
+    </div>
+  );
+}
+
+function TextAreaField({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  rows = 4,
+  error,
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
+        {label}
+      </label>
+      <textarea
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        rows={rows}
+        className="w-full rounded-xl border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+      />
+      {error && (
+        <span className="text-sm text-red-500 dark:text-red-400">{error}</span>
+      )}
+    </div>
   );
 }
 

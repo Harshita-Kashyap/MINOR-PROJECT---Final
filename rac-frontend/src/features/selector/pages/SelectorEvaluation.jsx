@@ -1,266 +1,224 @@
 import Header from "../../landing/components/Header";
 import SelectorRibbon from "../components/SelectorRibbon";
-import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import { useMemo, useState } from "react";
+import Card from "../../../shared/components/ui/Card";
+import Button from "../../../shared/components/ui/Button";
+import Badge from "../../../shared/components/ui/Badge";
+import { getSelectorCandidateById } from "../services/selectorService";
 
-const SelectorEvaluation = () => {
+export default function SelectorEvaluation() {
   const { id } = useParams();
+  const candidate = getSelectorCandidateById(id);
 
-  const [techScore, setTechScore] = useState(70);
-  const [interviewScore, setInterviewScore] = useState(65);
   const [decision, setDecision] = useState("");
-  const [remarks, setRemarks] = useState("");
+  const [remarks, setRemarks] = useState(candidate?.remarks || "");
 
-  const total = Number(techScore) + Number(interviewScore);
+  if (!candidate) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <Header />
+        <SelectorRibbon />
+        <main className="mx-auto max-w-6xl px-4 py-6">
+          <Card>
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Candidate not found
+            </h1>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
-  const getAutoDecision = () => {
-    if (total > 150) return "Recommended";
-    if (total > 120) return "Under Review";
+  const total = Number(candidate.profileScore) + Number(candidate.technical) + Number(candidate.personality);
+
+  const autoDecision = useMemo(() => {
+    if (candidate.currentStage !== "FINAL_REVIEW") return "Awaiting Stage Completion";
+    if (total >= 220) return "Recommended";
+    if (total >= 180) return "Hold";
     return "Not Recommended";
-  };
+  }, [candidate.currentStage, total]);
 
-  const autoDecision = getAutoDecision();
+  const stageReadyForDecision = candidate.currentStage === "FINAL_REVIEW";
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       <Header />
       <SelectorRibbon />
 
-      <div className="min-h-screen space-y-6 bg-gray-50 p-6 text-gray-900 transition-colors dark:bg-gray-900 dark:text-gray-100">
-        {/* HEADER */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-            Candidate Evaluation
-          </h1>
-          <p className="mt-1 text-gray-500 dark:text-gray-400">
-            Candidate ID: RAC/2026/CS/{id}
-          </p>
-        </div>
-
-        {/* SUMMARY */}
-        <div className="flex flex-col justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/30 md:flex-row md:items-center">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-              Aditi Sharma
-            </h2>
-            <p className="mt-1 text-gray-500 dark:text-gray-400">
-              Scientist B (CS)
-            </p>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                Interview Stage
-              </span>
-              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-300">
-                Verified Profile
-              </span>
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="space-y-6">
+          <section className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                Candidate Evaluation
+              </h1>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Candidate ID: {candidate.cid}
+              </p>
             </div>
-          </div>
 
-          <div className="rounded-2xl bg-gray-50 px-5 py-4 text-left dark:bg-gray-700/40 md:text-right">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Total Score
-            </p>
-            <h2 className="mt-1 text-3xl font-bold text-blue-600 dark:text-blue-400">
-              {total}
-            </h2>
-            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              Technical + Interview
-            </p>
-          </div>
-        </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="info">{candidate.currentStage.replaceAll("_", " ")}</Badge>
+              <Badge variant={candidate.verificationStatus === "ELIGIBLE" ? "success" : candidate.verificationStatus === "REVIEW" ? "warning" : "danger"}>
+                Verification: {candidate.verificationStatus}
+              </Badge>
+            </div>
+          </section>
 
-        {/* GRID */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* SCORING */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/30">
-            <h2 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white">
-              Scoring Panel
-            </h2>
+          <div className="grid gap-6 xl:grid-cols-12">
+            <Card className="xl:col-span-8 border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {candidate.name}
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    {candidate.vacancy}
+                  </p>
 
-            <div className="space-y-6">
-              {/* Technical */}
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Technical Score
-                  </label>
-                  <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                    {techScore}/100
-                  </span>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Badge variant="info">Profile Score: {candidate.profileScore}</Badge>
+                    <Badge variant="warning">GATE: {candidate.gate}</Badge>
+                    <Badge variant="success">Verification: {candidate.verificationScore}%</Badge>
+                  </div>
                 </div>
 
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={techScore}
-                  onChange={(e) => setTechScore(e.target.value)}
-                  className="w-full accent-blue-600 dark:accent-blue-400"
+                <div className="rounded-2xl bg-gray-50 px-5 py-4 text-left dark:bg-gray-900/40 md:text-right">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Composite Score
+                  </p>
+                  <h2 className="mt-1 text-3xl font-bold text-blue-600 dark:text-blue-400">
+                    {total}
+                  </h2>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Profile + Technical + Personality
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="xl:col-span-4 border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+              <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                System Recommendation
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Suggested final outcome based on verified profile and system-generated scores.
+              </p>
+              <div className="mt-4">
+                <span className={getDecisionBadge(autoDecision)}>{autoDecision}</span>
+              </div>
+            </Card>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+              <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
+                Score Summary
+              </h2>
+
+              <div className="space-y-4">
+                <InfoRow label="Profile Merit Score" value={candidate.profileScore} valueClass="text-blue-600 dark:text-blue-400" />
+                <InfoRow label="Technical Score" value={candidate.technical} valueClass="text-green-600 dark:text-green-400" />
+                <InfoRow label="Personality Score" value={candidate.personality} valueClass="text-purple-600 dark:text-purple-400" />
+                <InfoRow label="Overall Score" value={total} valueClass="text-blue-600 dark:text-blue-400" />
+              </div>
+            </Card>
+
+            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+              <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
+                Verification Summary
+              </h2>
+
+              <div className="space-y-4">
+                <InfoRow
+                  label="Profile Status"
+                  value={candidate.verificationStatus}
+                  valueClass={
+                    candidate.verificationStatus === "ELIGIBLE"
+                      ? "text-green-600 dark:text-green-400"
+                      : candidate.verificationStatus === "REVIEW"
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : "text-red-600 dark:text-red-400"
+                  }
+                />
+                <InfoRow
+                  label="Verification Score"
+                  value={`${candidate.verificationScore}%`}
+                  valueClass="text-blue-600 dark:text-blue-400"
+                />
+                <InfoRow
+                  label="Reason / Remark"
+                  value={candidate.verificationReason || "No verification issue found"}
+                  valueClass="text-gray-800 dark:text-gray-200"
                 />
               </div>
-
-              {/* Interview */}
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Interview Score
-                  </label>
-                  <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                    {interviewScore}/100
-                  </span>
-                </div>
-
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={interviewScore}
-                  onChange={(e) => setInterviewScore(e.target.value)}
-                  className="w-full accent-blue-600 dark:accent-blue-400"
-                />
-              </div>
-
-              {/* AUTO DECISION */}
-              <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-700/40">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  System Suggestion
-                </p>
-                <div className="mt-2">
-                  <span className={getDecisionBadge(autoDecision)}>
-                    {autoDecision}
-                  </span>
-                </div>
-              </div>
-            </div>
+            </Card>
           </div>
 
-          {/* VERIFICATION */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/30">
-            <h2 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white">
-              Verification Summary
+          <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+              Final Selector Decision
             </h2>
 
-            <div className="space-y-4">
-              <InfoRow
-                label="Resume"
-                value="Verified ✔"
-                valueClass="text-green-600 dark:text-green-400"
+            {!stageReadyForDecision && (
+              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-gray-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-gray-200">
+                Final selector decision is available only when the candidate reaches the <span className="font-semibold">FINAL REVIEW</span> stage.
+              </div>
+            )}
+
+            <div className="grid gap-4">
+              <select
+                className="w-full rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+                value={decision}
+                onChange={(e) => setDecision(e.target.value)}
+                disabled={!stageReadyForDecision}
+              >
+                <option value="">Select Decision</option>
+                <option>Recommended</option>
+                <option>Not Recommended</option>
+                <option>Hold</option>
+              </select>
+
+              <textarea
+                placeholder="Add selector remarks, decision justification, or observations..."
+                className="min-h-[140px] w-full rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-900"
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+                disabled={!stageReadyForDecision}
               />
-              <InfoRow
-                label="Documents"
-                value="Verified ✔"
-                valueClass="text-green-600 dark:text-green-400"
-              />
-              <InfoRow
-                label="Risk Level"
-                value="Low"
-                valueClass="text-blue-600 dark:text-blue-400"
-              />
-              <InfoRow
-                label="Background Check"
-                value="Clear"
-                valueClass="text-green-600 dark:text-green-400"
-              />
+
+              <div className="flex justify-end">
+                <Button disabled={!stageReadyForDecision || !decision}>
+                  Submit Evaluation
+                </Button>
+              </div>
             </div>
-          </div>
+          </Card>
         </div>
-
-        {/* QUICK DECISION */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/30">
-          <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
-            Quick Decision
-          </h2>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setDecision("Recommended")}
-              className={`rounded-xl px-4 py-2.5 text-sm font-medium transition ${
-                decision === "Recommended"
-                  ? "bg-green-600 text-white shadow"
-                  : "bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-300 dark:hover:bg-green-900/30"
-              }`}
-            >
-              Recommend
-            </button>
-
-            <button
-              onClick={() => setDecision("Not Recommended")}
-              className={`rounded-xl px-4 py-2.5 text-sm font-medium transition ${
-                decision === "Not Recommended"
-                  ? "bg-red-600 text-white shadow"
-                  : "bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30"
-              }`}
-            >
-              Reject
-            </button>
-
-            <button
-              onClick={() => setDecision("Hold")}
-              className={`rounded-xl px-4 py-2.5 text-sm font-medium transition ${
-                decision === "Hold"
-                  ? "bg-yellow-500 text-white shadow"
-                  : "bg-yellow-50 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-300 dark:hover:bg-yellow-900/30"
-              }`}
-            >
-              Hold
-            </button>
-          </div>
-
-          <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
-            Selected:{" "}
-            <span className="font-semibold text-gray-800 dark:text-white">
-              {decision || "No decision selected"}
-            </span>
-          </p>
-        </div>
-
-        {/* REMARKS */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-950/30">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
-            Evaluator Remarks
-          </h2>
-
-          <textarea
-            placeholder="Write remarks..."
-            className="min-h-[140px] w-full rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-900"
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
-          />
-
-          <div className="mt-4 flex justify-end">
-            <button className="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">
-              Submit Evaluation
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
+      </main>
+    </div>
   );
-};
+}
 
-export default SelectorEvaluation;
+function InfoRow({ label, value, valueClass = "" }) {
+  return (
+    <div className="flex items-start justify-between gap-4 rounded-xl bg-gray-50 px-4 py-3 dark:bg-gray-900/40">
+      <span className="text-sm text-gray-600 dark:text-gray-300">{label}</span>
+      <span className={`text-sm font-semibold text-right ${valueClass}`}>{value}</span>
+    </div>
+  );
+}
 
-/* INFO ROW */
-const InfoRow = ({ label, value, valueClass = "" }) => (
-  <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 dark:bg-gray-700/40">
-    <span className="text-sm text-gray-600 dark:text-gray-300">{label}</span>
-    <span className={`text-sm font-semibold ${valueClass}`}>{value}</span>
-  </div>
-);
-
-/* DECISION BADGE */
-const getDecisionBadge = (decision) => {
+function getDecisionBadge(decision) {
   switch (decision) {
     case "Recommended":
       return "inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300";
-    case "Under Review":
+    case "Hold":
       return "inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
     case "Not Recommended":
       return "inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-300";
     default:
       return "inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300";
   }
-};
+}
