@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
+import certificateContent from "../../../data/certificateContent";
 
 const pdfMap = {
   bonafideCertificate: {
@@ -90,13 +92,69 @@ const pdfMap = {
   },
 };
 
+const formatItems = [
+  { label: "Bonafide Certificate", key: "bonafideCertificate" },
+  { label: "Intimation to CCA Format", key: "intimationLetter" },
+  { label: "OBC Certificate Proforma", key: "obcProof" },
+  { label: "OBC Declaration", key: "obcDeclaration" },
+  { label: "EWS Certificate Proforma", key: "ewsCertificate" },
+  { label: "EWS Declaration", key: "ewsDeclaration" },
+  { label: "SC/ST Proforma", key: "scstProof" },
+  { label: "PWD Certificate Proforma", key: "pwdProof" },
+  { label: "Intimation to CCA Format (ADVT-145)", key: "ccaDeclaration142" },
+  {
+    label: "Declaration Intimation to CCA Format (ADVT-145)",
+    key: "declarationIntimation145",
+  },
+  {
+    label: "Intimation Letter to CCA Format (ADA ADVT-123)",
+    key: "intimationAda123",
+  },
+  { label: "No Recording Undertaking (147)", key: "noRecording147" },
+  {
+    label: "Intimation Letter to CCA Format (ADVT-154)",
+    key: "ccaDeclaration154",
+  },
+  {
+    label: "Intimation Letter to CCA Format (ADA ADVT-128)",
+    key: "ccaDeclarationAda128",
+  },
+  { label: "CCA Declaration (Advt-152)", key: "ccaDeclaration152" },
+  {
+    label:
+      "Intimation-cum-Undertaking (for temporary government employee unable to get NOC) (Advt-156)",
+    key: "intimationUndertaking156",
+  },
+  {
+    label:
+      "Intimation Letter (for permanent/temporary government employee) (Advt-156)",
+    key: "intimationLetter156",
+  },
+  { label: "Declaration to CCA (Advt-156)", key: "ccaDeclaration156" },
+  { label: "NET Declaration", key: "netDeclaration" },
+  {
+    label: "Declaration for Final Year Candidates",
+    key: "finalYearDeclaration",
+  },
+  {
+    label: "Central Government Civilian Employee",
+    key: "centralGovtDeclaration",
+  },
+];
+
 function PdfViewerPage() {
   const navigate = useNavigate();
   const { pdfKey } = useParams();
 
-  const pdfData = pdfMap[pdfKey];
+  const currentItem = useMemo(
+    () => formatItems.find((item) => item.key === pdfKey),
+    [pdfKey]
+  );
 
-  if (!pdfData) {
+  const pdfData = pdfMap[pdfKey];
+  const selectedContent = certificateContent[pdfKey];
+
+  if (!pdfData && !selectedContent) {
     return (
       <div className="min-h-screen bg-gray-100 transition-colors dark:bg-gray-900">
         <Header />
@@ -104,7 +162,7 @@ function PdfViewerPage() {
         <main className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 lg:px-8">
           <Card>
             <h1 className="text-2xl font-bold text-red-600 dark:text-red-400">
-              PDF not found
+              Document not found
             </h1>
             <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300">
               The requested document could not be located. Please go back and
@@ -122,15 +180,14 @@ function PdfViewerPage() {
     );
   }
 
-  const proxiedPdfUrl = `http://localhost:5000/api/pdf-proxy?url=${encodeURIComponent(
-    pdfData.url
-  )}`;
+  const proxiedPdfUrl = pdfData
+    ? `http://localhost:5000/api/pdf-proxy?url=${encodeURIComponent(pdfData.url)}`
+    : null;
 
   return (
     <div className="min-h-screen bg-gray-100 transition-colors dark:bg-gray-900">
       <Header />
 
-      {/* PAGE TITLE BAND */}
       <section className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
         <div className="mx-auto max-w-[1450px] px-4 py-8 sm:px-6 lg:px-8">
           <p className="text-sm font-medium uppercase tracking-wider text-blue-700 dark:text-blue-400">
@@ -138,29 +195,26 @@ function PdfViewerPage() {
           </p>
 
           <h1 className="mt-2 text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-            {pdfData.title}
+            {currentItem?.label || pdfData?.title || "Certificate / Declaration"}
           </h1>
 
           <p className="mt-3 max-w-3xl text-sm leading-7 text-gray-600 dark:text-gray-300 sm:text-base">
-            Review the selected certificate or declaration format below. You may
-            go back to the previous page to choose another document.
+            Review the selected certificate or declaration format below.
           </p>
         </div>
       </section>
 
-      {/* MAIN CONTENT */}
       <main className="mx-auto max-w-[1450px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-          {/* PDF VIEWER */}
           <section className="xl:col-span-9">
             <Card className="overflow-hidden p-0">
               <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/50">
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {pdfData.title}
+                    {currentItem?.label || pdfData?.title}
                   </h2>
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                    Embedded PDF preview
+                    PDF preview and content view
                   </p>
                 </div>
 
@@ -169,17 +223,36 @@ function PdfViewerPage() {
                 </Button>
               </div>
 
-              <div className="h-[78vh] w-full bg-gray-100 dark:bg-gray-900">
-                <iframe
-                  src={`${proxiedPdfUrl}#toolbar=0`}
-                  title={pdfData.title}
-                  className="h-full w-full"
-                />
+              {pdfData && (
+                <div className="h-[78vh] w-full bg-gray-100 dark:bg-gray-900">
+                  <iframe
+                    src={`${proxiedPdfUrl}#toolbar=0`}
+                    title={pdfData.title}
+                    className="h-full w-full"
+                  />
+                </div>
+              )}
+
+              <div className="bg-gray-100 p-6 dark:bg-gray-800/40">
+                <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                  {selectedContent ? (
+                    selectedContent.content
+                  ) : (
+                    <div className="p-10">
+                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        {currentItem?.label || "Content not available"}
+                      </h2>
+                      <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300">
+                        Formatted page content has not been added yet for this
+                        document.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </Card>
           </section>
 
-          {/* SIDE INFO */}
           <aside className="xl:col-span-3">
             <div className="space-y-6">
               <Card>
@@ -192,7 +265,7 @@ function PdfViewerPage() {
                     <span className="font-medium text-gray-800 dark:text-gray-200">
                       Title:
                     </span>{" "}
-                    {pdfData.title}
+                    {currentItem?.label || pdfData?.title || "Not found"}
                   </p>
 
                   <p>
