@@ -180,8 +180,9 @@ function PdfViewerPage() {
     );
   }
 
+  const backendBaseUrl = "http://localhost:5000";
   const proxiedPdfUrl = pdfData
-    ? `http://localhost:5000/api/pdf-proxy?url=${encodeURIComponent(pdfData.url)}`
+    ? `${backendBaseUrl}/api/pdf-proxy?url=${encodeURIComponent(pdfData.url)}`
     : null;
 
   return (
@@ -214,7 +215,7 @@ function PdfViewerPage() {
                     {currentItem?.label || pdfData?.title}
                   </h2>
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                    PDF preview and content view
+                    Content view
                   </p>
                 </div>
 
@@ -224,12 +225,23 @@ function PdfViewerPage() {
               </div>
 
               {pdfData && (
-                <div className="h-[78vh] w-full bg-gray-100 dark:bg-gray-900">
-                  <iframe
-                    src={`${proxiedPdfUrl}#toolbar=0`}
-                    title={pdfData.title}
-                    className="h-full w-full"
-                  />
+                <div className="flex items-center justify-end gap-3 border-b border-gray-200 bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800">
+                  <a
+                    href={proxiedPdfUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm font-medium text-blue-700 hover:underline dark:text-blue-400"
+                  >
+                    Open PDF in new tab
+                  </a>
+                  <a
+                    href={pdfData.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm font-medium text-blue-700 hover:underline dark:text-blue-400"
+                  >
+                    Open original PDF
+                  </a>
                 </div>
               )}
 

@@ -4,6 +4,8 @@ export default function HomeNoticeModal({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/45 p-4">
       <div className="w-full max-w-[760px] max-h-[88vh] overflow-hidden rounded-sm border border-gray-300 bg-white shadow-2xl">
+
+        {/* HEADER */}
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
           <button
             type="button"
@@ -21,8 +23,16 @@ export default function HomeNoticeModal({ isOpen, onClose }) {
           </button>
         </div>
 
+        {/* CONTENT */}
         <div className="max-h-[72vh] overflow-y-auto bg-[#f3f3f3] px-6 py-5">
+
+          {/* ✅ MOVED TO TOP */}
+          <div className="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm text-gray-800">
+            This site is for <span className="font-semibold">educational purpose</span> and is not an official RAC notice.
+          </div>
+
           <div className="mx-auto w-full max-w-[660px] border border-gray-300 bg-[#f6f1df] px-8 py-8 text-gray-900 shadow-sm">
+
             <p className="mb-2 text-center text-[11px] tracking-wide text-gray-700">
               Government of India, Ministry of Defence, DRDO, Recruitment and
               Assessment Centre, Lucknow Road, Timarpur, Delhi - 54
@@ -30,6 +40,8 @@ export default function HomeNoticeModal({ isOpen, onClose }) {
 
             <div className="mb-4 border-b border-gray-700 pb-3">
               <div className="grid grid-cols-[90px_1fr_90px] items-center gap-3">
+
+                {/* LEFT */}
                 <div className="text-center text-[11px] font-medium italic">
                   <div className="mb-2">
                     <img
@@ -42,6 +54,7 @@ export default function HomeNoticeModal({ isOpen, onClose }) {
                   <div className="mt-2 font-semibold not-italic">rac.gov.in</div>
                 </div>
 
+                {/* CENTER */}
                 <div className="text-center">
                   <h2 className="text-[20px] font-black tracking-wide">
                     GOVT. OF INDIA, MINISTRY OF DEFENCE
@@ -60,6 +73,7 @@ export default function HomeNoticeModal({ isOpen, onClose }) {
                   </p>
                 </div>
 
+                {/* RIGHT */}
                 <div className="text-center text-[11px] font-medium">
                   <div className="mb-2">
                     <img
@@ -70,6 +84,7 @@ export default function HomeNoticeModal({ isOpen, onClose }) {
                   </div>
                   <div className="mt-8 font-semibold">drdo.gov.in</div>
                 </div>
+
               </div>
             </div>
 
@@ -80,6 +95,7 @@ export default function HomeNoticeModal({ isOpen, onClose }) {
             </h3>
 
             <div className="mt-6 space-y-5 text-[15px] leading-8">
+
               <p>
                 Please be aware that any official communication from RAC is done
                 through following means only:
@@ -119,10 +135,7 @@ export default function HomeNoticeModal({ isOpen, onClose }) {
                   <li>https://drdo.gov.in</li>
                 </ul>
               </div>
-            </div>
 
-            <div className="mt-8 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm text-gray-800">
-              This popup is for <span className="font-semibold">educational purpose only</span> and is not an official RAC notice.
             </div>
           </div>
         </div>
