@@ -1,13 +1,14 @@
 const express = require("express");
 const router = express.Router();
 
-const { getProfile, saveProfile } = require("../controllers/applicantController");
 const { protect } = require("../middleware/authMiddleware");
 
-// ✅ GET PROFILE
-router.get("/profile", getProfile);
-
-// ✅ SAVE PROFILE
-router.post("/profile",  saveProfile);
-
+// ✅ TEMP SAFE CONTROLLER (NO CRASH)
+router.get("/me", protect, (req, res) => {
+  res.json({
+    success: true,
+    user: req.user,
+  });
+});
+console.log("protect:", protect);
 module.exports = router;

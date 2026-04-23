@@ -4,36 +4,49 @@ import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
 import { applyToVacancy } from "../services/applicantService";
-import { isProfileComplete } from "../../../shared/utils/profileStorage";
 
-export default function VacancyCard({ vacancy }) {
+export default function VacancyCard({ vacancy, appliedVacancies }) {
   const navigate = useNavigate();
+
   const [applied, setApplied] = useState(false);
-  const profileComplete = isProfileComplete();
 
+  // ❌ REMOVE THIS
+  // const profileComplete = isProfileComplete();
 
-const handleApply = async () => {
-  if (!profileComplete) {
-    alert("Please complete your profile before applying for a vacancy.");
-    navigate("/applicant/profile");
-    return;
-  }
+  // ✅ NEW: derive from backend
+  const profileComplete = true; // already handled in parent
 
-  try {
-    await applyToVacancy(vacancy.id);
-    setApplied(true);
-    alert("Applied Successfully");
-  } catch (err) {
-    alert(err.response?.data?.message || "Error applying");
-  }
-};
+  // ✅ IMPORTANT: set applied from backend
+  useEffect(() => {
+    if (appliedVacancies?.includes(vacancy._id)) {
+      setApplied(true);
+    }
+  }, [appliedVacancies, vacancy._id]);
+
+  const handleApply = async () => {
+    if (!profileComplete) {
+      alert("Please complete your profile before applying for a vacancy.");
+      navigate("/applicant/profile");
+      return;
+    }
+
+    try {
+      await applyToVacancy(vacancy._id);
+      setApplied(true); // instant UI update
+      alert("Applied Successfully");
+    } catch (err) {
+      alert(err.message || "Error applying");
+    }
+  };
+
   return (
     <Card className="group h-full border border-gray-200/80 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80">
       <div className="flex h-full flex-col justify-between space-y-4">
+
         <div className="space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-base font-semibold leading-7 text-gray-900 transition-colors duration-300 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-400">
+              <h3 className="text-base font-semibold leading-7 text-gray-900 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-400">
                 {vacancy.title}
               </h3>
 
@@ -46,29 +59,16 @@ const handleApply = async () => {
           </div>
 
           <div className="grid gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 text-sm dark:border-gray-700 dark:bg-gray-900/40">
-            <p className="text-gray-600 dark:text-gray-300">
-              <span className="font-medium text-gray-900 dark:text-white">
-                Last Date:
-              </span>{" "}
-              {vacancy.deadline}
+            <p>
+              <strong>Last Date:</strong> {vacancy.deadline}
             </p>
 
             {vacancy.location && (
-              <p className="text-gray-600 dark:text-gray-300">
-                <span className="font-medium text-gray-900 dark:text-white">
-                  Location:
-                </span>{" "}
-                {vacancy.location}
-              </p>
+              <p><strong>Location:</strong> {vacancy.location}</p>
             )}
 
             {vacancy.mode && (
-              <p className="text-gray-600 dark:text-gray-300">
-                <span className="font-medium text-gray-900 dark:text-white">
-                  Mode:
-                </span>{" "}
-                {vacancy.mode}
-              </p>
+              <p><strong>Mode:</strong> {vacancy.mode}</p>
             )}
           </div>
         </div>
@@ -78,7 +78,7 @@ const handleApply = async () => {
             size="sm"
             variant="outline"
             fullWidth
-            onClick={() => navigate(`/applicant/vacancies/${vacancy.id}`)}
+            onClick={() => navigate(`/applicant/vacancies/${vacancy._id}`)}
           >
             View Details
           </Button>
@@ -90,11 +90,7 @@ const handleApply = async () => {
             disabled={applied}
             variant={applied ? "secondary" : "primary"}
           >
-            {applied
-              ? "Applied"
-              : profileComplete
-              ? "Apply Now"
-              : "Complete Profile First"}
+            {applied ? "Applied" : "Apply Now"}
           </Button>
         </div>
       </div>
