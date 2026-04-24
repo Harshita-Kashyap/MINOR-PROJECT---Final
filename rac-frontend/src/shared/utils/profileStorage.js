@@ -13,9 +13,9 @@ export function setProfileComplete(value) {
   localStorage.setItem(PROFILE_COMPLETE_KEY, value ? "true" : "false");
 }
 
-export function isProfileComplete() {
-  return localStorage.getItem(PROFILE_COMPLETE_KEY) === "true";
-}
+export const isProfileComplete = () => {
+  return localStorage.getItem("profileComplete") === "true";
+};
 
 export function getApplicantName() {
   const profile = getApplicantProfile();

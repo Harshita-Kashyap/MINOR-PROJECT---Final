@@ -1100,7 +1100,7 @@
 //     </div>
 //   );
 // }
-
+import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import Header from "../../landing/components/Header";
 import ApplicantRibbon from "../components/ApplicantRibbon";
@@ -1109,7 +1109,7 @@ import Input from "../../../shared/components/ui/Input";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
 import { saveApplicantProfile } from "../services/applicantService";
-
+import { getApplicantProfile } from "../services/applicantService";
 const initialForm = {
   fullName: "",
   fatherName: "",
@@ -1275,16 +1275,26 @@ export default function ApplicantProfile() {
   const [saved, setSaved] = useState(false);
   const [profileComplete, setProfileCompleteState] = useState(false);
   const [errors, setErrors] = useState({});
+  
+  const navigate = useNavigate();
+  useEffect(() => {
+  const loadProfile = async () => {
+    try {
+      const res = await getApplicantProfile();
 
-  // useEffect(() => {
-  //   const stored = getApplicantProfile();
-  //   if (stored) {
-  //     setForm((prev) => ({
-  //       ...prev,
-  //       ...stored,
-  //     }));
-  //   }
-  // }, []);
+      if (res.profile) {
+        setForm((prev) => ({
+          ...prev,
+          ...res.profile,
+        }));
+      }
+    } catch (err) {
+      console.error("LOAD ERROR:", err);
+    }
+  };
+
+  loadProfile();
+}, []);
 
   const isIndian = form.nationality === "Indian";
   const needsGate = form.examType === "GATE";
@@ -1545,21 +1555,26 @@ export default function ApplicantProfile() {
     return Object.keys(newErrors).length === 0;
   };
 const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const isValid = validateForm();
-    const finalComplete = isValid && completionCheck;
-try {
-  await saveApplicantProfile(form);
-  setProfileCompleteState(finalComplete);
-  setSaved(true);
-} catch (err) {
-  alert("Error saving profile");
-}
+  try {
+    const res = await saveApplicantProfile(form);
 
-    setSaved(true);
-  };
+    alert("Profile saved successfully");
 
+    // ✅ FORCE CORRECT STATE
+    if (res.profile?.profileStatus === "COMPLETE") {
+      localStorage.setItem("profileComplete", "true");
+    }
+
+    // ✅ HARD REFRESH PAGE
+    window.location.href = "/applicant/vacancies";
+
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Error saving profile");
+  }
+};
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       <Header />

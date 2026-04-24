@@ -3,40 +3,52 @@ import ApplicantRibbon from "../components/ApplicantRibbon";
 import VacancyCard from "../components/VacancyCard";
 import Button from "../../../shared/components/ui/Button";
 import { useNavigate } from "react-router-dom";
-import { applyToVacancy } from "../services/applicantService";
+import { useEffect, useState } from "react";
+import { getApplicantProfile, applyToVacancy, getApplicantApplications } from "../services/applicantService"; // ✅ UPDATED
+import { getVacancies } from "../services/vacancyService";
+
 export default function ApplicantVacancies() {
   const navigate = useNavigate();
 
-  // ✅ ADD THIS FUNCTION HERE
+  const [profileComplete, setProfileComplete] = useState(false);
+  const [vacancies, setVacancies] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ✅ NEW STATE (DO NOT REMOVE EXISTING)
+  const [appliedVacancies, setAppliedVacancies] = useState([]);
+
+  // ✅ UPDATED FETCH (ADDED APPLICATIONS ONLY)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // existing
+        const data = await getVacancies();
+        setVacancies(data);
+
+        // 🔥 NEW (IMPORTANT)
+        const apps = await getApplicantApplications();
+        const appliedIds = apps.map(app => app.vacancyId);
+        setAppliedVacancies(appliedIds);
+
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // ✅ KEEP YOUR EXISTING APPLY FUNCTION
   const handleApply = async (id) => {
     try {
       await applyToVacancy(id);
-      alert("Applied Successfully");
+      alert("Applied Successfully ✅");
     } catch (err) {
-      alert(err.response?.data?.message || "Error applying");
+      alert(err.message || "Error applying");
     }
   };
-
-  const vacancies = [
-    {
-      id: "1",
-      title: "Scientist B - Computer Science",
-      department: "DRDO RAC",
-      deadline: "20 Apr 2026",
-      status: "Open",
-      location: "New Delhi",
-      mode: "Online Application",
-    },
-    {
-      id: "2",
-      title: "Scientist B - Mechanical",
-      department: "DRDO RAC",
-      deadline: "25 Apr 2026",
-      status: "Open",
-      location: "Hyderabad",
-      mode: "Online Application",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -45,6 +57,8 @@ export default function ApplicantVacancies() {
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="space-y-6">
+
+          {/* HEADER */}
           <section className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
@@ -60,15 +74,28 @@ export default function ApplicantVacancies() {
             </Button>
           </section>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {vacancies.map((vacancy) => (
-              <VacancyCard 
-  key={vacancy.id} 
-  vacancy={vacancy} 
-  onApply={handleApply}
-/>
-            ))}
-          </div>
+          {/* LOADING */}
+          {loading ? (
+            <p className="text-center text-gray-500">Loading vacancies...</p>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {vacancies.length === 0 ? (
+                <p className="text-gray-500">No vacancies available</p>
+              ) : (
+                vacancies.map((vacancy) => (
+                  <VacancyCard
+                    key={vacancy._id}
+                    vacancy={vacancy}
+                    onApply={() => handleApply(vacancy._id)}
+
+                    // 🔥 ONLY ADD THIS
+                    appliedVacancies={appliedVacancies}
+                  />
+                ))
+              )}
+            </div>
+          )}
+
         </div>
       </main>
     </div>
