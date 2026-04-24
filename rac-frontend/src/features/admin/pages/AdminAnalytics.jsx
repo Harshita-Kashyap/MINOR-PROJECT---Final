@@ -53,14 +53,14 @@ function AdminAnalytics() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-[#030712] dark:via-[#0b1220] dark:to-[#111827]">
       <Header />
       <AdminNavbar />
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="space-y-6">
           <section>
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
               Recruitment Analytics
             </h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -96,10 +96,10 @@ function AdminAnalytics() {
           </section>
 
           <div className="grid gap-6 xl:grid-cols-12">
-            <Card className="xl:col-span-7 border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <Card className="xl:col-span-7 border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
               <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     Recruitment Funnel Snapshot
                   </h2>
                   <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -119,10 +119,10 @@ function AdminAnalytics() {
               </div>
             </Card>
 
-            <Card className="xl:col-span-5 border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <Card className="xl:col-span-5 border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
               <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     Admin Signals
                   </h2>
                   <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -140,9 +140,9 @@ function AdminAnalytics() {
           </div>
 
           <div className="grid gap-6 xl:grid-cols-2">
-            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <Card className="border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
               <div className="mb-5 border-b border-gray-200 pb-3 dark:border-gray-700">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                   Vacancy Insights
                 </h2>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -154,7 +154,7 @@ function AdminAnalytics() {
                 {vacancyInsights.map((item) => (
                   <li
                     key={item}
-                    className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300"
+                    className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-300"
                   >
                     {item}
                   </li>
@@ -162,9 +162,9 @@ function AdminAnalytics() {
               </ul>
             </Card>
 
-            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <Card className="border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
               <div className="mb-5 border-b border-gray-200 pb-3 dark:border-gray-700">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                   Operational Insights
                 </h2>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -176,7 +176,7 @@ function AdminAnalytics() {
                 {operationalInsights.map((item) => (
                   <li
                     key={item}
-                    className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300"
+                    className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-300"
                   >
                     {item}
                   </li>
@@ -185,9 +185,9 @@ function AdminAnalytics() {
             </Card>
           </div>
 
-          <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+          <Card className="border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
             <div className="mb-5 border-b border-gray-200 pb-3 dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Analytics Direction
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -218,23 +218,23 @@ function AdminAnalytics() {
 
 function MetricCard({ title, value, description, tone }) {
   const toneMap = {
-    default: "from-gray-50 to-white dark:from-gray-800 dark:to-gray-800",
-    info: "from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-gray-800",
-    success: "from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-gray-800",
-    warning: "from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-gray-800",
-    danger: "from-red-50 to-rose-50 dark:from-red-950/20 dark:to-gray-800",
+    default: "from-gray-50 to-white dark:from-gray-900 dark:to-gray-800",
+    info: "from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-gray-800",
+    success: "from-green-50 to-emerald-50 dark:from-emerald-950/30 dark:to-gray-800",
+    warning: "from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-gray-800",
+    danger: "from-red-50 to-rose-50 dark:from-red-950/30 dark:to-gray-800",
   };
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 ${
         toneMap[tone || "default"]
       }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {title}
       </p>
-      <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+      <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
         {value}
       </h3>
       <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
@@ -246,9 +246,9 @@ function MetricCard({ title, value, description, tone }) {
 
 function FunnelCard({ label, value }) {
   return (
-    <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm dark:border-gray-700 dark:bg-gray-900/40">
+    <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm dark:border-gray-700 dark:bg-gray-800/60">
       <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
+      <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-gray-100">
         {value}
       </p>
     </div>
@@ -265,8 +265,8 @@ function SignalItem({ text }) {
 
 function InfoBox({ title, description }) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+    <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/60">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
         {title}
       </h3>
       <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">

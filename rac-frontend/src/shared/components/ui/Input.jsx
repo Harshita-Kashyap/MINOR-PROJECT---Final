@@ -41,21 +41,21 @@ function Input({
           placeholder={placeholder}
           disabled={disabled}
           className={`
-            w-full rounded-xl border px-3 py-2.5 text-sm
+            w-full rounded-xl border px-3 py-2.5 text-sm shadow-sm
             bg-white text-gray-900 placeholder:text-gray-400
-            dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500
+            dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500
             ${isPassword ? "pr-12" : ""}
             ${
               error
                 ? "border-red-500 dark:border-red-400"
                 : "border-gray-300 dark:border-gray-600"
             }
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-            dark:focus:ring-blue-400 dark:focus:border-blue-400
+            focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+            dark:focus:ring-blue-400/20 dark:focus:border-blue-400
             transition duration-150
             ${
               disabled
-                ? "cursor-not-allowed bg-gray-100 opacity-60 dark:bg-gray-800"
+                ? "cursor-not-allowed bg-gray-100 text-gray-500 opacity-70 dark:bg-gray-900 dark:text-gray-500"
                 : ""
             }
             ${className}
@@ -67,7 +67,7 @@ function Input({
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-500 transition hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
           >
             {showPassword ? t("hide") : t("show")}
           </button>

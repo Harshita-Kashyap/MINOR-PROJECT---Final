@@ -37,6 +37,11 @@ export default function Header() {
     navigate("/", { replace: true });
   };
 
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem("language", lang);
+  };
+
   const roleLabel = user?.role
     ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
     : "";
@@ -44,6 +49,7 @@ export default function Header() {
   return (
     <header className="border-b border-gray-200 bg-white px-4 py-4 shadow-sm transition-colors duration-300 dark:border-gray-700 dark:bg-gray-800 sm:px-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        {/* Left */}
         <div className="flex min-w-0 items-start gap-3 sm:gap-4">
           <img
             src="https://rac.gov.in/images/rac_logo_2025_sm.png"
@@ -70,8 +76,10 @@ export default function Header() {
           </div>
         </div>
 
+        {/* Right */}
         <div className="flex items-center justify-between gap-4 lg:justify-end">
           <div className="flex flex-col items-end gap-2">
+            {/* Login / Logout */}
             <div>
               {isPublicPage && (
                 <Button size="sm" onClick={handleLogin}>
@@ -92,38 +100,41 @@ export default function Header() {
               )}
             </div>
 
+            {/* Toggles */}
             <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2 py-1 transition-all duration-300 dark:border-gray-700 dark:bg-gray-900">
-              <div className="flex">
-                <button
-                  type="button"
-                  onClick={() => i18n.changeLanguage("en")}
-                  className={`rounded-md px-2 py-1 text-xs transition-all duration-200 ${
-                    i18n.language === "en"
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-                  }`}
-                >
-                  EN
-                </button>
+              {isPublicPage && (
+                <div className="flex items-center overflow-hidden rounded-lg border border-gray-300 dark:border-gray-600">
+                  <button
+                    type="button"
+                    onClick={() => changeLanguage("en")}
+                    className={`px-3 py-1 text-xs font-medium transition ${
+                      i18n.language === "en"
+                        ? "bg-blue-700 text-white"
+                        : "bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    EN
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => i18n.changeLanguage("hi")}
-                  className={`rounded-md px-2 py-1 text-xs transition-all duration-200 ${
-                    i18n.language === "hi"
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-                  }`}
-                >
-                  हिंदी
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => changeLanguage("hi")}
+                    className={`px-3 py-1 text-xs font-medium transition ${
+                      i18n.language === "hi"
+                        ? "bg-blue-700 text-white"
+                        : "bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    हिं
+                  </button>
+                </div>
+              )}
 
-              <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
               <ThemeToggle />
             </div>
           </div>
 
+          {/* National Emblem */}
           <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-2 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700 dark:bg-gray-800/60">
             <img
               src={ashok}

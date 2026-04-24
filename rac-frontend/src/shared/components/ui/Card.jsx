@@ -7,11 +7,14 @@ export default function Card({
   return (
     <div
       className={`
-        bg-white dark:bg-gray-800 
-        border border-gray-200 dark:border-gray-700 
-        rounded-2xl shadow-sm
+        rounded-2xl border border-gray-200 bg-white shadow-sm
+        dark:border-gray-700/70 dark:bg-gray-900/80
         ${padding}
-        ${hover ? "hover:shadow-md transition duration-200" : ""}
+        ${
+          hover
+            ? "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+            : ""
+        }
         ${className}
       `}
     >

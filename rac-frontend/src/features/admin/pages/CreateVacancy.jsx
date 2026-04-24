@@ -136,14 +136,14 @@ function CreateVacancy() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-[#030712] dark:via-[#0b1220] dark:to-[#111827]">
       <Header />
       <AdminNavbar />
 
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="space-y-6">
           <section className="flex flex-col gap-2">
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
               Create Vacancy
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -153,7 +153,7 @@ function CreateVacancy() {
           </section>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <Card className="bg-white/95 shadow-sm backdrop-blur-sm dark:bg-gray-900/80">
               <SectionTitle
                 title="Basic Vacancy Information"
                 subtitle="Core vacancy identity and applicant-facing details."
@@ -208,7 +208,7 @@ function CreateVacancy() {
               </div>
             </Card>
 
-            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <Card className="bg-white/95 shadow-sm backdrop-blur-sm dark:bg-gray-900/80">
               <SectionTitle
                 title="Eligibility and Academic Rules"
                 subtitle="Define who is eligible to apply and minimum qualification thresholds."
@@ -289,7 +289,7 @@ function CreateVacancy() {
               </div>
             </Card>
 
-            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <Card className="bg-white/95 shadow-sm backdrop-blur-sm dark:bg-gray-900/80">
               <SectionTitle
                 title="Publication and Deadline"
                 subtitle="Set the vacancy status and application closing date."
@@ -338,7 +338,7 @@ function CreateVacancy() {
 function SectionTitle({ title, subtitle }) {
   return (
     <div className="border-b border-gray-200 pb-3 dark:border-gray-700">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
         {title}
       </h2>
       <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -350,15 +350,15 @@ function SectionTitle({ title, subtitle }) {
 
 function SelectField({ label, name, value, onChange, options, error }) {
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
         {label}
       </label>
       <select
         name={name}
         value={value}
         onChange={onChange}
-        className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+        className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-400/20"
       >
         {options.map((option) => (
           <option key={option || "empty"} value={option}>
@@ -383,8 +383,8 @@ function TextAreaField({
   error,
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
         {label}
       </label>
       <textarea
@@ -393,7 +393,7 @@ function TextAreaField({
         onChange={onChange}
         placeholder={placeholder}
         rows={rows}
-        className="w-full rounded-xl border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+        className="w-full rounded-xl border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-blue-400 dark:focus:ring-blue-400/20"
       />
       {error && (
         <span className="text-sm text-red-500 dark:text-red-400">{error}</span>

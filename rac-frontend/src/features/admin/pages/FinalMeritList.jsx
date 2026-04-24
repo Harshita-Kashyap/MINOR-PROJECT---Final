@@ -80,7 +80,7 @@ function FinalMeritList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-[#030712] dark:via-[#0b1220] dark:to-[#111827]">
       <Header />
       <AdminNavbar />
 
@@ -88,7 +88,7 @@ function FinalMeritList() {
         <div className="space-y-6">
           <section className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                 Final Merit List
               </h1>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -129,7 +129,7 @@ function FinalMeritList() {
             />
           </section>
 
-          <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+          <Card className="border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
             <div className="grid gap-4 md:grid-cols-3">
               <InfoBox
                 title="Result workflow"
@@ -146,19 +146,19 @@ function FinalMeritList() {
             </div>
           </Card>
 
-          <Card className="overflow-hidden border border-gray-200/80 p-0 shadow-sm dark:border-gray-700/80">
+          <Card className="overflow-hidden border border-gray-200/80 bg-white/95 p-0 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
             {loading ? (
-              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              <div className="p-10 text-center text-gray-500 dark:text-gray-400">
                 Loading merit list...
               </div>
             ) : sortedCandidates.length === 0 ? (
-              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              <div className="p-10 text-center text-gray-500 dark:text-gray-400">
                 No candidates are available in the final merit list yet.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[950px] text-left">
-                  <thead className="bg-gray-50 text-sm text-gray-700 dark:bg-gray-800/70 dark:text-gray-200">
+                  <thead className="bg-gray-100/90 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-200">
                     <tr>
                       <th className="p-4 font-semibold">Rank</th>
                       <th className="p-4 font-semibold">Candidate</th>
@@ -170,13 +170,13 @@ function FinalMeritList() {
                     </tr>
                   </thead>
 
-                  <tbody>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {sortedCandidates.map((candidate, index) => (
                       <tr
                         key={candidate.id || candidate._id || index}
-                        className={`border-t border-gray-200 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/60 ${
+                        className={`transition hover:bg-gray-50/80 dark:hover:bg-gray-800/70 ${
                           index === 0
-                            ? "bg-green-50/70 dark:bg-green-900/10"
+                            ? "bg-emerald-50/80 dark:bg-emerald-950/20"
                             : ""
                         }`}
                       >
@@ -186,7 +186,7 @@ function FinalMeritList() {
                           </span>
                         </td>
 
-                        <td className="p-4 font-medium text-gray-800 dark:text-white">
+                        <td className="p-4 font-medium text-gray-800 dark:text-gray-100">
                           {candidate.name}
                         </td>
 
@@ -231,22 +231,26 @@ function FinalMeritList() {
 
 function MetricCard({ title, value, description, tone }) {
   const toneMap = {
-    default: "from-gray-50 to-white dark:from-gray-800 dark:to-gray-800",
-    success: "from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-gray-800",
-    warning: "from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-gray-800",
-    info: "from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-gray-800",
+    default:
+      "from-gray-50 to-white dark:from-gray-900 dark:to-gray-800",
+    success:
+      "from-green-50 to-emerald-50 dark:from-emerald-950/30 dark:to-gray-800",
+    warning:
+      "from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-gray-800",
+    info:
+      "from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-gray-800",
   };
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 ${
         toneMap[tone || "default"]
       }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {title}
       </p>
-      <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+      <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
         {value}
       </h3>
       <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
@@ -258,8 +262,8 @@ function MetricCard({ title, value, description, tone }) {
 
 function InfoBox({ title, description }) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+    <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/60">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
         {title}
       </h3>
       <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
@@ -277,7 +281,7 @@ function StatusPill({ status }) {
       ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
       : normalized === "waitlisted"
       ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
-      : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300";
+      : "bg-gray-100 text-gray-700 dark:bg-gray-700/70 dark:text-gray-300";
 
   return (
     <span

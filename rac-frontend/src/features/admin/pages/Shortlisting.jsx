@@ -70,14 +70,14 @@ function Shortlisting() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-[#030712] dark:via-[#0b1220] dark:to-[#111827]">
       <Header />
       <AdminNavbar />
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="space-y-6">
           <section>
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
               Shortlisting Control
             </h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -112,12 +112,12 @@ function Shortlisting() {
             />
           </section>
 
-          <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+          <Card className="border border-gray-200/80 bg-white/90 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/75">
             <div className="grid gap-4 md:grid-cols-3">
               <select
                 value={vacancyFilter}
                 onChange={(e) => setVacancyFilter(e.target.value)}
-                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-900/50"
               >
                 {vacancies.map((vacancy) => (
                   <option key={vacancy} value={vacancy}>
@@ -129,7 +129,7 @@ function Shortlisting() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-900/50"
               >
                 <option value="All">All Status</option>
                 <option value="Pending">Pending</option>
@@ -137,16 +137,16 @@ function Shortlisting() {
                 <option value="Rejected">Rejected</option>
               </select>
 
-              <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-300">
+              <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-300">
                 Admin can preview and confirm shortlist progression here.
               </div>
             </div>
           </Card>
 
-          <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+          <Card className="border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
             <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                   Candidate Shortlisting Queue
                 </h2>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -162,7 +162,7 @@ function Shortlisting() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1100px] text-left">
-                  <thead className="bg-gray-50 text-sm text-gray-700 dark:bg-gray-800/70 dark:text-gray-200">
+                  <thead className="bg-gray-100/90 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-200">
                     <tr>
                       <th className="p-4 font-semibold">Candidate</th>
                       <th className="p-4 font-semibold">Vacancy</th>
@@ -174,13 +174,13 @@ function Shortlisting() {
                     </tr>
                   </thead>
 
-                  <tbody>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredCandidates.map((candidate) => (
                       <tr
                         key={candidate.id}
-                        className="border-t border-gray-200 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/60"
+                        className="transition hover:bg-gray-50/80 dark:hover:bg-gray-800/70"
                       >
-                        <td className="p-4 font-medium text-gray-800 dark:text-white">
+                        <td className="p-4 font-medium text-gray-800 dark:text-gray-100">
                           {candidate.name}
                         </td>
 
@@ -233,7 +233,7 @@ function Shortlisting() {
             )}
           </Card>
 
-          <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+          <Card className="border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
             <div className="grid gap-4 md:grid-cols-3">
               <InfoBox
                 title="How this page works"
@@ -257,22 +257,26 @@ function Shortlisting() {
 
 function MetricCard({ title, value, description, tone }) {
   const toneMap = {
-    default: "from-gray-50 to-white dark:from-gray-800 dark:to-gray-800",
-    warning: "from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-gray-800",
-    success: "from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-gray-800",
-    danger: "from-red-50 to-rose-50 dark:from-red-950/20 dark:to-gray-800",
+    default:
+      "from-gray-50 to-white dark:from-gray-900 dark:to-gray-800",
+    warning:
+      "from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-gray-800",
+    success:
+      "from-green-50 to-emerald-50 dark:from-emerald-950/30 dark:to-gray-800",
+    danger:
+      "from-red-50 to-rose-50 dark:from-red-950/30 dark:to-gray-800",
   };
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 ${
         toneMap[tone || "default"]
       }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {title}
       </p>
-      <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+      <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
         {value}
       </h3>
       <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
@@ -307,7 +311,7 @@ function StatusPill({ status, type }) {
     <span
       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
         map[status] ||
-        "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+        "bg-gray-100 text-gray-700 dark:bg-gray-700/70 dark:text-gray-300"
       }`}
     >
       {status}
@@ -317,8 +321,8 @@ function StatusPill({ status, type }) {
 
 function InfoBox({ title, description }) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+    <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/60">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
         {title}
       </h3>
       <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">

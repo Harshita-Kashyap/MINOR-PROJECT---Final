@@ -101,7 +101,7 @@ function VacancyManagement() {
   const departments = [...new Set(vacancies.map((v) => v.department).filter(Boolean))];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-[#030712] dark:via-[#0b1220] dark:to-[#111827]">
       <Header />
       <AdminNavbar />
 
@@ -109,7 +109,7 @@ function VacancyManagement() {
         <div className="space-y-6">
           <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                 Vacancy Management
               </h1>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -149,7 +149,7 @@ function VacancyManagement() {
             />
           </section>
 
-          <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+          <Card className="border border-gray-200/80 bg-white/90 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/75">
             <div className="grid gap-4 md:grid-cols-3">
               <Input
                 placeholder="Search by vacancy title..."
@@ -161,7 +161,7 @@ function VacancyManagement() {
               <select
                 value={departmentFilter}
                 onChange={(e) => setDepartmentFilter(e.target.value)}
-                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-900/50"
               >
                 <option value="">All Departments</option>
                 {departments.map((dep) => (
@@ -174,7 +174,7 @@ function VacancyManagement() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-900/50"
               >
                 <option value="">All Status</option>
                 <option value="ACTIVE">Active</option>
@@ -187,24 +187,24 @@ function VacancyManagement() {
           </Card>
 
           {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
               {error}
             </div>
           )}
 
-          <Card className="overflow-hidden border border-gray-200/80 p-0 shadow-sm dark:border-gray-700/80">
+          <Card className="overflow-hidden border border-gray-200/80 bg-white/95 p-0 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
             {loading ? (
-              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              <div className="p-10 text-center text-gray-500 dark:text-gray-400">
                 Loading vacancies...
               </div>
             ) : filteredVacancies.length === 0 ? (
-              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              <div className="p-10 text-center text-gray-500 dark:text-gray-400">
                 No vacancies found for the selected filters.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[980px] text-left">
-                  <thead className="bg-gray-50 text-sm text-gray-700 dark:bg-gray-800/70 dark:text-gray-200">
+                  <thead className="bg-gray-100/90 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-200">
                     <tr>
                       <th className="p-4 font-semibold">Title</th>
                       <th className="p-4 font-semibold">Department</th>
@@ -215,7 +215,7 @@ function VacancyManagement() {
                     </tr>
                   </thead>
 
-                  <tbody>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredVacancies.map((v) => {
                       const id = v.id || v._id;
                       const status = getVacancyStatus(v);
@@ -223,9 +223,9 @@ function VacancyManagement() {
                       return (
                         <tr
                           key={id}
-                          className="border-t border-gray-200 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/60"
+                          className="transition hover:bg-gray-50/80 dark:hover:bg-gray-800/70"
                         >
-                          <td className="p-4 font-medium text-gray-800 dark:text-white">
+                          <td className="p-4 font-medium text-gray-800 dark:text-gray-100">
                             {v.title}
                           </td>
 
@@ -282,22 +282,26 @@ function VacancyManagement() {
 
 function MetricCard({ title, value, description, tone }) {
   const toneMap = {
-    default: "from-gray-50 to-white dark:from-gray-800 dark:to-gray-800",
-    success: "from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-gray-800",
-    danger: "from-red-50 to-rose-50 dark:from-red-950/20 dark:to-gray-800",
-    warning: "from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-gray-800",
+    default:
+      "from-gray-50 to-white dark:from-gray-900 dark:to-gray-800",
+    success:
+      "from-green-50 to-emerald-50 dark:from-emerald-950/30 dark:to-gray-800",
+    danger:
+      "from-red-50 to-rose-50 dark:from-red-950/30 dark:to-gray-800",
+    warning:
+      "from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-gray-800",
   };
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 ${
         toneMap[tone || "default"]
       }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {title}
       </p>
-      <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+      <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
         {value}
       </h3>
       <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
@@ -325,7 +329,7 @@ function StatusPill({ status }) {
     <span
       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
         map[status] ||
-        "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+        "bg-gray-100 text-gray-700 dark:bg-gray-700/70 dark:text-gray-300"
       }`}
     >
       {status}
