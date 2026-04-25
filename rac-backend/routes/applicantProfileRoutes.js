@@ -9,9 +9,9 @@ const {
 } = require("../controllers/applicantProfileController");
 
 // ✅ SAVE PROFILE
-router.post("/profile", protect, saveProfile);
+router.post("/", protect, saveProfile);
 
 // ✅ GET PROFILE
-router.get("/profile", protect, getMyProfile);
+router.get("/", protect, getMyProfile);
 
 module.exports = router;
