@@ -12,6 +12,9 @@ const {
   getVacancyById,
   updateVacancy,
   deleteVacancy,
+  updateVacancyStatus,
+  publishVacancy,
+  closeVacancy,
 } = require("../controllers/vacancyController");
 
 // ========================
@@ -36,5 +39,14 @@ router.put("/:id", protect, authorize("admin"), updateVacancy);
 
 // Delete vacancy
 router.delete("/:id", protect, authorize("admin"), deleteVacancy);
+
+// Update vacancy status
+router.put("/status/:id", protect, authorize("admin"), updateVacancyStatus);
+
+// Publish vacancy
+router.put("/publish/:id", protect, authorize("admin"), publishVacancy);
+
+// Close vacancy
+router.put("/close/:id", protect, authorize("admin"), closeVacancy);
 
 module.exports = router;

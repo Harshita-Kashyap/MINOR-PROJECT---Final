@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../landing/components/Header";
 import AdminNavbar from "../components/AdminNavbar";
-import { updateVacancy } from "../services/vacancyService";
-import API from "../../../shared/services/api";
+import { getVacancyById, updateVacancy } from "../services/vacancyService";
 import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import Input from "../../../shared/components/ui/Input";
@@ -41,8 +40,8 @@ function EditVacancy() {
         setLoading(true);
         setPageError("");
 
-        const res = await API.get("/vacancies");
-        const vacancy = res.data.find((v) => String(v.id || v._id) === String(id));
+        const res = await getVacancyById(id);
+        const vacancy = res.data?.vacancy;
 
         if (!vacancy) {
           setPageError("Vacancy not found");

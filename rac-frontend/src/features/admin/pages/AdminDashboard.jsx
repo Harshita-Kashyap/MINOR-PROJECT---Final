@@ -4,6 +4,7 @@ import Header from "../../landing/components/Header";
 import AdminNavbar from "../components/AdminNavbar";
 import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
+import { getAdminAnalytics } from "../services/vacancyService";
 
 function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -24,20 +25,30 @@ function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    // Later replace with admin dashboard API
-    setStats({
-      activeVacancies: 10,
-      totalApplications: 45,
-      verificationReview: 6,
-      finalReviewPending: 8,
-      resultsPending: 3,
-    });
+    const fetchDashboardStats = async () => {
+      try {
+        const res = await getAdminAnalytics();
+        const data = res.data?.analytics || {};
+
+        setStats({
+          activeVacancies: data.activeVacancies || 0,
+          totalApplications: data.totalApplications || 0,
+          verificationReview: data.verificationReview || 0,
+          finalReviewPending: data.finalReviewPending || 0,
+          resultsPending: data.selected || 0,
+        });
+      } catch (error) {
+        console.error("Admin dashboard stats error:", error);
+      }
+    };
+
+    fetchDashboardStats();
   }, []);
 
   const priorityItems = [
-    "6 applications require verification review.",
-    "8 candidates are waiting in final review or selector decision stage.",
-    "3 result sets are ready for final publication.",
+    `${stats.verificationReview} applications require verification review.`,
+    `${stats.finalReviewPending} candidates are waiting in final review or selector decision stage.`,
+    `${stats.resultsPending} selected results are ready for merit confirmation or publishing.`,
   ];
 
   const recentActivity = [
@@ -270,9 +281,8 @@ function MetricCard({ title, value, description, tone }) {
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 ${
-        toneMap[tone || "default"]
-      }`}
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 ${toneMap[tone || "default"]
+        }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
       <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">

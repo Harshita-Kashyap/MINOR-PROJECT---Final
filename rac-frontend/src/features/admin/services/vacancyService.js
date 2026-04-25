@@ -6,23 +6,23 @@ import API from "../../../shared/services/api";
 
 // Get all vacancies (admin view)
 export const getVacancies = (params = {}) =>
-  API.get("/vacancies", { params });
+  API.get("/api/vacancies", { params });
 
 // Get single vacancy
 export const getVacancyById = (id) =>
-  API.get(`/vacancies/${id}`);
+  API.get(`/api/vacancies/${id}`);
 
 // Create new vacancy
 export const createVacancy = (data) =>
-  API.post("/vacancies", data);
+  API.post("/api/vacancies", data);
 
 // Update vacancy
 export const updateVacancy = (id, data) =>
-  API.put(`/vacancies/${id}`, data);
+  API.put(`/api/vacancies/${id}`, data);
 
 // Delete vacancy
 export const deleteVacancy = (id) =>
-  API.delete(`/vacancies/${id}`);
+  API.delete(`/api/vacancies/${id}`);
 
 
 /* ===============================
@@ -31,17 +31,15 @@ export const deleteVacancy = (id) =>
 
 // Activate / Deactivate vacancy
 export const toggleVacancyStatus = (id, status) =>
-  API.put(`/vacancies/${id}/status`, { status });
+  API.put(`/api/vacancies/${id}/status`, { status });
 
-
-// Publish vacancy (visible to applicants)
+// Publish vacancy
 export const publishVacancy = (id) =>
-  API.put(`/vacancies/${id}/publish`);
+  API.put(`/api/vacancies/${id}/publish`);
 
-
-// Close vacancy (stop accepting applications)
+// Close vacancy
 export const closeVacancy = (id) =>
-  API.put(`/vacancies/${id}/close`);
+  API.put(`/api/vacancies/${id}/close`);
 
 
 /* ===============================
@@ -50,36 +48,53 @@ export const closeVacancy = (id) =>
 
 // Get vacancy-wise analytics
 export const getVacancyAnalytics = (id) =>
-  API.get(`/vacancies/${id}/analytics`);
-
+  API.get(`/api/vacancies/${id}/analytics`);
 
 // Get overall admin analytics
 export const getAdminAnalytics = () =>
-  API.get(`/admin/analytics`);
+  API.get(`/api/admin/analytics`);
 
 
 /* ===============================
-   📌 APPLICATION LINKED (ADMIN)
+   📌 APPLICATION MANAGEMENT
 ================================ */
 
-// Get applications for a vacancy
+// Get all applications
+export const getAllApplications = () =>
+  API.get("/api/applications");
+
+// Get applications by vacancy
 export const getApplicationsByVacancy = (vacancyId) =>
-  API.get(`/applications/vacancy/${vacancyId}`);
+  API.get(`/api/applications/vacancy/${vacancyId}`);
+
+// Update verification status
+export const updateApplicationVerification = (id, data) =>
+  API.put(`/api/applications/${id}/verification`, data);
+
+// Update technical round result
+export const updateTechnicalResult = (id, data) =>
+  API.put(`/api/applications/${id}/technical`, data);
+
+// Update final result
+export const updateFinalResult = (id, data) =>
+  API.put(`/api/applications/${id}/final`, data);
 
 
-// Bulk shortlist (admin trigger)
-export const shortlistCandidates = (vacancyId, criteria) =>
-  API.post(`/applications/shortlist`, {
+/* ===============================
+   📌 SHORTLIST & MERIT SYSTEM
+================================ */
+
+// Shortlist candidates
+export const shortlistCandidates = (vacancyId, criteria = {}) =>
+  API.post("/api/applications/shortlist", {
     vacancyId,
     criteria,
   });
 
-
 // Generate merit list
 export const generateMeritList = (vacancyId) =>
-  API.post(`/merit-list/generate`, { vacancyId });
+  API.post("/api/applications/merit-list/generate", { vacancyId });
 
-
-// Publish results
+// Publish results - backend pending
 export const publishResults = (vacancyId) =>
-  API.post(`/merit-list/publish`, { vacancyId });
+  API.post(`/api/applications/merit-list/publish`, { vacancyId });

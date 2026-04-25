@@ -23,7 +23,7 @@ function VacancyManagement() {
       setError("");
 
       const res = await getVacancies();
-      const data = Array.isArray(res.data) ? res.data : [];
+      const data = Array.isArray(res.data?.vacancies) ? res.data.vacancies : [];
       setVacancies(data);
     } catch (error) {
       console.error("Fetch error:", error);
@@ -294,9 +294,8 @@ function MetricCard({ title, value, description, tone }) {
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 ${
-        toneMap[tone || "default"]
-      }`}
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 ${toneMap[tone || "default"]
+        }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {title}
@@ -327,10 +326,9 @@ function StatusPill({ status }) {
 
   return (
     <span
-      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-        map[status] ||
+      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${map[status] ||
         "bg-gray-100 text-gray-700 dark:bg-gray-700/70 dark:text-gray-300"
-      }`}
+        }`}
     >
       {status}
     </span>

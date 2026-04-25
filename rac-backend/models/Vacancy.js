@@ -1,4 +1,4 @@
-// models/vacancy.js
+// models/Vacancy.js
 
 const mongoose = require("mongoose");
 

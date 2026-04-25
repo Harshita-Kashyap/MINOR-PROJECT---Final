@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Header from "../../landing/components/Header";
 import AdminNavbar from "../components/AdminNavbar";
 import Card from "../../../shared/components/ui/Card";
+import { getAdminAnalytics } from "../services/vacancyService";
 
 function AdminAnalytics() {
   const [analytics, setAnalytics] = useState({
@@ -16,17 +17,26 @@ function AdminAnalytics() {
   });
 
   useEffect(() => {
-    // Replace later with real admin analytics API
-    setAnalytics({
-      activeVacancies: 8,
-      totalApplications: 120,
-      verificationReview: 14,
-      finalReviewPending: 9,
-      selectionRate: 27,
-      applicationsPerDay: 18,
-      shortlisted: 32,
-      selected: 12,
-    });
+    const fetchAnalytics = async () => {
+      try {
+        const res = await getAdminAnalytics();
+
+        setAnalytics({
+          activeVacancies: res.data?.analytics?.activeVacancies || 0,
+          totalApplications: res.data?.analytics?.totalApplications || 0,
+          verificationReview: res.data?.analytics?.verificationReview || 0,
+          finalReviewPending: res.data?.analytics?.finalReviewPending || 0,
+          selectionRate: res.data?.analytics?.selectionRate || 0,
+          applicationsPerDay: res.data?.analytics?.applicationsPerDay || 0,
+          shortlisted: res.data?.analytics?.shortlisted || 0,
+          selected: res.data?.analytics?.selected || 0,
+        });
+      } catch (error) {
+        console.error("Admin analytics fetch error:", error);
+      }
+    };
+
+    fetchAnalytics();
   }, []);
 
   const funnelData = useMemo(
@@ -227,9 +237,8 @@ function MetricCard({ title, value, description, tone }) {
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 ${
-        toneMap[tone || "default"]
-      }`}
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 ${toneMap[tone || "default"]
+        }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {title}

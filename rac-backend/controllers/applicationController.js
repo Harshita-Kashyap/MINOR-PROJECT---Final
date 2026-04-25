@@ -180,3 +180,261 @@ exports.getAllApplications = async (req, res) => {
     });
   }
 };
+
+// ================= GET APPLICATIONS BY VACANCY =================
+exports.getApplicationsByVacancy = async (req, res) => {
+  try {
+    const { vacancyId } = req.params;
+
+    const applications = await Application.find({ vacancyId })
+      .sort({ createdAt: -1 })
+      .populate("userId", "name email phone")
+      .populate("profileId")
+      .populate("vacancyId", "title department status");
+
+    res.status(200).json({
+      success: true,
+      count: applications.length,
+      applications,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ================= UPDATE VERIFICATION =================
+exports.updateVerification = async (req, res) => {
+  try {
+    const { verificationStatus, verificationReason = "" } = req.body;
+
+    if (!["PENDING", "ELIGIBLE", "REVIEW", "REJECTED"].includes(verificationStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification status",
+      });
+    }
+
+    let currentStage = "APPLIED";
+    let technicalTestStatus = "NOT_ASSIGNED";
+
+    if (verificationStatus === "ELIGIBLE") {
+      currentStage = "TECHNICAL";
+      technicalTestStatus = "ASSIGNED";
+    }
+
+    if (verificationStatus === "REJECTED") {
+      currentStage = "COMPLETED";
+    }
+
+    const application = await Application.findByIdAndUpdate(
+      req.params.id,
+      {
+        verificationStatus,
+        verificationReason,
+        currentStage,
+        technicalTestStatus,
+        $push: {
+          timeline: {
+            stage: "VERIFICATION",
+            note: `Verification status updated to ${verificationStatus}`,
+            date: new Date(),
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Verification updated successfully",
+      application,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ================= UPDATE TECHNICAL RESULT =================
+exports.updateTechnicalResult = async (req, res) => {
+  try {
+    const { technicalScore, technicalRemarks = "" } = req.body;
+
+    const status = Number(technicalScore) >= 60 ? "SHORTLISTED" : "REJECTED";
+
+    const application = await Application.findByIdAndUpdate(
+      req.params.id,
+      {
+        technicalScore,
+        technicalRemarks,
+        technicalTestStatus: status,
+        currentStage: status === "SHORTLISTED" ? "PERSONALITY" : "COMPLETED",
+        personalityTestStatus: status === "SHORTLISTED" ? "ASSIGNED" : "NOT_ASSIGNED",
+        $push: {
+          timeline: {
+            stage: "TECHNICAL",
+            note: `Technical result updated. Score: ${technicalScore}`,
+            date: new Date(),
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Technical result updated successfully",
+      application,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ================= UPDATE FINAL RESULT =================
+exports.updateFinalResult = async (req, res) => {
+  try {
+    const {
+      personalityScore = 0,
+      finalStatus,
+      finalRemarks = "",
+      finalReason = "",
+    } = req.body;
+
+    if (!["SELECTED", "REJECTED", "WAITLISTED", "HOLD", "RECOMMENDED"].includes(finalStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid final status",
+      });
+    }
+
+    const application = await Application.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    const technical = Number(application.technicalScore || 0);
+    const personality = Number(personalityScore || 0);
+    const verification = Number(application.verificationScore || 0);
+
+    const overallScore = technical * 0.6 + personality * 0.3 + verification * 0.1;
+
+    application.personalityScore = personality;
+    application.personalityTestStatus = "SUBMITTED";
+    application.finalStatus = finalStatus;
+    application.finalRemarks = finalRemarks;
+    application.finalReason = finalReason;
+    application.overallScore = overallScore;
+    application.currentStage = "COMPLETED";
+
+    application.timeline.push({
+      stage: "FINAL_REVIEW",
+      note: `Final result updated to ${finalStatus}`,
+      date: new Date(),
+    });
+
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Final result updated successfully",
+      application,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ================= SHORTLIST CANDIDATES =================
+exports.shortlistCandidates = async (req, res) => {
+  try {
+    const { vacancyId, criteria = {} } = req.body;
+
+    const minTechnicalScore = Number(criteria.minTechnicalScore || 60);
+
+    const applications = await Application.find({ vacancyId });
+
+    const updated = [];
+
+    for (const app of applications) {
+      if (
+        app.verificationStatus === "ELIGIBLE" &&
+        Number(app.technicalScore || 0) >= minTechnicalScore
+      ) {
+        app.technicalTestStatus = "SHORTLISTED";
+        app.currentStage = "PERSONALITY";
+        app.personalityTestStatus = "ASSIGNED";
+
+        app.timeline.push({
+          stage: "SHORTLISTING",
+          note: "Candidate shortlisted for personality stage",
+          date: new Date(),
+        });
+
+        await app.save();
+        updated.push(app);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Shortlisting completed",
+      count: updated.length,
+      shortlisted: updated,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ================= GENERATE MERIT LIST =================
+exports.generateMeritList = async (req, res) => {
+  try {
+    const { vacancyId } = req.body;
+
+    const applications = await Application.find({ vacancyId })
+      .populate("userId", "name email phone")
+      .populate("profileId")
+      .sort({ overallScore: -1, technicalScore: -1 });
+
+    const meritList = applications
+      .filter((app) =>
+        ["SELECTED", "WAITLISTED", "RECOMMENDED"].includes(app.finalStatus)
+      )
+      .map((app, index) => ({
+        rank: index + 1,
+        applicationId: app.applicationId,
+        candidateName: app.profileId?.fullName || app.userId?.name || "Candidate",
+        email: app.userId?.email,
+        technicalScore: app.technicalScore || 0,
+        personalityScore: app.personalityScore || 0,
+        overallScore: app.overallScore || 0,
+        finalStatus: app.finalStatus,
+      }));
+
+    res.status(200).json({
+      success: true,
+      count: meritList.length,
+      meritList,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

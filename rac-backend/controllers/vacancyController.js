@@ -141,27 +141,47 @@ exports.deleteVacancy = async (req, res) => {
   }
 };
 
-// ✅ GET SINGLE VACANCY
-// exports.getVacancyById = async (req, res) => {
-//   try {
-//     const vacancy = await Vacancy.findById(req.params.id);
+exports.updateVacancyStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
 
-//     if (!vacancy) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Vacancy not found",
-//       });
-//     }
+    if (!["OPEN", "CLOSED", "DRAFT"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid vacancy status",
+      });
+    }
 
-//     res.json({
-//       success: true,
-//       vacancy,
-//     });
+    const vacancy = await Vacancy.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: true }
+    );
 
-//   } catch (err) {
-//     res.status(500).json({
-//       success: false,
-//       message: err.message,
-//     });
-//   }
-// };
+    if (!vacancy) {
+      return res.status(404).json({
+        success: false,
+        message: "Vacancy not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Vacancy status updated successfully",
+      vacancy,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.publishVacancy = async (req, res) => {
+  req.body.status = "OPEN";
+  return exports.updateVacancyStatus(req, res);
+};
+
+exports.closeVacancy = async (req, res) => {
+  req.body.status = "CLOSED";
+  return exports.updateVacancyStatus(req, res);
+};
+

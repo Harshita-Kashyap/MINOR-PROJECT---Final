@@ -115,14 +115,14 @@ function CreateVacancy() {
         ...form,
         minGraduationPercentage: form.minGraduationPercentage
           ? Number(form.minGraduationPercentage)
-          : 0,
+          : null,
         minTwelfthPercentage: form.minTwelfthPercentage
           ? Number(form.minTwelfthPercentage)
-          : 0,
+          : null,
         minTenthPercentage: form.minTenthPercentage
           ? Number(form.minTenthPercentage)
-          : 0,
-        minGateScore: form.minGateScore ? Number(form.minGateScore) : 0,
+          : null,
+        minGateScore: form.minGateScore ? Number(form.minGateScore) : null,
       });
 
       alert("Vacancy created successfully");

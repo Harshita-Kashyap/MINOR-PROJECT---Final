@@ -1,48 +1,76 @@
-// routes/applicationRoutes
-
 const express = require("express");
 const router = express.Router();
 
 const { protect } = require("../middleware/authMiddleware");
 const { authorize } = require("../middleware/roleMiddleware");
-console.log("authorize value:", authorize);
+
 const {
   apply,
   getMyApplications,
   getApplicationById,
   getAllApplications,
+  getApplicationsByVacancy,
+  updateVerification,
+  updateTechnicalResult,
+  updateFinalResult,
+  shortlistCandidates,
+  generateMeritList,
 } = require("../controllers/applicationController");
 
-// ========================
-// 📝 APPLY (Applicant)
-// ========================
+// Applicant
 router.post("/", protect, authorize("applicant"), apply);
-
-// ========================
-// 📄 GET MY APPLICATIONS (Applicant)
-// ========================
 router.get("/my", protect, authorize("applicant"), getMyApplications);
 
-// ========================
-// 👤 GET SINGLE APPLICATION
-// (Applicant → own, Admin/Selector → any)
-// ========================
+// Admin / Selector
+router.get("/", protect, authorize("admin", "selector"), getAllApplications);
+router.get(
+  "/vacancy/:vacancyId",
+  protect,
+  authorize("admin", "selector"),
+  getApplicationsByVacancy
+);
+
+router.put(
+  "/:id/verification",
+  protect,
+  authorize("admin", "selector"),
+  updateVerification
+);
+
+router.put(
+  "/:id/technical",
+  protect,
+  authorize("admin", "selector"),
+  updateTechnicalResult
+);
+
+router.put(
+  "/:id/final",
+  protect,
+  authorize("admin", "selector"),
+  updateFinalResult
+);
+
+router.post(
+  "/shortlist",
+  protect,
+  authorize("admin", "selector"),
+  shortlistCandidates
+);
+
+router.post(
+  "/merit-list/generate",
+  protect,
+  authorize("admin", "selector"),
+  generateMeritList
+);
+
+// Keep this near bottom
 router.get(
   "/:id",
   protect,
   authorize("applicant", "admin", "selector"),
   getApplicationById
-);
-
-// ========================
-// 📋 GET ALL APPLICATIONS
-// (Admin + Selector)
-// ========================
-router.get(
-  "/",
-  protect,
-  authorize("admin", "selector"),
-  getAllApplications
 );
 
 module.exports = router;
