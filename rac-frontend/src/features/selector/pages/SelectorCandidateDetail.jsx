@@ -5,43 +5,91 @@ import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
 import { getSelectorCandidateById } from "../services/selectorService";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  formatStage,
+  getCandidateEmail,
+  getCandidateName,
+  getCompositeScore,
+  getPersonalityScore,
+  getStageBadgeVariant,
+  getTechnicalScore,
+  getVacancyTitle,
+} from "../utils/selectorHelpers";
+
+const workflowSteps = [
+  "APPLIED",
+  "VERIFICATION",
+  "TECHNICAL",
+  "PERSONALITY",
+  "FINAL_REVIEW",
+  "COMPLETED",
+];
 
 export default function SelectorCandidateDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [candidate, setCandidate] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCandidate = async () => {
       try {
+        setLoading(true);
         const res = await getSelectorCandidateById(id);
-        setCandidate(res.candidate);
+        setCandidate(res.candidate || null);
       } catch (err) {
         console.error(err);
+        setCandidate(null);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchCandidate();
+    if (id) fetchCandidate();
   }, [id]);
 
-  if (!candidate) {
+  const total = useMemo(() => {
+    if (!candidate) return 0;
+    return getCompositeScore(candidate);
+  }, [candidate]);
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-        <Header />
-        <SelectorRibbon />
-        <main className="mx-auto max-w-6xl px-4 py-6">
-          <Card>
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Candidate not found
-            </h1>
-          </Card>
-        </main>
-      </div>
+      <PageShell>
+        <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Loading candidate details...
+          </p>
+        </Card>
+      </PageShell>
     );
   }
 
-  const total = Number(candidate.profileScore) + Number(candidate.technical) + Number(candidate.personality);
+  if (!candidate) {
+    return (
+      <PageShell>
+        <Card className="border border-gray-200/80 text-center shadow-sm dark:border-gray-700/80">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Candidate not found
+          </h1>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            The candidate may not exist or the record could not be loaded.
+          </p>
+          <div className="mt-5">
+            <Button onClick={() => navigate("/selector/candidates")}>
+              Back to Candidates
+            </Button>
+          </div>
+        </Card>
+      </PageShell>
+    );
+  }
+
+  const profile = candidate.profileId || {};
+  const timeline = Array.isArray(candidate.timeline) ? candidate.timeline : [];
+  const canEvaluate = candidate.currentStage === "FINAL_REVIEW";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -50,115 +98,239 @@ export default function SelectorCandidateDetail() {
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="space-y-6">
-          <section className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                Candidate Detail
-              </h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {candidate.cid}
-              </p>
-            </div>
+          <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-blue-900 to-blue-800 p-6 text-white shadow-sm sm:p-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_35%)]" />
 
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="info">{candidate.currentStage.replaceAll("_", " ")}</Badge>
-              <Badge
-                variant={
-                  candidate.verificationStatus === "ELIGIBLE"
-                    ? "success"
-                    : candidate.verificationStatus === "REVIEW"
-                      ? "warning"
-                      : "danger"
-                }
-              >
-                Verification: {candidate.verificationStatus}
-              </Badge>
-              <Badge variant="warning">Match Score: {candidate.verificationScore}%</Badge>
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-blue-100">
+                  Candidate Profile
+                </p>
+
+                <h1 className="text-2xl font-semibold sm:text-3xl">
+                  {getCandidateName(candidate)}
+                </h1>
+
+                <p className="mt-2 text-sm text-blue-100">
+                  {candidate.cid || candidate.applicationId || candidate._id}
+                </p>
+
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-blue-100">
+                  {getVacancyTitle(candidate)}
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Badge variant={getStageBadgeVariant(candidate.currentStage)}>
+                    {formatStage(candidate.currentStage)}
+                  </Badge>
+
+                  <Badge variant={getVerificationVariant(candidate.verificationStatus)}>
+                    Verification: {candidate.verificationStatus || "N/A"}
+                  </Badge>
+
+                  <Badge variant="warning">
+                    Match Score: {candidate.verificationScore || 0}%
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate("/selector/candidates")}
+                >
+                  Back to Candidates
+                </Button>
+
+                <Button
+                  variant="outlineWhite"
+                  onClick={() => navigate(`/selector/evaluation/${candidate._id}`)}
+                  disabled={!canEvaluate}
+                >
+                  Open Evaluation
+                </Button>
+              </div>
             </div>
           </section>
 
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <ScoreMetric
+              label="Verification"
+              value={`${candidate.verificationScore || 0}%`}
+              note={candidate.verificationStatus || "N/A"}
+            />
+            <ScoreMetric
+              label="Technical"
+              value={getTechnicalScore(candidate)}
+              note={candidate.technicalTestStatus || "N/A"}
+            />
+            <ScoreMetric
+              label="Personality"
+              value={getPersonalityScore(candidate)}
+              note={candidate.personalityTestStatus || "N/A"}
+            />
+            <ScoreMetric
+              label="Overall"
+              value={candidate.overallScore || total}
+              note={candidate.finalStatus || "N/A"}
+            />
+          </div>
+
+          <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <div className="mb-5 flex items-center justify-between gap-3 border-b border-gray-200 pb-4 dark:border-gray-700">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Workflow Progress
+                </h2>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Current application stage across the selector workflow.
+                </p>
+              </div>
+            </div>
+
+            <Progress stage={candidate.currentStage} />
+          </Card>
+
           <div className="grid gap-6 xl:grid-cols-12">
-            <Card className="xl:col-span-8 border border-gray-200/80 shadow-sm dark:border-gray-700/80">
-              <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-                Candidate Profile Summary
-              </h2>
+            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80 xl:col-span-8">
+              <SectionHeader
+                title="Profile Summary"
+                subtitle="Applicant, vacancy, and application metadata from backend records."
+              />
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <InfoCard label="Name" value={candidate.userId?.name} />
-                <InfoCard label="Email" value={candidate.userId?.email} />
-                <InfoCard label="Phone" value={candidate.userId?.phone} />
-                <InfoCard label="Education" value={candidate.education} />
-                <InfoCard label="Experience" value={candidate.experience} />
-                <InfoCard label="Vacancy" value={candidate.vacancyId?.title} />
+                <InfoCard label="Name" value={getCandidateName(candidate)} />
+                <InfoCard label="Email" value={getCandidateEmail(candidate)} />
+                <InfoCard label="Phone" value={candidate.userId?.phone || profile.mobile || "N/A"} />
+                <InfoCard label="Vacancy" value={getVacancyTitle(candidate)} />
+                <InfoCard label="Department" value={candidate.vacancyId?.department || candidate.department || "N/A"} />
+                <InfoCard label="Applied On" value={formatDate(candidate.appliedAt || candidate.createdAt)} />
               </div>
             </Card>
 
-            <Card className="xl:col-span-4 border border-gray-200/80 shadow-sm dark:border-gray-700/80">
-              <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-                Score Snapshot
-              </h2>
+            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80 xl:col-span-4">
+              <SectionHeader
+                title="Decision Readiness"
+                subtitle="Whether this candidate can be evaluated now."
+              />
 
-              <div className="space-y-4">
-                <ScoreRow label="Profile Score" value={candidate.profileScore} color="blue" />
-                <ScoreRow label="GATE Score" value={candidate.gate} color="purple" />
-                <ScoreRow label="Technical Score" value={candidate.technical || "-"} color="green" />
-                <ScoreRow label="Personality Score" value={candidate.personality || "-"} color="amber" />
-                <ScoreRow label="Overall Score" value={total} color="blue" />
+              <div
+                className={`rounded-2xl border px-4 py-4 ${
+                  canEvaluate
+                    ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900/60 dark:bg-green-950/20 dark:text-green-300"
+                    : "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-300"
+                }`}
+              >
+                <p className="text-sm font-semibold">
+                  {canEvaluate ? "Ready for Evaluation" : "Not Ready Yet"}
+                </p>
+                <p className="mt-2 text-sm leading-6">
+                  {canEvaluate
+                    ? "Candidate has reached FINAL REVIEW and can receive selector decision."
+                    : "Candidate must reach FINAL REVIEW before final selector decision."}
+                </p>
+              </div>
+
+              <div className="mt-4 space-y-3">
+                <ScoreRow label="Selector Decision" value={candidate.selectorDecision || "PENDING"} />
+                <ScoreRow label="Final Status" value={candidate.finalStatus || "N/A"} />
               </div>
             </Card>
           </div>
 
           <div className="grid gap-6 xl:grid-cols-2">
-            <Section title="Parsed Resume Data">
-              <DetailItem label="Skills">
-                <div className="flex flex-wrap gap-2">
-                  {candidate.skills.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </DetailItem>
-              <DetailItem label="Projects">{candidate.projects}</DetailItem>
+            <Section title="Applicant Personal Data">
+              <DetailGrid>
+                <DetailItem label="Full Name">{profile.fullName || getCandidateName(candidate)}</DetailItem>
+                <DetailItem label="Mobile">{profile.mobile || candidate.userId?.phone || "N/A"}</DetailItem>
+                <DetailItem label="Category">{profile.category || "N/A"}</DetailItem>
+                <DetailItem label="Gender">{profile.gender || "N/A"}</DetailItem>
+                <DetailItem label="Nationality">{profile.nationality || "N/A"}</DetailItem>
+                <DetailItem label="Domicile State">{profile.domicileState || "N/A"}</DetailItem>
+              </DetailGrid>
             </Section>
 
             <Section title="Academic Snapshot">
-              <DetailItem label="10th">{candidate.academics.tenth}</DetailItem>
-              <DetailItem label="12th">{candidate.academics.twelfth}</DetailItem>
-              <DetailItem label="Graduation">{candidate.academics.graduation}</DetailItem>
+              <div className="space-y-3">
+                <DetailItem label="10th">{formatAcademic(profile, "tenth")}</DetailItem>
+                <DetailItem label="12th">{formatAcademic(profile, "twelfth")}</DetailItem>
+                <DetailItem label="Graduation">{formatGraduation(profile)}</DetailItem>
+                <DetailItem label="GATE Score">{profile.gateScore || candidate.gate || "N/A"}</DetailItem>
+              </div>
             </Section>
 
             <Section title="Verification Review">
-              <ChecklistItem label="Verification Status" status={candidate.verificationStatus === "ELIGIBLE" ? "success" : candidate.verificationStatus === "REVIEW" ? "warning" : "danger"} />
-              <DetailItem label="Verification Reason">
-                {candidate.verificationReason || "No verification issue found."}
-              </DetailItem>
-            </Section>
-
-            <Section title="Stage Progress">
-              <Progress stage={candidate.currentStage} />
+              <div className="space-y-3">
+                <ChecklistItem
+                  label="Verification Status"
+                  status={getVerificationChecklistStatus(candidate.verificationStatus)}
+                />
+                <DetailItem label="Verification Reason">
+                  {candidate.verificationReason || "No verification reason available."}
+                </DetailItem>
+                <DetailItem label="Verification Score">
+                  {candidate.verificationScore || 0}%
+                </DetailItem>
+              </div>
             </Section>
 
             <Section title="Evaluation Summary">
-              <DetailItem label="Technical Score">{candidate.technical || "-"}</DetailItem>
-              <DetailItem label="Personality Score">{candidate.personality || "-"}</DetailItem>
-              <DetailItem label="Current Status">{candidate.status}</DetailItem>
+              <div className="space-y-3">
+                <DetailItem label="Technical Test Status">
+                  {candidate.technicalTestStatus || "N/A"}
+                </DetailItem>
+                <DetailItem label="Technical Score">
+                  {getTechnicalScore(candidate)}
+                </DetailItem>
+                <DetailItem label="Personality Test Status">
+                  {candidate.personalityTestStatus || "N/A"}
+                </DetailItem>
+                <DetailItem label="Personality Score">
+                  {getPersonalityScore(candidate)}
+                </DetailItem>
+              </div>
             </Section>
 
             <Section title="Selector Notes">
-              <DetailItem label="Remarks">{candidate.remarks || "No remarks added yet."}</DetailItem>
+              <div className="space-y-3">
+                <DetailItem label="Selector Decision">
+                  {candidate.selectorDecision || "PENDING"}
+                </DetailItem>
+                <DetailItem label="Remarks">
+                  {candidate.selectorRemarks || candidate.finalRemarks || "No remarks added yet."}
+                </DetailItem>
+              </div>
+            </Section>
+
+            <Section title="Timeline">
+              <div className="space-y-3">
+                {timeline.length > 0 ? (
+                  timeline.map((item, index) => (
+                    <TimelineItem
+                      key={`${item.stage || "stage"}-${index}`}
+                      stage={item.stage}
+                      note={item.note}
+                      date={item.date}
+                    />
+                  ))
+                ) : (
+                  <DetailItem label="No timeline">
+                    No timeline updates available yet.
+                  </DetailItem>
+                )}
+              </div>
             </Section>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap justify-end gap-3">
             <Button variant="outline" onClick={() => navigate("/selector/candidates")}>
               Back to Candidates
             </Button>
 
-            <Button onClick={() => navigate(`/selector/evaluation/${candidate._id}`)}>
+            <Button
+              onClick={() => navigate(`/selector/evaluation/${candidate._id}`)}
+              disabled={!canEvaluate}
+            >
               Open Evaluation
             </Button>
           </div>
@@ -168,100 +340,224 @@ export default function SelectorCandidateDetail() {
   );
 }
 
+function PageShell({ children }) {
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Header />
+      <SelectorRibbon />
+      <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
+    </div>
+  );
+}
+
 function Section({ title, children }) {
   return (
     <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
-      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-        {title}
-      </h2>
+      <SectionHeader title={title} />
       <div className="space-y-4">{children}</div>
     </Card>
   );
 }
 
+function SectionHeader({ title, subtitle }) {
+  return (
+    <div className="mb-5 border-b border-gray-200 pb-3 dark:border-gray-700">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        {title}
+      </h2>
+      {subtitle && (
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function DetailGrid({ children }) {
+  return <div className="grid gap-3 sm:grid-cols-2">{children}</div>;
+}
+
 function InfoCard({ label, value }) {
   return (
-    <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
-      <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
-      <p className="mt-1 font-medium text-gray-900 dark:text-white">{value}</p>
+    <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
+      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+        {label}
+      </p>
+      <p className="mt-2 break-words text-sm font-semibold text-gray-900 dark:text-white">
+        {value || "N/A"}
+      </p>
     </div>
   );
 }
 
 function DetailItem({ label, children }) {
   return (
-    <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
-      <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
-      <div className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-        {children}
+    <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
+      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+        {label}
+      </p>
+      <div className="mt-2 break-words text-sm font-medium leading-6 text-gray-900 dark:text-white">
+        {children || "N/A"}
       </div>
     </div>
   );
 }
 
-function ScoreRow({ label, value, color = "blue" }) {
-  const colorMap = {
-    blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-    green: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-    purple: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
-    amber: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-  };
+function ScoreMetric({ label, value, note }) {
+  return (
+    <Card className="border border-gray-200/80 bg-gradient-to-br from-white to-gray-50 shadow-sm dark:border-gray-700/80 dark:from-gray-800 dark:to-gray-900">
+      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+        {label}
+      </p>
+      <h2 className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+        {value || "N/A"}
+      </h2>
+      <p className="mt-2 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+        {note || "N/A"}
+      </p>
+    </Card>
+  );
+}
 
+function ScoreRow({ label, value }) {
   return (
     <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 dark:bg-gray-900/40">
       <span className="text-sm text-gray-600 dark:text-gray-300">{label}</span>
-      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${colorMap[color]}`}>
-        {value}
+      <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+        {value || "N/A"}
       </span>
     </div>
   );
 }
 
-function ChecklistItem({ label, status = "success" }) {
+function ChecklistItem({ label, status = "warning" }) {
   const statusMap = {
-    success: "text-green-600 dark:text-green-400",
-    warning: "text-yellow-600 dark:text-yellow-400",
-    danger: "text-red-600 dark:text-red-400",
+    success:
+      "border-green-200 bg-green-50 text-green-700 dark:border-green-900/60 dark:bg-green-950/20 dark:text-green-300",
+    warning:
+      "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-900/60 dark:bg-yellow-950/20 dark:text-yellow-300",
+    danger:
+      "border-red-200 bg-red-50 text-red-700 dark:border-red-900/60 dark:bg-red-950/20 dark:text-red-300",
   };
 
   const statusText = {
-    success: "Passed ✔",
-    warning: "Pending Review",
+    success: "Passed",
+    warning: "Pending / Review",
     danger: "Failed",
   };
 
   return (
-    <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 dark:bg-gray-900/40">
-      <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
-      <span className={`text-sm font-semibold ${statusMap[status]}`}>
-        {statusText[status]}
-      </span>
+    <div
+      className={`flex items-center justify-between rounded-2xl border px-4 py-3 ${statusMap[status]}`}
+    >
+      <span className="text-sm font-medium">{label}</span>
+      <span className="text-sm font-semibold">{statusText[status]}</span>
     </div>
   );
 }
 
 function Progress({ stage }) {
-  const steps = [
-    "VERIFICATION_REVIEW",
-    "TECHNICAL",
-    "PERSONALITY",
-    "FINAL_REVIEW",
-  ];
-  const currentIndex = steps.indexOf(stage);
+  const currentIndex = workflowSteps.indexOf(stage);
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {steps.map((step, i) => (
-        <span
-          key={i}
-          className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${currentIndex >= i
-              ? "bg-green-600 text-white"
-              : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+    <div className="grid gap-3 md:grid-cols-6">
+      {workflowSteps.map((step, index) => {
+        const active = currentIndex >= index;
+
+        return (
+          <div
+            key={step}
+            className={`rounded-2xl border px-4 py-4 transition ${
+              active
+                ? "border-green-200 bg-green-50 dark:border-green-900/60 dark:bg-green-950/20"
+                : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40"
             }`}
-        >
-          {step.replaceAll("_", " ")}
-        </span>
-      ))}
+          >
+            <div
+              className={`mb-3 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
+                active
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-300"
+              }`}
+            >
+              {index + 1}
+            </div>
+            <p
+              className={`text-sm font-semibold ${
+                active
+                  ? "text-green-700 dark:text-green-300"
+                  : "text-gray-600 dark:text-gray-300"
+              }`}
+            >
+              {formatStage(step)}
+            </p>
+          </div>
+        );
+      })}
     </div>
   );
+}
+
+function TimelineItem({ stage, note, date }) {
+  return (
+    <div className="relative rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+            {formatStage(stage)}
+          </p>
+          <p className="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-300">
+            {note || "No note available."}
+          </p>
+        </div>
+        <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
+          {formatDate(date)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function getVerificationVariant(status) {
+  if (status === "ELIGIBLE") return "success";
+  if (status === "REVIEW" || status === "PENDING") return "warning";
+  if (status === "REJECTED") return "danger";
+  return "info";
+}
+
+function getVerificationChecklistStatus(status) {
+  if (status === "ELIGIBLE") return "success";
+  if (status === "REJECTED") return "danger";
+  return "warning";
+}
+
+function formatDate(value) {
+  if (!value) return "N/A";
+
+  return new Date(value).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function formatAcademic(profile, level) {
+  const board = profile?.[`${level}Board`];
+  const school = profile?.[`${level}School`];
+  const year = profile?.[`${level}Year`];
+  const percentage = profile?.[`${level}Percentage`];
+
+  const parts = [board, school, year, percentage ? `${percentage}%` : ""].filter(Boolean);
+  return parts.length ? parts.join(" • ") : "N/A";
+}
+
+function formatGraduation(profile) {
+  const degree = profile?.graduationDegree || profile?.qualification;
+  const specialization = profile?.specialization;
+  const institute = profile?.institute;
+  const percentage = profile?.graduationPercentage;
+
+  const parts = [degree, specialization, institute, percentage ? `${percentage}%` : ""].filter(Boolean);
+  return parts.length ? parts.join(" • ") : "N/A";
 }

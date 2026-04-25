@@ -52,6 +52,7 @@ import SelectorCandidates from "../../features/selector/pages/SelectorCandidates
 import SelectorCandidateDetail from "../../features/selector/pages/SelectorCandidateDetail";
 import SelectorEvaluation from "../../features/selector/pages/SelectorEvaluation";
 import SelectorAnalytics from "../../features/selector/pages/SelectorAnalytics";
+import SelectorEvaluationQueue from "../../features/selector/pages/SelectorEvaluationQueue";
 
 function AppRoutes() {
   return (
@@ -95,7 +96,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        
+
         <Route
           path="/admin/analytics"
           element={
@@ -246,6 +247,15 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/selector/evaluation"
+          element={
+            <ProtectedRoute allowedRoles={["selector"]}>
+              <SelectorEvaluationQueue />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/selector/evaluation/:id"
           element={

@@ -6,20 +6,29 @@ import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
 import { getSelectorCandidates } from "../services/selectorService";
+import {
+  formatStage,
+  getCandidateEmail,
+  getCandidateName,
+  getPersonalityScore,
+  getStageBadgeVariant,
+  getTechnicalScore,
+  getVacancyTitle,
+} from "../utils/selectorHelpers";
 
 export default function SelectorCandidates() {
   const navigate = useNavigate();
+
   const [search, setSearch] = useState("");
   const [vacancyFilter, setVacancyFilter] = useState("All");
   const [stageFilter, setStageFilter] = useState("All");
-
   const [applications, setApplications] = useState([]);
 
   useEffect(() => {
     const fetchCandidates = async () => {
       try {
         const res = await getSelectorCandidates();
-        setApplications(res.candidates);
+        setApplications(Array.isArray(res.candidates) ? res.candidates : []);
       } catch (err) {
         console.error(err);
       }
@@ -28,24 +37,31 @@ export default function SelectorCandidates() {
     fetchCandidates();
   }, []);
 
-  const vacancies = ["All", ...new Set(applications.map((item) => item.vacancy))];
+  const vacancies = [
+    "All",
+    ...new Set(applications.map((item) => getVacancyTitle(item)).filter(Boolean)),
+  ];
+
   const stages = [
     "All",
-    "VERIFICATION_REVIEW",
-    "VERIFICATION_REJECTED",
-    "TECHNICAL", // "TECHNICAL_TEST_ASSIGNED", BACKEND USES IT 
-    "PERSONALITY",//"PERSONALITY_TEST_ASSIGNED",
+    "APPLIED",
+    "VERIFICATION",
+    "TECHNICAL",
+    "PERSONALITY",
     "FINAL_REVIEW",
+    "COMPLETED",
   ];
 
   const filtered = useMemo(() => {
     return applications.filter((c) => {
+      const searchText = search.toLowerCase();
+
       const matchesSearch =
-        c.userId?.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.cid.toLowerCase().includes(search.toLowerCase());
+        getCandidateName(c).toLowerCase().includes(searchText) ||
+        (c.cid || c.applicationId || "").toLowerCase().includes(searchText);
 
       const matchesVacancy =
-        vacancyFilter === "All" ||c.vacancyId?.title === vacancyFilter;
+        vacancyFilter === "All" || getVacancyTitle(c) === vacancyFilter;
 
       const matchesStage =
         stageFilter === "All" || c.currentStage === stageFilter;
@@ -63,10 +79,10 @@ export default function SelectorCandidates() {
         <div className="space-y-6">
           <section>
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-              Candidate Evaluation Queue
+              Candidate Directory
             </h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Review applicants by vacancy, current stage, verification outcome, and decision readiness.
+              View all applicants, inspect profiles, and track recruitment stages.
             </p>
           </section>
 
@@ -85,9 +101,9 @@ export default function SelectorCandidates() {
                 value={vacancyFilter}
                 onChange={(e) => setVacancyFilter(e.target.value)}
               >
-                {vacancies.map((v) => (
-                  <option key={v} value={v}>
-                    {v}
+                {vacancies.map((v, index) => (
+                  <option key={v || `vacancy-${index}`} value={v}>
+                    {v || "Untitled Vacancy"}
                   </option>
                 ))}
               </select>
@@ -99,7 +115,7 @@ export default function SelectorCandidates() {
               >
                 {stages.map((stage) => (
                   <option key={stage} value={stage}>
-                    {stage === "All" ? "All Stages" : stage.replaceAll("_", " ")}
+                    {stage === "All" ? "All Stages" : formatStage(stage)}
                   </option>
                 ))}
               </select>
@@ -124,72 +140,59 @@ export default function SelectorCandidates() {
 
                 <tbody>
                   {filtered.length > 0 ? (
-                    filtered.map((c) => (
+                    filtered.map((c, index) => (
                       <tr
-                        key={c._id}
+                        key={c._id || c.cid || `candidate-${index}`}
                         className="border-t border-gray-100 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50"
                       >
                         <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {c.cid}
+                          {c.cid || c.applicationId || "N/A"}
                         </td>
 
                         <td className="px-4 py-4">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">
-                              {c.userId?.name}
-                            </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              {c.userId?.email}
-                            </p>
-                          </div>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {getCandidateName(c)}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {getCandidateEmail(c)}
+                          </p>
                         </td>
 
                         <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-300">
-                          {c.vacancy}
+                          {getVacancyTitle(c)}
                         </td>
 
                         <td className="px-4 py-4">
-                          <Badge variant="info">
-                            {c.currentStage.replaceAll("_", " ")}
+                          <Badge variant={getStageBadgeVariant(c.currentStage)}>
+                            {formatStage(c.currentStage)}
                           </Badge>
                         </td>
 
-                        <td className="px-4 py-4">
-                          <div className="space-y-1 text-sm">
-                            <p className="font-medium text-gray-900 dark:text-white">
-                              {c.verificationStatus}
-                            </p>
-                            <p className="text-gray-500 dark:text-gray-400">
-                              {c.verificationScore}%
-                            </p>
-                          </div>
+                        <td className="px-4 py-4 text-sm">
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {c.verificationStatus || "N/A"}
+                          </p>
+                          <p className="text-gray-500 dark:text-gray-400">
+                            {c.verificationScore || 0}%
+                          </p>
                         </td>
 
                         <td className="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-white">
-                          {c.technical || "-"}
+                          {getTechnicalScore(c)}
                         </td>
 
                         <td className="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-white">
-                          {c.personality || "-"}
+                          {getPersonalityScore(c)}
                         </td>
 
                         <td className="px-4 py-4">
-                          <div className="flex flex-wrap gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => navigate(`/selector/candidate/${c._id}`)}
-                            >
-                              View
-                            </Button>
-
-                            <Button
-                              size="sm"
-                              onClick={() => navigate(`/selector/evaluation/${c._id}`)}
-                            >
-                              Evaluate
-                            </Button>
-                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/selector/candidate/${c._id}`)}
+                          >
+                            View Profile
+                          </Button>
                         </td>
                       </tr>
                     ))

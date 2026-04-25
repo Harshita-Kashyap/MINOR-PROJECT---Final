@@ -1,32 +1,53 @@
 import Header from "../../landing/components/Header";
 import SelectorRibbon from "../components/SelectorRibbon";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useMemo, useEffect, useState } from "react";
 import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
-import { getSelectorCandidateById } from "../services/selectorService";
-import { submitEvaluation } from "../services/selectorService";
+import {
+  getSelectorCandidateById,
+  submitEvaluation,
+} from "../services/selectorService";
+import {
+  formatStage,
+  getCandidateName,
+  getCompositeScore,
+  getStageBadgeVariant,
+  getVacancyTitle,
+} from "../utils/selectorHelpers";
 
 export default function SelectorEvaluation() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [candidate, setCandidate] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [decision, setDecision] = useState("");
+  const [remarks, setRemarks] = useState("");
 
   useEffect(() => {
     const fetchCandidate = async () => {
       try {
+        setLoading(true);
+
+        if (!id || id === "1") {
+          setCandidate(null);
+          return;
+        }
+
         const res = await getSelectorCandidateById(id);
-        setCandidate(res.candidate);
-      } catch (err) {
-        console.error(err);
+        setCandidate(res.candidate || null);
+      } catch (error) {
+        console.error(error);
+        setCandidate(null);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCandidate();
   }, [id]);
-
-  const [decision, setDecision] = useState("");
-  const [remarks, setRemarks] = useState("");
 
   useEffect(() => {
     if (candidate) {
@@ -34,47 +55,70 @@ export default function SelectorEvaluation() {
     }
   }, [candidate]);
 
+  const total = useMemo(() => {
+    if (!candidate) return 0;
+    return getCompositeScore(candidate);
+  }, [candidate]);
+
+  const autoDecision = useMemo(() => {
+    if (!candidate) return "Awaiting Candidate";
+    if (candidate.currentStage !== "FINAL_REVIEW") {
+      return "Awaiting Stage Completion";
+    }
+
+    if (total >= 220) return "Recommended";
+    if (total >= 180) return "Hold";
+    return "Not Recommended";
+  }, [candidate, total]);
+
+  const stageReadyForDecision = candidate?.currentStage === "FINAL_REVIEW";
+
   const handleSubmit = async () => {
     try {
       await submitEvaluation({
         applicationId: id,
-        decision: decision.toUpperCase().replace(" ", "_"),
+        decision: decision.toUpperCase().replaceAll(" ", "_"),
         remarks,
       });
 
-      navigate("/selector/candidates");
+      navigate("/selector/evaluation");
     } catch (err) {
       console.error(err);
       alert("Error submitting evaluation");
     }
   };
 
-  if (!candidate) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-        <Header />
-        <SelectorRibbon />
-        <main className="mx-auto max-w-6xl px-4 py-6">
-          <Card>
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Candidate not found
-            </h1>
-          </Card>
-        </main>
-      </div>
+      <PageShell>
+        <Card>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Loading candidate...
+          </h1>
+        </Card>
+      </PageShell>
     );
   }
 
-  const total = Number(candidate.profileScore) + Number(candidate.technical) + Number(candidate.personality);
-
-  const autoDecision = useMemo(() => {
-    if (candidate.currentStage !== "FINAL_REVIEW") return "Awaiting Stage Completion";
-    if (total >= 220) return "Recommended";
-    if (total >= 180) return "Hold";
-    return "Not Recommended";
-  }, [candidate.currentStage, total]);
-
-  const stageReadyForDecision = candidate.currentStage === "FINAL_REVIEW";
+  if (!candidate) {
+    return (
+      <PageShell>
+        <Card>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Candidate not found
+          </h1>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            Invalid candidate ID: {id}
+          </p>
+          <div className="mt-4">
+            <Button onClick={() => navigate("/selector/evaluation")}>
+              Back to Evaluation Queue
+            </Button>
+          </div>
+        </Card>
+      </PageShell>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -89,33 +133,50 @@ export default function SelectorEvaluation() {
                 Candidate Evaluation
               </h1>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Candidate ID: {candidate.cid}
+                Candidate ID: {candidate.cid || candidate.applicationId || candidate._id}
               </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Badge variant="info">{candidate.currentStage.replaceAll("_", " ")}</Badge>
-              <Badge variant={candidate.verificationStatus === "ELIGIBLE" ? "success" : candidate.verificationStatus === "REVIEW" ? "warning" : "danger"}>
-                Verification: {candidate.verificationStatus}
+              <Badge variant={getStageBadgeVariant(candidate.currentStage)}>
+                {formatStage(candidate.currentStage)}
+              </Badge>
+              <Badge
+                variant={
+                  candidate.verificationStatus === "ELIGIBLE"
+                    ? "success"
+                    : candidate.verificationStatus === "REVIEW" ||
+                      candidate.verificationStatus === "PENDING"
+                    ? "warning"
+                    : "danger"
+                }
+              >
+                Verification: {candidate.verificationStatus || "N/A"}
               </Badge>
             </div>
           </section>
 
           <div className="grid gap-6 xl:grid-cols-12">
-            <Card className="xl:col-span-8 border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80 xl:col-span-8">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {candidate.name}
+                    {getCandidateName(candidate)}
                   </h2>
                   <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {candidate.vacancy}
+                    {getVacancyTitle(candidate)}
                   </p>
 
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Badge variant="info">Profile Score: {candidate.profileScore}</Badge>
-                    <Badge variant="warning">GATE: {candidate.gate}</Badge>
-                    <Badge variant="success">Verification: {candidate.verificationScore}%</Badge>
+                    <Badge variant="success">
+                      Verification: {candidate.verificationScore || 0}%
+                    </Badge>
+                    <Badge variant="info">
+                      Technical: {candidate.technicalScore ?? "-"}
+                    </Badge>
+                    <Badge variant="warning">
+                      Personality: {candidate.personalityScore ?? "-"}
+                    </Badge>
                   </div>
                 </div>
 
@@ -124,69 +185,26 @@ export default function SelectorEvaluation() {
                     Composite Score
                   </p>
                   <h2 className="mt-1 text-3xl font-bold text-blue-600 dark:text-blue-400">
-                    {total}
+                    {candidate.overallScore || total}
                   </h2>
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Profile + Technical + Personality
+                    Verification + Technical + Personality
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="xl:col-span-4 border border-gray-200/80 shadow-sm dark:border-gray-700/80">
+            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80 xl:col-span-4">
               <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                 System Recommendation
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Suggested final outcome based on verified profile and system-generated scores.
+                Suggested outcome based on backend scores and final review stage.
               </p>
               <div className="mt-4">
-                <span className={getDecisionBadge(autoDecision)}>{autoDecision}</span>
-              </div>
-            </Card>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
-              <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-                Score Summary
-              </h2>
-
-              <div className="space-y-4">
-                <InfoRow label="Profile Merit Score" value={candidate.profileScore} valueClass="text-blue-600 dark:text-blue-400" />
-                <InfoRow label="Technical Score" value={candidate.technical} valueClass="text-green-600 dark:text-green-400" />
-                <InfoRow label="Personality Score" value={candidate.personality} valueClass="text-purple-600 dark:text-purple-400" />
-                <InfoRow label="Overall Score" value={total} valueClass="text-blue-600 dark:text-blue-400" />
-              </div>
-            </Card>
-
-            <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
-              <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-                Verification Summary
-              </h2>
-
-              <div className="space-y-4">
-                <InfoRow
-                  label="Profile Status"
-                  value={candidate.verificationStatus}
-                  valueClass={
-                    candidate.verificationStatus === "ELIGIBLE"
-                      ? "text-green-600 dark:text-green-400"
-                      : candidate.verificationStatus === "REVIEW"
-                        ? "text-yellow-600 dark:text-yellow-400"
-                        : "text-red-600 dark:text-red-400"
-                  }
-                />
-                <InfoRow
-                  label="Verification Score"
-                  value={`${candidate.verificationScore}%`}
-                  valueClass="text-blue-600 dark:text-blue-400"
-                />
-                <InfoRow
-                  label="Reason / Remark"
-                  value={candidate.verificationReason || "No verification issue found"}
-                  valueClass="text-gray-800 dark:text-gray-200"
-                />
+                <span className={getDecisionBadge(autoDecision)}>
+                  {autoDecision}
+                </span>
               </div>
             </Card>
           </div>
@@ -198,13 +216,14 @@ export default function SelectorEvaluation() {
 
             {!stageReadyForDecision && (
               <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-gray-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-gray-200">
-                Final selector decision is available only when the candidate reaches the <span className="font-semibold">FINAL REVIEW</span> stage.
+                Final selector decision is available only when the candidate reaches{" "}
+                <span className="font-semibold">FINAL REVIEW</span>.
               </div>
             )}
 
             <div className="grid gap-4">
               <select
-                className="w-full rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
+                className="w-full rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
                 value={decision}
                 onChange={(e) => setDecision(e.target.value)}
                 disabled={!stageReadyForDecision}
@@ -213,17 +232,25 @@ export default function SelectorEvaluation() {
                 <option>Recommended</option>
                 <option>Not Recommended</option>
                 <option>Hold</option>
+                <option>Waitlisted</option>
               </select>
 
               <textarea
-                placeholder="Add selector remarks, decision justification, or observations..."
-                className="min-h-[140px] w-full rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-900"
+                placeholder="Add selector remarks..."
+                className="min-h-[140px] w-full rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
                 disabled={!stageReadyForDecision}
               />
 
-              <div className="flex justify-end">
+              <div className="flex flex-wrap justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/selector/evaluation")}
+                >
+                  Back to Queue
+                </Button>
+
                 <Button
                   onClick={handleSubmit}
                   disabled={!stageReadyForDecision || !decision}
@@ -239,11 +266,12 @@ export default function SelectorEvaluation() {
   );
 }
 
-function InfoRow({ label, value, valueClass = "" }) {
+function PageShell({ children }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-xl bg-gray-50 px-4 py-3 dark:bg-gray-900/40">
-      <span className="text-sm text-gray-600 dark:text-gray-300">{label}</span>
-      <span className={`text-sm font-semibold text-right ${valueClass}`}>{value}</span>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Header />
+      <SelectorRibbon />
+      <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
     </div>
   );
 }
