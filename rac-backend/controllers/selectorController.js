@@ -184,7 +184,6 @@ exports.submitSelectorEvaluation = async (req, res) => {
 
     const allowedDecisions = [
       "RECOMMENDED",
-      "REJECTED",
       "HOLD",
       "WAITLISTED",
       "NOT_RECOMMENDED",
@@ -194,7 +193,7 @@ exports.submitSelectorEvaluation = async (req, res) => {
       return res.status(400).json({
         success: false,
         message:
-          "Invalid decision. Allowed values: RECOMMENDED, REJECTED, HOLD, WAITLISTED, NOT_RECOMMENDED",
+          "Invalid decision. Allowed values: RECOMMENDED, HOLD, WAITLISTED, NOT_RECOMMENDED",
       });
     }
 

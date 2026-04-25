@@ -5,11 +5,25 @@ import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
 import { getSelectorCandidateById } from "../services/selectorService";
+import { useEffect, useState } from "react";
 
 export default function SelectorCandidateDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const candidate = getSelectorCandidateById(id);
+  const [candidate, setCandidate] = useState(null);
+
+  useEffect(() => {
+    const fetchCandidate = async () => {
+      try {
+        const res = await getSelectorCandidateById(id);
+        setCandidate(res.candidate);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchCandidate();
+  }, [id]);
 
   if (!candidate) {
     return (
@@ -53,8 +67,8 @@ export default function SelectorCandidateDetail() {
                   candidate.verificationStatus === "ELIGIBLE"
                     ? "success"
                     : candidate.verificationStatus === "REVIEW"
-                    ? "warning"
-                    : "danger"
+                      ? "warning"
+                      : "danger"
                 }
               >
                 Verification: {candidate.verificationStatus}
@@ -70,12 +84,12 @@ export default function SelectorCandidateDetail() {
               </h2>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <InfoCard label="Name" value={candidate.name} />
-                <InfoCard label="Email" value={candidate.email} />
-                <InfoCard label="Phone" value={candidate.phone} />
+                <InfoCard label="Name" value={candidate.userId?.name} />
+                <InfoCard label="Email" value={candidate.userId?.email} />
+                <InfoCard label="Phone" value={candidate.userId?.phone} />
                 <InfoCard label="Education" value={candidate.education} />
                 <InfoCard label="Experience" value={candidate.experience} />
-                <InfoCard label="Vacancy" value={candidate.vacancy} />
+                <InfoCard label="Vacancy" value={candidate.vacancyId?.title} />
               </div>
             </Card>
 
@@ -144,7 +158,7 @@ export default function SelectorCandidateDetail() {
               Back to Candidates
             </Button>
 
-            <Button onClick={() => navigate(`/selector/evaluation/${candidate.id}`)}>
+            <Button onClick={() => navigate(`/selector/evaluation/${candidate._id}`)}>
               Open Evaluation
             </Button>
           </div>
@@ -229,8 +243,8 @@ function ChecklistItem({ label, status = "success" }) {
 function Progress({ stage }) {
   const steps = [
     "VERIFICATION_REVIEW",
-    "TECHNICAL_TEST_ASSIGNED",
-    "PERSONALITY_TEST_ASSIGNED",
+    "TECHNICAL",
+    "PERSONALITY",
     "FINAL_REVIEW",
   ];
   const currentIndex = steps.indexOf(stage);
@@ -240,11 +254,10 @@ function Progress({ stage }) {
       {steps.map((step, i) => (
         <span
           key={i}
-          className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
-            currentIndex >= i
+          className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${currentIndex >= i
               ? "bg-green-600 text-white"
               : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
-          }`}
+            }`}
         >
           {step.replaceAll("_", " ")}
         </span>

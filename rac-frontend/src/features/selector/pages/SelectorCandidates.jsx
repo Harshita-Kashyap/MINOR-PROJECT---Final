@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../landing/components/Header";
 import SelectorRibbon from "../components/SelectorRibbon";
@@ -13,26 +13,39 @@ export default function SelectorCandidates() {
   const [vacancyFilter, setVacancyFilter] = useState("All");
   const [stageFilter, setStageFilter] = useState("All");
 
-  const applications = getSelectorCandidates();
+  const [applications, setApplications] = useState([]);
+
+  useEffect(() => {
+    const fetchCandidates = async () => {
+      try {
+        const res = await getSelectorCandidates();
+        setApplications(res.candidates);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchCandidates();
+  }, []);
 
   const vacancies = ["All", ...new Set(applications.map((item) => item.vacancy))];
   const stages = [
     "All",
     "VERIFICATION_REVIEW",
     "VERIFICATION_REJECTED",
-    "TECHNICAL_TEST_ASSIGNED",
-    "PERSONALITY_TEST_ASSIGNED",
+    "TECHNICAL", // "TECHNICAL_TEST_ASSIGNED", BACKEND USES IT 
+    "PERSONALITY",//"PERSONALITY_TEST_ASSIGNED",
     "FINAL_REVIEW",
   ];
 
   const filtered = useMemo(() => {
     return applications.filter((c) => {
       const matchesSearch =
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.userId?.name.toLowerCase().includes(search.toLowerCase()) ||
         c.cid.toLowerCase().includes(search.toLowerCase());
 
       const matchesVacancy =
-        vacancyFilter === "All" || c.vacancy === vacancyFilter;
+        vacancyFilter === "All" ||c.vacancyId?.title === vacancyFilter;
 
       const matchesStage =
         stageFilter === "All" || c.currentStage === stageFilter;
@@ -113,7 +126,7 @@ export default function SelectorCandidates() {
                   {filtered.length > 0 ? (
                     filtered.map((c) => (
                       <tr
-                        key={c.id}
+                        key={c._id}
                         className="border-t border-gray-100 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50"
                       >
                         <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
@@ -123,10 +136,10 @@ export default function SelectorCandidates() {
                         <td className="px-4 py-4">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
-                              {c.name}
+                              {c.userId?.name}
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                              {c.email}
+                              {c.userId?.email}
                             </p>
                           </div>
                         </td>
@@ -165,14 +178,14 @@ export default function SelectorCandidates() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => navigate(`/selector/candidate/${c.id}`)}
+                              onClick={() => navigate(`/selector/candidate/${c._id}`)}
                             >
                               View
                             </Button>
 
                             <Button
                               size="sm"
-                              onClick={() => navigate(`/selector/evaluation/${c.id}`)}
+                              onClick={() => navigate(`/selector/evaluation/${c._id}`)}
                             >
                               Evaluate
                             </Button>

@@ -1,6 +1,7 @@
 import Header from "../../landing/components/Header";
 import SelectorRibbon from "../components/SelectorRibbon";
 import useTheme from "../../../shared/hooks/useTheme";
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -16,10 +17,23 @@ import { getSelectorCandidates } from "../services/selectorService";
 
 export default function SelectorAnalytics() {
   const { dark } = useTheme();
-  const candidates = getSelectorCandidates();
+  const [candidates, setCandidates] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getSelectorCandidates();
+        setCandidates(res.candidates);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const data = candidates.map((c) => ({
-    name: c.name,
+    name: c.userId?.name || "Unknown",
     profile: c.profileScore || 0,
     technical: c.technical || 0,
     personality: c.personality || 0,
@@ -226,8 +240,8 @@ export default function SelectorAnalytics() {
                       <tr
                         key={index}
                         className={`border-b border-gray-100 transition dark:border-gray-700 ${index === 0
-                            ? "bg-green-50/80 dark:bg-green-900/20"
-                            : "hover:bg-gray-50 dark:hover:bg-gray-700/30"
+                          ? "bg-green-50/80 dark:bg-green-900/20"
+                          : "hover:bg-gray-50 dark:hover:bg-gray-700/30"
                           }`}
                       >
                         <td className="p-3 font-semibold text-gray-800 dark:text-white">
@@ -243,10 +257,10 @@ export default function SelectorAnalytics() {
                         <td className="p-3">
                           <div className="flex flex-col">
                             <span className="font-medium text-gray-800 dark:text-gray-100">
-                              {c.name}
+                              {c.userId?.name}
                             </span>
                             <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {c.vacancy}
+                              {c.vacancyId?.title}
                             </span>
                           </div>
                         </td>
@@ -371,7 +385,7 @@ function getStageColor(stage) {
       return "inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
     case "VERIFICATION_REJECTED":
       return "inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-300";
-    case "TECHNICAL_TEST_ASSIGNED":
+    case "TECHNICAL":
       return "inline-flex rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300";
     default:
       return "inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300";

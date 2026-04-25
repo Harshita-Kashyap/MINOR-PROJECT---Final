@@ -3,15 +3,37 @@ import SelectorRibbon from "../components/SelectorRibbon";
 import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
+  getSelectorDashboard,
   getSelectorCandidates,
-  getSelectorDashboardStats,
 } from "../services/selectorService";
 
 export default function SelectorDashboard() {
   const navigate = useNavigate();
-  const stats = getSelectorDashboardStats();
-  const candidates = getSelectorCandidates();
+  const [stats, setStats] = useState({
+    verificationReview: 0,
+    verificationRejected: 0,
+    technicalAssigned: 0,
+    finalReview: 0,
+  });
+  const [candidates, setCandidates] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const dashboard = await getSelectorDashboard();
+        const candidateRes = await getSelectorCandidates();
+
+        setStats(dashboard.stats);
+        setCandidates(candidateRes.candidates);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const stageBuckets = [
     {
@@ -215,9 +237,8 @@ function MetricCard({ title, value, description, tone }) {
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${
-        toneMap[tone || "default"]
-      }`}
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${toneMap[tone || "default"]
+        }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
       <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">

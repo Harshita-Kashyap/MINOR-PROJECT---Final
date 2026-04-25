@@ -1,18 +1,53 @@
 import Header from "../../landing/components/Header";
 import SelectorRibbon from "../components/SelectorRibbon";
 import { useParams } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
 import { getSelectorCandidateById } from "../services/selectorService";
+import { submitEvaluation } from "../services/selectorService";
 
 export default function SelectorEvaluation() {
   const { id } = useParams();
-  const candidate = getSelectorCandidateById(id);
+  const [candidate, setCandidate] = useState(null);
+
+  useEffect(() => {
+    const fetchCandidate = async () => {
+      try {
+        const res = await getSelectorCandidateById(id);
+        setCandidate(res.candidate);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchCandidate();
+  }, [id]);
 
   const [decision, setDecision] = useState("");
-  const [remarks, setRemarks] = useState(candidate?.remarks || "");
+  const [remarks, setRemarks] = useState("");
+
+  useEffect(() => {
+    if (candidate) {
+      setRemarks(candidate.selectorRemarks || "");
+    }
+  }, [candidate]);
+
+  const handleSubmit = async () => {
+    try {
+      await submitEvaluation({
+        applicationId: id,
+        decision: decision.toUpperCase().replace(" ", "_"),
+        remarks,
+      });
+
+      navigate("/selector/candidates");
+    } catch (err) {
+      console.error(err);
+      alert("Error submitting evaluation");
+    }
+  };
 
   if (!candidate) {
     return (
@@ -138,8 +173,8 @@ export default function SelectorEvaluation() {
                     candidate.verificationStatus === "ELIGIBLE"
                       ? "text-green-600 dark:text-green-400"
                       : candidate.verificationStatus === "REVIEW"
-                      ? "text-yellow-600 dark:text-yellow-400"
-                      : "text-red-600 dark:text-red-400"
+                        ? "text-yellow-600 dark:text-yellow-400"
+                        : "text-red-600 dark:text-red-400"
                   }
                 />
                 <InfoRow
@@ -189,7 +224,10 @@ export default function SelectorEvaluation() {
               />
 
               <div className="flex justify-end">
-                <Button disabled={!stageReadyForDecision || !decision}>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!stageReadyForDecision || !decision}
+                >
                   Submit Evaluation
                 </Button>
               </div>
