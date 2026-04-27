@@ -78,49 +78,81 @@ exports.apply = async (req, res) => {
   finalStatus: "NOT_DECIDED",
   finalRemarks: "",
 });
+    // ================= AUTO VERIFICATION =================
+    const clean = (str) => (str || "").toString().toLowerCase().trim();
 
+    const record = await VerificationRecord.findOne({
+      aadhaarNumber: clean(profile.govtIdNumber),
+    });
 
-// ================= AUTO VERIFICATION =================
+    let totalFields = 0;
+    let matchedFields = 0;
 
-try {
-      const clean = (str) =>
-        (str || "").toString().toLowerCase().trim();
+    const check = (a, b) => {
+      totalFields++;
+      if (clean(a) === clean(b)) matchedFields++;
+    };
 
-      const record = await VerificationRecord.findOne({
-        aadhaarNumber: clean(profile.govtIdNumber),
-      });
+    if (record) {
+      // BASIC
+      check(record.fullName, profile.fullName);
+      check(record.dob, profile.dob);
+      check(record.aadhaarNumber, profile.govtIdNumber);
 
-      let isMatch = false;
+      // 10th
+      check(record.tenth?.board, profile.tenthBoard);
+      check(record.tenth?.school, profile.tenthSchool);
+      check(record.tenth?.rollNumber, profile.tenthRollNumber);
+      check(record.tenth?.percentage, profile.tenthPercentage);
+      check(record.tenth?.year, profile.tenthYear);
 
-      if (record) {
-        isMatch =
-          clean(record.fullName) === clean(profile.fullName) &&
-          clean(record.dob) === clean(profile.dob) &&
-          clean(record.aadhaarNumber) === clean(profile.govtIdNumber) &&
-          clean(record.tenth?.rollNumber) === clean(profile.tenthRollNumber) &&
-          clean(record.twelfth?.rollNumber) === clean(profile.twelfthRollNumber) &&
-          clean(record.graduation?.degree) === clean(profile.graduationDegree) &&
-          clean(record.gate?.score) === clean(profile.gateScore);
-      }
+      // 12th
+      check(record.twelfth?.board, profile.twelfthBoard);
+      check(record.twelfth?.school, profile.twelfthSchool);
+      check(record.twelfth?.rollNumber, profile.twelfthRollNumber);
+      check(record.twelfth?.stream, profile.twelfthStream);
+      check(record.twelfth?.percentage, profile.twelfthPercentage);
+      check(record.twelfth?.year, profile.twelfthYear);
 
-      if (isMatch) {
-        application.verificationStatus = "ELIGIBLE";
-        application.currentStage = "TECHNICAL";
-        application.verificationReason = "Candidate verified as eligible.";
-        application.technicalTestStatus = "ASSIGNED";
-      } else {
-        application.verificationStatus = "REJECTED";
-        application.currentStage = "COMPLETED";
-        application.verificationReason =
-          "Data mismatch with verification record.";
-      }
+      // Graduation
+      check(record.graduation?.degree, profile.graduationDegree);
+      check(record.graduation?.discipline, profile.graduationDiscipline);
+      check(record.graduation?.specialization, profile.graduationSpecialization);
+      check(record.graduation?.institute, profile.graduationInstitute);
+      check(record.graduation?.university, profile.graduationUniversity);
+      check(record.graduation?.percentage, profile.graduationPercentage);
+      check(record.graduation?.year, profile.graduationYear);
 
-      await application.save();
-
-    } catch (err) {
-      console.error("AUTO VERIFICATION ERROR:", err);
+      // GATE
+      check(record.gate?.paper, profile.gatePaper);
+      check(record.gate?.score, profile.gateScore);
+      check(record.gate?.rank, profile.gateRank);
+      check(record.gate?.year, profile.gateYear);
     }
 
+    const matchPercent = totalFields
+      ? (matchedFields / totalFields) * 100
+      : 0;
+
+    // RESULT
+    if (matchPercent >= 75) {
+      application.verificationStatus = "ELIGIBLE";
+      application.currentStage = "TECHNICAL";
+      application.technicalTestStatus = "ASSIGNED";
+      application.verificationReason = `High match (${matchPercent.toFixed(1)}%)`;
+    } else if (matchPercent >= 50) {
+      application.verificationStatus = "REVIEW";
+      application.currentStage = "APPLIED";
+      application.verificationReason = `Needs review (${matchPercent.toFixed(1)}%)`;
+    } else {
+      application.verificationStatus = "REJECTED";
+      application.currentStage = "COMPLETED";
+      application.verificationReason = `Low match (${matchPercent.toFixed(1)}%)`;
+    }
+
+    await application.save();
+
+    // ✅ RETURN RESPONSE (MISSING BEFORE)
     return res.status(201).json({
       success: true,
       message: "Application submitted successfully",
