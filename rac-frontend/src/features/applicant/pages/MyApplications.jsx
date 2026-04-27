@@ -24,7 +24,7 @@ export default function MyApplications() {
     const fetchApplications = async () => {
       try {
         const data = await getApplicantApplications();
-        setApplications(data); // ✅ backend already returns array
+        setApplications(data);
       } catch (err) {
         console.error("Fetch Error:", err);
         alert(err.message || "Error fetching applications");
@@ -89,9 +89,17 @@ export default function MyApplications() {
                     {/* LEFT SIDE */}
                     <div className="flex-1">
 
-                      {/* STATUS */}
-                      <Badge variant="info">
-                        {app.currentStage || "APPLIED"}
+                      {/* VERIFICATION STATUS */}
+                      <Badge
+                        variant={
+                          app.verificationStatus === "ELIGIBLE"
+                            ? "success"
+                            : app.verificationStatus === "REJECTED"
+                            ? "danger"
+                            : "warning"
+                        }
+                      >
+                        {app.verificationStatus || "PENDING"}
                       </Badge>
 
                       {/* TITLE */}
@@ -102,6 +110,13 @@ export default function MyApplications() {
                       {/* DEPARTMENT */}
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {app.department}
+                      </p>
+
+                      {/* STATUS MESSAGE */}
+                      <p className="mt-2 text-sm font-medium">
+                        {app.verificationStatus === "PENDING" && "Waiting for verification"}
+                        {app.verificationStatus === "ELIGIBLE" && "You are eligible for technical test"}
+                        {app.verificationStatus === "REJECTED" && "Application rejected"}
                       </p>
 
                       {/* DATES */}
@@ -129,6 +144,17 @@ export default function MyApplications() {
 
                     {/* RIGHT SIDE */}
                     <div className="flex flex-col gap-2 lg:w-48">
+
+                      {/* TECHNICAL TEST BUTTON */}
+                      <Button
+                        disabled={app.verificationStatus !== "ELIGIBLE"}
+                        onClick={() =>
+                          navigate(`/applicant/technical-test/${app._id}`)
+                        }
+                      >
+                        Start Technical Test
+                      </Button>
+
                       <Button
                         variant="outline"
                         onClick={() => navigate("/applicant/vacancies")}
@@ -142,6 +168,7 @@ export default function MyApplications() {
                       >
                         Back to Dashboard
                       </Button>
+
                     </div>
 
                   </div>

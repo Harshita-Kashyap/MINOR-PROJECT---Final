@@ -193,12 +193,12 @@ function AppRoutes() {
           }
         />
         <Route
-          path="/applicant/technical-test"
-          element={
-            <ProtectedRoute allowedRoles={["applicant"]}>
-              <TechnicalTest />
-            </ProtectedRoute>
-          }
+         path="/applicant/technical-test/:id"
+         element={
+          <ProtectedRoute allowedRoles={["applicant"]}>
+            <TechnicalTest />
+          </ProtectedRoute>
+         }
         />
         <Route
           path="/applicant/personality-test"

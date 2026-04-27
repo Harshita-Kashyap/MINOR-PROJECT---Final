@@ -3,6 +3,7 @@
 const Application = require("../models/Application");
 const ApplicantProfile = require("../models/ApplicantProfile");
 const Vacancy = require("../models/Vacancy");
+const VerificationRecord = require("../models/VerificationRecord");
 
 // ================= APPLY =================
 exports.apply = async (req, res) => {
@@ -54,35 +55,78 @@ exports.apply = async (req, res) => {
     }
 
     // 4. create application
-    const application = await Application.create({
-      applicationId: `APP-${Date.now()}`,
-      userId,
-      profileId: profile._id,
-      vacancyId: vacancy._id,
-      vacancyTitle: vacancy.title,
-      department: vacancy.department,
-      appliedAt: new Date(),
+   let application = await Application.create({
+  applicationId: `APP-${Date.now()}`,
+  userId,
+  profileId: profile._id,
+  vacancyId: vacancy._id,
+  vacancyTitle: vacancy.title,
+  department: vacancy.department,
+  appliedAt: new Date(),
 
-      currentStage: "APPLIED",
-      verificationStatus: "PENDING",
+  currentStage: "APPLIED",
+  verificationStatus: "PENDING",
 
-      technicalTestStatus: "NOT_ASSIGNED",
-      technicalScore: null,
-      technicalRemarks: "",
+  technicalTestStatus: "NOT_ASSIGNED",
+  technicalScore: null,
+  technicalRemarks: "",
 
-      personalityTestStatus: "NOT_ASSIGNED",
-      personalityScore: null,
-      personalityRemarks: "",
+  personalityTestStatus: "NOT_ASSIGNED",
+  personalityScore: null,
+  personalityRemarks: "",
 
-      finalStatus: "NOT_DECIDED",
-      finalRemarks: "",
-    });
+  finalStatus: "NOT_DECIDED",
+  finalRemarks: "",
+});
+
+
+// ================= AUTO VERIFICATION =================
+
+try {
+      const clean = (str) =>
+        (str || "").toString().toLowerCase().trim();
+
+      const record = await VerificationRecord.findOne({
+        aadhaarNumber: clean(profile.govtIdNumber),
+      });
+
+      let isMatch = false;
+
+      if (record) {
+        isMatch =
+          clean(record.fullName) === clean(profile.fullName) &&
+          clean(record.dob) === clean(profile.dob) &&
+          clean(record.aadhaarNumber) === clean(profile.govtIdNumber) &&
+          clean(record.tenth?.rollNumber) === clean(profile.tenthRollNumber) &&
+          clean(record.twelfth?.rollNumber) === clean(profile.twelfthRollNumber) &&
+          clean(record.graduation?.degree) === clean(profile.graduationDegree) &&
+          clean(record.gate?.score) === clean(profile.gateScore);
+      }
+
+      if (isMatch) {
+        application.verificationStatus = "ELIGIBLE";
+        application.currentStage = "TECHNICAL";
+        application.verificationReason = "Candidate verified as eligible.";
+        application.technicalTestStatus = "ASSIGNED";
+      } else {
+        application.verificationStatus = "REJECTED";
+        application.currentStage = "COMPLETED";
+        application.verificationReason =
+          "Data mismatch with verification record.";
+      }
+
+      await application.save();
+
+    } catch (err) {
+      console.error("AUTO VERIFICATION ERROR:", err);
+    }
 
     return res.status(201).json({
       success: true,
       message: "Application submitted successfully",
       application,
     });
+
   } catch (err) {
     console.error("APPLY ERROR:", err);
 
