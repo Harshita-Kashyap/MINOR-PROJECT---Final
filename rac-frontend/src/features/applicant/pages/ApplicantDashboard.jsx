@@ -20,49 +20,50 @@ export default function ApplicantDashboard() {
   const [loading, setLoading] = useState(true);
 
   // 🚀 FETCH ALL DATA
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("token");
+ useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-        // 1️⃣ Profile
-        const profileRes = await fetch("http://localhost:5000/api/profile/me", {
+      // 1️⃣ PROFILE (FIXED URL)
+      const profileRes = await fetch("http://localhost:5000/api/profile/", {
+        headers: { Authorization: "Bearer " + token },
+      });
+      const profileData = await profileRes.json();
+
+      // 2️⃣ VACANCIES (FIXED PARSING)
+      const res = await fetch("http://localhost:5000/api/vacancies", {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
+      const vacancyData = await res.json();
+
+      // 3️⃣ APPLICATIONS
+      let appData = { applications: [] };
+      try {
+        const appRes = await fetch("http://localhost:5000/api/applications/my", {
           headers: { Authorization: "Bearer " + token },
         });
-        const profileData = await profileRes.json();
-
-        // 2️⃣ Vacancies
-       const res = await fetch("http://localhost:5000/api/vacancies", {
-  headers: {
-    Authorization: "Bearer " + localStorage.getItem("token"),
-  },
-});
-
-        // 3️⃣ Applications (if API ready)
-        let appData = { applications: [] };
-        try {
-          const appRes = await fetch("http://localhost:5000/api/applications/my", {
-            headers: { Authorization: "Bearer " + token },
-          });
-          appData = await appRes.json();
-        } catch {
-          console.warn("Applications API not ready yet");
-        }
-
-        setProfile(profileData.profile);
-        setVacancies(vacancyData);
-        setApplications(appData.applications || []);
-
-      } catch (err) {
-        console.error("Dashboard error:", err);
-      } finally {
-        setLoading(false);
+        appData = await appRes.json();
+      } catch {
+        console.warn("Applications API not ready yet");
       }
-    };
 
-    fetchData();
-  }, []);
+      // ✅ SAFE SET
+      setProfile(profileData?.profile || profileData);
+      setVacancies(vacancyData?.vacancies || vacancyData || []);
+      setApplications(appData?.applications || []);
 
+    } catch (err) {
+      console.error("Dashboard error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
   // 🧠 DERIVED DATA
   const applicantName = profile?.fullName || "Applicant";
   const profileComplete = profile?.profileStatus === "COMPLETE";
