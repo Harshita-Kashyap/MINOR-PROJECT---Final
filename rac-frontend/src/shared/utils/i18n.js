@@ -63,6 +63,95 @@ const enCommon = {
   grade: "Grade",
   levelInPayMatrix: "Level in Pay Matrix",
   initialPay: "Initial Pay in Pay Matrix ₹",
+  footerWebInfoTitle: "Web Information Manager",
+footerWebInfoDirector: "Director",
+footerWebInfoLine1: "Recruitment and Assessment Centre",
+footerWebInfoLine2: "Defence Research and Development Organisation",
+footerWebInfoLine3: "Ministry of Defence",
+footerWebInfoLine4: "Lucknow Road, Timarpur, Delhi (INDIA)",
+footerWebInfoLine5: "PIN - 110 054",
+footerWebInfoTel: "Tel: +91-11-23817833, 23810314, 23889507",
+footerWebInfoFax: "Fax: +91-11-23812690",
+
+footerAboutTitle: "About Us",
+footerAboutP1:
+  "RAC, the Recruitment and Assessment Centre of DRDO was set up on 23 July 1985 after getting exemption from the purview of Union Public Service Commission (UPSC). It is situated at Lucknow Road, Timarpur, Delhi. RAC has undertaken various recruitment programmes to induct scientists each year in variety of scientific and engineering disciplines relevant to DRDO Laboratories and assessed the suitability of DRDO scientists for promotion to next higher grade through duly constituted Assessment Boards/ Peer Committee.",
+footerAboutResp: "The primary responsibilities of RAC",
+footerAboutLi1:
+  "Recruitment of Scientists (Group 'A' Class I Gazetted Post) in DRDO",
+footerAboutLi2:
+  "Assessments of Scientists of DRDO for promotion to the next higher grades",
+footerAboutLi3:
+  "Selection of candidates for higher study course under Research & Training Scheme of DRDO and Post Graduate Training scheme of Army, Navy and Air Force",
+footerAboutLi4:
+  "Any other assignment specified by Secretary, Department of Defence R&D and Chairman, DRDO.",
+
+footerInterfaceTitle: "Interface Desk",
+footerInterfaceHeading: "Interface Desk 011-23889599, 011-23915134",
+footerDesignation: "Designation",
+footerTelEmail: "Tel - email",
+footerCorrespondence: "For any correspondence you may write to us at:",
+
+footerSitemapTitle: "Sitemap",
+
+footerHelpTitle: "Help",
+footerHelpIntro:
+  "This website includes some content that is available in non-HTML format e.g. PDF files. They might not be visible properly if your browser does not support or does not have the required plug-ins.",
+footerAccessibility: "Accessibility Statement",
+footerHelpP1:
+  "We are committed to ensure that RAC website is accessible to all users irrespective of device in use, technology or ability.",
+footerHelpP2:
+  "We have put in our best efforts to ensure that all information on this portal is accessible easily.",
+footerHelpP3:
+  "This portal is designed using HTML5 to meet Web Development Guidelines for Websites and also adheres to accessibility guidelines.",
+footerHelpP4:
+  "If you have any problem or suggestion regarding the accessibility of this portal, please contact us.",
+footerSearchFacility: "Using the Search Facility",
+footerSearchText:
+  "The Search facility is located at the top right hand corner of all the pages.",
+footerSitemapText:
+  "You can visit Sitemap page to get an overall view of the contents of this site.",
+footerFeedback: "Feedback/Suggestion",
+footerFeedbackText:
+  "You can use the Feedback form to submit your comments, feedback, suggestions and ideas for improvements.",
+footerFurtherHelp: "Do you need further help?",
+footerFurtherHelpText: "If you need further help, please contact us.",
+
+footerRefundTitle: "Refund and Cancellation",
+footerRefundText:
+  "Please note that no cancellations and refunds are entertained for any transactions done through RAC website.",
+
+footerDisclaimerTitle: "Disclaimer",
+footerDisclaimerP1:
+  "Content on this website is compiled by RAC and also maintained by RAC only. Though all efforts have been made to keep the content on this website accurate and up-to-date, the same should not be construed as a statement of law or used for any legal purposes.",
+footerDisclaimerP2:
+  "URL https://rac.gov.in is the official website of the Recruitment & Assessment Centre (RAC). Please be aware that unauthorized websites may mislead users while displaying https://rac.gov.in as a hyperlink that redirects to their own web pages.",
+
+footerPoliciesTitle: "Website Policies",
+footerPolicyCopyright:
+  "Contents of this website may not be reproduced partially or fully, without due permission from Director RAC.",
+footerPolicyCmap:
+  "RAC has a mechanism to ensure that the content has appropriate authorisation before being published to the website.",
+footerPolicyCap:
+  "Archival Management is provided to ensure that expired content is removed from the main website.",
+footerPolicyCrp:
+  "The web administrator and assigned personnel periodically review the content of the website.",
+footerPolicyHyper:
+  "Links to other websites are provided for convenience. RAC is not responsible for the content or reliability of linked websites.",
+footerPolicyPrivacy:
+  "This privacy policy sets out how RAC uses and protects information provided by users.",
+footerPolicyCollect:
+  "We may collect name, job title, age, educational qualification, category, experience and contact information.",
+footerPolicyGather:
+  "We require this information to understand your profile as required by vacant positions in DRDO.",
+footerPolicyTerms:
+  "The use of this website is subject to terms and conditions. Unauthorized use may give rise to a claim for damages.",
+footerPolicyMonitoring:
+  "The website will be monitored periodically to address quality and compatibility issues.",
+footerPolicyContingency:
+  "RAC endeavours to keep this website functional and running at all times.",
+footerPolicySecurity:
+  "All security issues related to the website will be addressed as per security guidelines.",
 };
 
 const enLanding = {
@@ -487,6 +576,94 @@ const hiCommon = {
   grade: "ग्रेड",
   levelInPayMatrix: "वेतन मैट्रिक्स स्तर",
   initialPay: "वेतन मैट्रिक्स में प्रारंभिक वेतन ₹",
+  footerWebInfoTitle: "वेब सूचना प्रबंधक",
+footerWebInfoDirector: "निदेशक",
+footerWebInfoLine1: "भर्ती एवं मूल्यांकन केंद्र",
+footerWebInfoLine2: "रक्षा अनुसंधान एवं विकास संगठन",
+footerWebInfoLine3: "रक्षा मंत्रालय",
+footerWebInfoLine4: "लखनऊ रोड, तिमारपुर, दिल्ली (भारत)",
+footerWebInfoLine5: "पिन - 110 054",
+footerWebInfoTel: "दूरभाष: +91-11-23817833, 23810314, 23889507",
+footerWebInfoFax: "फैक्स: +91-11-23812690",
+
+footerAboutTitle: "हमारे बारे में",
+footerAboutP1:
+  "RAC, DRDO का भर्ती एवं मूल्यांकन केंद्र, 23 जुलाई 1985 को UPSC के दायरे से छूट मिलने के बाद स्थापित किया गया। यह लखनऊ रोड, तिमारपुर, दिल्ली में स्थित है। RAC ने DRDO प्रयोगशालाओं से संबंधित विभिन्न वैज्ञानिक एवं अभियान्त्रिकी विषयों में प्रत्येक वर्ष वैज्ञानिकों की भर्ती तथा पदोन्नति मूल्यांकन से जुड़े कार्य किए हैं।",
+footerAboutResp: "RAC की मुख्य जिम्मेदारियाँ",
+footerAboutLi1: "DRDO में वैज्ञानिकों की भर्ती",
+footerAboutLi2:
+  "DRDO वैज्ञानिकों का उच्चतर पदों पर पदोन्नति हेतु मूल्यांकन",
+footerAboutLi3:
+  "DRDO और सशस्त्र बलों की उच्च अध्ययन योजनाओं हेतु अभ्यर्थियों का चयन",
+footerAboutLi4:
+  "सचिव, रक्षा अनुसंधान एवं विकास विभाग तथा अध्यक्ष DRDO द्वारा निर्दिष्ट अन्य कार्य।",
+
+footerInterfaceTitle: "इंटरफेस डेस्क",
+footerInterfaceHeading: "इंटरफेस डेस्क 011-23889599, 011-23915134",
+footerDesignation: "पदनाम",
+footerTelEmail: "दूरभाष - ईमेल",
+footerCorrespondence: "किसी भी पत्राचार हेतु आप हमें लिख सकते हैं:",
+
+footerSitemapTitle: "साइटमैप",
+
+footerHelpTitle: "सहायता",
+footerHelpIntro:
+  "इस वेबसाइट में कुछ सामग्री PDF जैसे गैर-HTML प्रारूप में उपलब्ध है। यदि आपके ब्राउज़र में आवश्यक प्लग-इन नहीं हैं, तो वे ठीक से दिखाई नहीं दे सकते।",
+footerAccessibility: "सुगम्यता वक्तव्य",
+footerHelpP1:
+  "हम यह सुनिश्चित करने के लिए प्रतिबद्ध हैं कि RAC वेबसाइट सभी उपयोगकर्ताओं के लिए सुलभ हो।",
+footerHelpP2:
+  "हमने सभी जानकारी को आसानी से उपलब्ध कराने का प्रयास किया है।",
+footerHelpP3:
+  "यह पोर्टल वेब विकास और सुगम्यता दिशानिर्देशों के अनुसार बनाया गया है।",
+footerHelpP4:
+  "यदि आपको कोई समस्या या सुझाव हो, तो कृपया हमसे संपर्क करें।",
+footerSearchFacility: "खोज सुविधा का उपयोग",
+footerSearchText:
+  "खोज सुविधा सभी पृष्ठों के ऊपरी दाईं ओर उपलब्ध है।",
+footerSitemapText:
+  "आप साइटमैप पृष्ठ पर जाकर इस साइट की सामग्री का अवलोकन कर सकते हैं।",
+footerFeedback: "प्रतिक्रिया/सुझाव",
+footerFeedbackText:
+  "आप अपने सुझाव, प्रतिक्रिया और सुधार संबंधी विचार भेज सकते हैं।",
+footerFurtherHelp: "क्या आपको और सहायता चाहिए?",
+footerFurtherHelpText: "यदि आपको और सहायता चाहिए, तो कृपया हमसे संपर्क करें।",
+
+footerRefundTitle: "धनवापसी और रद्दीकरण",
+footerRefundText:
+  "कृपया ध्यान दें कि RAC वेबसाइट के माध्यम से किए गए किसी भी लेनदेन के लिए कोई रद्दीकरण या धनवापसी स्वीकार नहीं की जाएगी।",
+
+footerDisclaimerTitle: "अस्वीकरण",
+footerDisclaimerP1:
+  "इस वेबसाइट की सामग्री RAC द्वारा संकलित और अनुरक्षित की जाती है। सामग्री को सही और अद्यतन रखने का प्रयास किया गया है, परंतु इसे विधिक कथन नहीं माना जाना चाहिए।",
+footerDisclaimerP2:
+  "URL https://rac.gov.in RAC की आधिकारिक वेबसाइट है। कृपया अनधिकृत वेबसाइटों से सावधान रहें।",
+
+footerPoliciesTitle: "वेबसाइट नीतियाँ",
+footerPolicyCopyright:
+  "इस वेबसाइट की सामग्री निदेशक RAC की अनुमति के बिना आंशिक या पूर्ण रूप से पुनः प्रस्तुत नहीं की जा सकती।",
+footerPolicyCmap:
+  "RAC यह सुनिश्चित करता है कि वेबसाइट पर प्रकाशित सामग्री उचित स्वीकृति के बाद ही प्रकाशित हो।",
+footerPolicyCap:
+  "पुरानी सामग्री को मुख्य वेबसाइट से हटाने हेतु अभिलेखीकरण व्यवस्था उपलब्ध है।",
+footerPolicyCrp:
+  "वेब प्रशासक वेबसाइट सामग्री की समय-समय पर समीक्षा करते हैं।",
+footerPolicyHyper:
+  "अन्य वेबसाइटों के लिंक सुविधा के लिए दिए गए हैं। RAC उनकी सामग्री के लिए जिम्मेदार नहीं है।",
+footerPolicyPrivacy:
+  "यह गोपनीयता नीति बताती है कि RAC उपयोगकर्ता की जानकारी का उपयोग और संरक्षण कैसे करता है।",
+footerPolicyCollect:
+  "हम नाम, पद, आयु, शैक्षणिक योग्यता, श्रेणी, अनुभव और संपर्क जानकारी एकत्र कर सकते हैं।",
+footerPolicyGather:
+  "यह जानकारी DRDO में रिक्त पदों के लिए प्रोफ़ाइल समझने हेतु आवश्यक होती है।",
+footerPolicyTerms:
+  "इस वेबसाइट का उपयोग नियमों और शर्तों के अधीन है।",
+footerPolicyMonitoring:
+  "वेबसाइट की गुणवत्ता और संगतता संबंधी समस्याओं के लिए समय-समय पर निगरानी की जाएगी।",
+footerPolicyContingency:
+  "RAC वेबसाइट को हर समय चालू रखने का प्रयास करता है।",
+footerPolicySecurity:
+  "वेबसाइट से संबंधित सुरक्षा समस्याओं का समाधान सुरक्षा दिशानिर्देशों के अनुसार किया जाएगा।",
 };
 
 const hiLanding = {

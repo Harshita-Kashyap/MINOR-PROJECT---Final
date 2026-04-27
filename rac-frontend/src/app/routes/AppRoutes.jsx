@@ -24,6 +24,7 @@ import FAQs from "../../features/landing/pages/FAQs";
 import Grahpatrika from "../../features/landing/pages/Grahpatrika";
 import CertificateFormats from "../../features/landing/pages/CertificateFormats";
 import PdfViewerPage from "../../features/landing/pages/PdfViewerPage";
+import FooterPage from "../../features/landing/pages/FooterPage";
 
 // ================= ADMIN PAGES =================
 import AdminDashboard from "../../features/admin/pages/AdminDashboard";
@@ -82,11 +83,19 @@ function AppRoutes() {
         <Route path="/certificate-formats" element={<CertificateFormats />} />
         <Route path="/certificate-formats/:pdfKey" element={<PdfViewerPage />} />
 
+        {/* ================= FOOTER ROUTES ================= */}
+        <Route path="/footer/archive" element={<FooterPage page="archive" />} />
+        <Route path="/footer/web-information-manager" element={<FooterPage page="web-information-manager" />} />
+        <Route path="/footer/footer-about-us" element={<FooterPage page="footer-about-us" />} />
+        <Route path="/footer/interface-desk" element={<FooterPage page="interface-desk" />} />
+        <Route path="/footer/sitemap" element={<FooterPage page="sitemap" />} />
+        <Route path="/footer/help" element={<FooterPage page="help" />} />
+        <Route path="/footer/refund-cancellation" element={<FooterPage page="refund-cancellation" />} />
+        <Route path="/footer/disclaimer" element={<FooterPage page="disclaimer" />} />
+        <Route path="/footer/website-policies" element={<FooterPage page="website-policies" />} />
+
         {/* ================= ADMIN ROUTES ================= */}
-        <Route
-          path="/admin"
-          element={<Navigate to="/admin/dashboard" replace />}
-        />
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 
         <Route
           path="/admin/dashboard"
@@ -105,6 +114,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/vacancies"
           element={
@@ -113,6 +123,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/create-vacancy"
           element={
@@ -121,6 +132,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/edit-vacancy/:id"
           element={
@@ -129,6 +141,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/applications"
           element={
@@ -137,6 +150,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/shortlisting"
           element={
@@ -145,6 +159,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/results"
           element={
@@ -155,10 +170,7 @@ function AppRoutes() {
         />
 
         {/* ================= APPLICANT ROUTES ================= */}
-        <Route
-          path="/applicant"
-          element={<Navigate to="/applicant/dashboard" replace />}
-        />
+        <Route path="/applicant" element={<Navigate to="/applicant/dashboard" replace />} />
 
         <Route
           path="/applicant/dashboard"
@@ -168,6 +180,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/applicant/vacancies"
           element={
@@ -176,6 +189,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/applicant/vacancies/:id"
           element={
@@ -184,6 +198,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/applicant/applications"
           element={
@@ -192,6 +207,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
          path="/applicant/technical-test/:id"
          element={
@@ -200,6 +216,7 @@ function AppRoutes() {
           </ProtectedRoute>
          }
         />
+
         <Route
           path="/applicant/personality-test"
           element={
@@ -208,6 +225,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/applicant/profile"
           element={
@@ -218,10 +236,7 @@ function AppRoutes() {
         />
 
         {/* ================= SELECTOR ROUTES ================= */}
-        <Route
-          path="/selector"
-          element={<Navigate to="/selector/dashboard" replace />}
-        />
+        <Route path="/selector" element={<Navigate to="/selector/dashboard" replace />} />
 
         <Route
           path="/selector/dashboard"
@@ -231,6 +246,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/selector/candidates"
           element={
@@ -239,6 +255,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/selector/candidate/:id"
           element={
@@ -247,6 +264,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/selector/evaluation"
           element={
@@ -264,6 +282,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/selector/analytics"
           element={
