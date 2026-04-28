@@ -3,9 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
-import { applyToVacancy } from "../services/applicantService";
 
-export default function VacancyCard({ vacancy, appliedVacancies }) {
+export default function VacancyCard({ vacancy, appliedVacancies, onApply }) {
   const navigate = useNavigate();
 
   const [applied, setApplied] = useState(false);
@@ -18,9 +17,7 @@ export default function VacancyCard({ vacancy, appliedVacancies }) {
 
   // ✅ IMPORTANT: set applied from backend
   useEffect(() => {
-    if (appliedVacancies?.includes(vacancy._id)) {
-      setApplied(true);
-    }
+    setApplied(appliedVacancies?.includes(vacancy._id));
   }, [appliedVacancies, vacancy._id]);
 
   const handleApply = async () => {
@@ -31,9 +28,8 @@ export default function VacancyCard({ vacancy, appliedVacancies }) {
     }
 
     try {
-      await applyToVacancy(vacancy._id);
-      setApplied(true); // instant UI update
-      alert("Applied Successfully");
+      await onApply();
+      setApplied(true);
     } catch (err) {
       alert(err.message || "Error applying");
     }

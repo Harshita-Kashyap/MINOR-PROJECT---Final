@@ -31,15 +31,13 @@ export const deleteVacancy = (id) =>
 
 // Activate / Deactivate vacancy
 export const toggleVacancyStatus = (id, status) =>
-  API.put(`/api/vacancies/${id}/status`, { status });
+  API.put(`/api/vacancies/status/${id}`, { status });
 
-// Publish vacancy
 export const publishVacancy = (id) =>
-  API.put(`/api/vacancies/${id}/publish`);
+  API.put(`/api/vacancies/publish/${id}`);
 
-// Close vacancy
 export const closeVacancy = (id) =>
-  API.put(`/api/vacancies/${id}/close`);
+  API.put(`/api/vacancies/close/${id}`);
 
 
 /* ===============================

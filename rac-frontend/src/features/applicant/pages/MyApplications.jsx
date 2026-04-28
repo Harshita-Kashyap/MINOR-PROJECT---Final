@@ -114,10 +114,27 @@ export default function MyApplications() {
 
                       {/* STATUS MESSAGE */}
                       <p className="mt-2 text-sm font-medium">
-                        {app.verificationStatus === "PENDING" && "Waiting for verification"}
-                        {app.verificationStatus === "ELIGIBLE" && "You are eligible for technical test"}
-                        {app.verificationStatus === "REJECTED" && "Application rejected"}
+                        {app.currentStage === "VERIFICATION_PENDING" &&
+                          "Your profile is being verified."}
+
+                        {app.currentStage === "VERIFICATION_ELIGIBLE" &&
+                          "You are eligible. Technical test will be assigned after the vacancy deadline."}
+
+                        {app.currentStage === "VERIFICATION_REVIEW" &&
+                          "Your application needs manual review."}
+
+                        {app.currentStage === "VERIFICATION_REJECTED" &&
+                          "Your application was rejected during eligibility verification."}
+
+                        {app.currentStage === "TECHNICAL_TEST_ASSIGNED" &&
+                          "Technical test has been assigned."}
                       </p>
+
+                      {app.verificationReason && (
+                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                          <strong>Reason:</strong> {app.verificationReason}
+                        </p>
+                      )}
 
                       {/* DATES */}
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -147,12 +164,12 @@ export default function MyApplications() {
 
                       {/* TECHNICAL TEST BUTTON */}
                       <Button
-                        disabled={app.verificationStatus !== "ELIGIBLE"}
-                        onClick={() =>
-                          navigate(`/applicant/technical-test/${app._id}`)
-                        }
+                        disabled={app.currentStage !== "TECHNICAL_TEST_ASSIGNED"}
+                        onClick={() => navigate(`/applicant/technical-test/${app._id}`)}
                       >
-                        Start Technical Test
+                        {app.currentStage === "TECHNICAL_TEST_ASSIGNED"
+                          ? "Start Technical Test"
+                          : "Test Not Assigned"}
                       </Button>
 
                       <Button

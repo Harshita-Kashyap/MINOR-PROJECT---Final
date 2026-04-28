@@ -53,7 +53,7 @@ export default function ApplicationStatusCard({ application }) {
             Last Updated
           </p>
           <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
-            {formatDate(application.lastUpdatedAt)}
+            {formatDate(application.updatedAt)}
           </p>
         </div>
       </div>

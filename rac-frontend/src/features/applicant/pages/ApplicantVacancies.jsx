@@ -27,7 +27,10 @@ export default function ApplicantVacancies() {
 
         // 🔥 NEW (IMPORTANT)
         const apps = await getApplicantApplications();
-        const appliedIds = apps.map(app => app.vacancyId);
+        const appliedIds = apps.map((app) =>
+          typeof app.vacancyId === "object" ? app.vacancyId._id : app.vacancyId
+        );
+
         setAppliedVacancies(appliedIds);
 
       } catch (err) {
@@ -44,6 +47,7 @@ export default function ApplicantVacancies() {
   const handleApply = async (id) => {
     try {
       await applyToVacancy(id);
+      setAppliedVacancies((prev) => [...prev, id]);
       alert("Applied Successfully ✅");
     } catch (err) {
       alert(err.message || "Error applying");

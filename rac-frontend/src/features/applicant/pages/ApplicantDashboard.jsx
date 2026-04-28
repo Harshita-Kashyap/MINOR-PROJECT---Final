@@ -8,8 +8,13 @@ import ApplicationStatusCard from "../components/ApplicationStatusCard";
 import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
+import { getStageLabel } from "../utils/applicantHelpers";
 
-import { getVacancies } from "../services/vacancyService";
+import {
+  getApplicantApplications,
+  getApplicantProfile,
+  applyToVacancy,
+} from "../services/applicantService";
 
 export default function ApplicantDashboard() {
   const navigate = useNavigate();
@@ -20,62 +25,56 @@ export default function ApplicantDashboard() {
   const [loading, setLoading] = useState(true);
 
   // 🚀 FETCH ALL DATA
- useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      // 1️⃣ PROFILE (FIXED URL)
-      const profileRes = await fetch("http://localhost:5000/api/profile/", {
-        headers: { Authorization: "Bearer " + token },
-      });
-      const profileData = await profileRes.json();
-
-      // 2️⃣ VACANCIES (FIXED PARSING)
-      const res = await fetch("http://localhost:5000/api/vacancies", {
-        headers: {
-          Authorization: "Bearer " + token,
-        },
-      });
-      const vacancyData = await res.json();
-
-      // 3️⃣ APPLICATIONS
-      let appData = { applications: [] };
+  useEffect(() => {
+    const fetchData = async () => {
       try {
-        const appRes = await fetch("http://localhost:5000/api/applications/my", {
-          headers: { Authorization: "Bearer " + token },
-        });
-        appData = await appRes.json();
-      } catch {
-        console.warn("Applications API not ready yet");
+        const [profileData, vacancyRes, applicationsData] = await Promise.all([
+          getApplicantProfile(),
+          fetch("http://localhost:5000/api/vacancies").then((res) => res.json()),
+          getApplicantApplications(),
+        ]);
+
+        setProfile(profileData?.profile || null);
+        setVacancies(vacancyRes?.vacancies || []);
+        setApplications(applicationsData || []);
+      } catch (err) {
+        console.error("Dashboard error:", err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // ✅ SAFE SET
-      setProfile(profileData?.profile || profileData);
-      setVacancies(vacancyData?.vacancies || vacancyData || []);
-      setApplications(appData?.applications || []);
-
-    } catch (err) {
-      console.error("Dashboard error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
   // 🧠 DERIVED DATA
   const applicantName = profile?.fullName || "Applicant";
   const profileComplete = profile?.profileStatus === "COMPLETE";
 
+  const pendingActions = applications.filter((app) =>
+    [
+      "VERIFICATION_REVIEW",
+      "TECHNICAL_TEST_ASSIGNED",
+      "PERSONALITY_TEST_ASSIGNED",
+      "FINAL_REVIEW",
+    ].includes(app.currentStage)
+  ).length;
+
+  const finalResults = applications.filter((app) =>
+    ["SELECTED", "WAITLISTED", "FINAL_REJECTED"].includes(app.currentStage)
+  ).length;
+
   const stats = [
     { title: "Open Vacancies", value: vacancies.length, tone: "info" },
     { title: "Applications Submitted", value: applications.length, tone: "default" },
-    { title: "Pending Actions", value: 0, tone: "warning" },
-    { title: "Final Results", value: 0, tone: "success" },
+    { title: "Pending Actions", value: pendingActions, tone: "warning" },
+    { title: "Final Results", value: finalResults, tone: "success" },
   ];
 
   const latestApplication = applications[0];
+
+  const appliedVacancyIds = applications.map((app) =>
+    typeof app.vacancyId === "object" ? app.vacancyId._id : app.vacancyId
+  );
 
   const quickActions = useMemo(() => {
     const actions = [];
@@ -108,7 +107,7 @@ export default function ApplicantDashboard() {
 
     return actions;
   }, [profileComplete, navigate]);
-  
+
   // 🔄 LOADING STATE
   if (loading) {
     return <p className="text-center mt-10">Loading dashboard...</p>;
@@ -137,10 +136,23 @@ export default function ApplicantDashboard() {
                 {profileComplete ? "Profile Ready" : "Profile Incomplete"}
               </Badge>
             </div>
+
+            {latestApplication && (
+              <div className="mt-4 rounded-2xl bg-white/10 p-4">
+                <p className="text-sm text-blue-100">Current Application</p>
+                <h2 className="mt-1 text-lg font-semibold text-white">
+                  {latestApplication.vacancyTitle}
+                </h2>
+                <p className="mt-1 text-sm text-blue-100">
+                  Stage: {getStageLabel(latestApplication.currentStage)}
+                </p>
+              </div>
+            )}
           </section>
 
           {/* STATS */}
           <ApplicantStats stats={stats} />
+
 
           {/* QUICK ACTIONS */}
           <section className="grid gap-4 md:grid-cols-3">
@@ -169,7 +181,15 @@ export default function ApplicantDashboard() {
                 <p>No vacancies available</p>
               ) : (
                 vacancies.slice(0, 4).map((v) => (
-                  <VacancyCard key={v._id} vacancy={v} />
+                  <VacancyCard
+                    key={v._id}
+                    vacancy={v}
+                    appliedVacancies={appliedVacancyIds}
+                    onApply={async () => {
+                      const data = await applyToVacancy(v._id);
+                      setApplications((prev) => [data.application, ...prev]);
+                    }}
+                  />
                 ))
               )}
             </div>

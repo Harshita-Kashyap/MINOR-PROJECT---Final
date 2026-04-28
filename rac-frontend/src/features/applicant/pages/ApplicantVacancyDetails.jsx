@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../landing/components/Header";
 import ApplicantRibbon from "../components/ApplicantRibbon";
@@ -7,44 +7,61 @@ import Button from "../../../shared/components/ui/Button";
 import Badge from "../../../shared/components/ui/Badge";
 
 import { getVacancyById } from "../services/vacancyService";
-import { applyToVacancy } from "../services/applicantService";
+import {
+  applyToVacancy,
+  getApplicantApplications,
+  getApplicantProfile,
+} from "../services/applicantService";
+
+function formatDate(dateValue) {
+  if (!dateValue) return "N/A";
+
+  return new Date(dateValue).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getVacancyIdFromApplication(app) {
+  if (!app?.vacancyId) return null;
+  return typeof app.vacancyId === "object" ? app.vacancyId._id : app.vacancyId;
+}
 
 export default function ApplicantVacancyDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [vacancy, setVacancy] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [applied, setApplied] = useState(false);
+  const [applications, setApplications] = useState([]);
   const [profileComplete, setProfileComplete] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [applying, setApplying] = useState(false);
 
-  // 🚀 FETCH DATA
+  const existingApplication = useMemo(() => {
+    return applications.find((app) => getVacancyIdFromApplication(app) === id);
+  }, [applications, id]);
+
+  const applied = Boolean(existingApplication);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const [vacancyData, profileData, applicationsData] = await Promise.all([
+          getVacancyById(id),
+          getApplicantProfile(),
+          getApplicantApplications(),
+        ]);
 
-        // 1️⃣ Vacancy
-        const vacancyData = await getVacancyById(id);
         setVacancy(vacancyData);
+        setApplications(applicationsData || []);
 
-        // 2️⃣ Profile
-        const res = await fetch("http://localhost:5000/api/profile/me", {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-          setProfileComplete(
-            data.profile?.profileStatus === "COMPLETE"
-          );
-        }
-
+        setProfileComplete(
+          profileData?.profile?.profileStatus === "COMPLETE"
+        );
       } catch (err) {
         console.error("Error:", err);
+        alert(err.message || "Error loading vacancy details");
       } finally {
         setLoading(false);
       }
@@ -53,7 +70,6 @@ export default function ApplicantVacancyDetails() {
     fetchData();
   }, [id]);
 
-  // 🚀 APPLY
   const handleApply = async () => {
     if (!profileComplete) {
       alert("Please complete your profile first");
@@ -61,23 +77,61 @@ export default function ApplicantVacancyDetails() {
       return;
     }
 
+    if (vacancy?.status !== "OPEN") {
+      alert("This vacancy is not open for applications");
+      return;
+    }
+
     try {
-      await applyToVacancy(id);
+      setApplying(true);
+
+      const data = await applyToVacancy(id);
+
+      setApplications((prev) => [data.application, ...prev]);
+
       alert("Applied Successfully ✅");
-      setApplied(true);
     } catch (err) {
       alert(err.message || "Error applying");
+    } finally {
+      setApplying(false);
     }
   };
 
-  // 🔄 LOADING
   if (loading) {
-    return <h2 className="text-center mt-10">Loading...</h2>;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+        <Header />
+        <ApplicantRibbon />
+        <main className="mx-auto max-w-5xl px-4 py-10">
+          <Card>
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              Loading vacancy details...
+            </p>
+          </Card>
+        </main>
+      </div>
+    );
   }
 
-  // ❌ NOT FOUND
   if (!vacancy) {
-    return <h2 className="text-center mt-10">Vacancy not found</h2>;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+        <Header />
+        <ApplicantRibbon />
+        <main className="mx-auto max-w-5xl px-4 py-10">
+          <Card className="text-center">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Vacancy not found
+            </h2>
+            <div className="mt-5">
+              <Button onClick={() => navigate("/applicant/vacancies")}>
+                Back to Vacancies
+              </Button>
+            </div>
+          </Card>
+        </main>
+      </div>
+    );
   }
 
   return (
@@ -87,66 +141,171 @@ export default function ApplicantVacancyDetails() {
 
       <main className="mx-auto max-w-5xl px-4 py-6">
         <div className="space-y-6">
-
-          {/* 🧾 MAIN CARD */}
           <Card>
-            <div className="flex justify-between items-start">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h1 className="text-2xl font-bold">{vacancy.title}</h1>
-                <p className="text-gray-500">{vacancy.department}</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {vacancy.title}
+                </h1>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  {vacancy.department}
+                </p>
               </div>
 
-              <Badge>{vacancy.status}</Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant={vacancy.status === "OPEN" ? "success" : "warning"}>
+                  {vacancy.status}
+                </Badge>
+
+                {applied && (
+                  <Badge variant="info">
+                    Applied
+                  </Badge>
+                )}
+              </div>
             </div>
 
-            {/* DETAILS */}
-            <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-              <p><b>Location:</b> {vacancy.location}</p>
-              <p><b>Mode:</b> {vacancy.mode}</p>
-              <p>
-                <b>Deadline:</b>{" "}
-                {vacancy.deadline
-                  ? new Date(vacancy.deadline).toDateString()
-                  : "N/A"}
+            <div className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
+              <p className="text-gray-700 dark:text-gray-300">
+                <b>Location:</b> {vacancy.location || "N/A"}
               </p>
-              <p><b>Experience:</b> {vacancy.experience}</p>
-              <p><b>Eligibility:</b> {vacancy.eligibility}</p>
+
+              <p className="text-gray-700 dark:text-gray-300">
+                <b>Mode:</b> {vacancy.mode || "N/A"}
+              </p>
+
+              <p className="text-gray-700 dark:text-gray-300">
+                <b>Deadline:</b> {formatDate(vacancy.deadline)}
+              </p>
+
+              <p className="text-gray-700 dark:text-gray-300">
+                <b>Total Posts:</b> {vacancy.totalPosts ?? "N/A"}
+              </p>
+
+              <p className="text-gray-700 dark:text-gray-300">
+                <b>Advertisement No:</b> {vacancy.advertisementNo || "N/A"}
+              </p>
+
+              <p className="text-gray-700 dark:text-gray-300">
+                <b>Experience:</b> {vacancy.experience || "N/A"}
+              </p>
             </div>
           </Card>
 
-          {/* DESCRIPTION */}
           <Card>
-            <h2 className="font-semibold mb-2">Description</h2>
-            <p className="text-gray-600">{vacancy.description}</p>
+            <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              Eligibility
+            </h2>
+            <p className="leading-7 text-gray-600 dark:text-gray-300">
+              {vacancy.eligibility || "Eligibility details not provided."}
+            </p>
+
+            <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+              <p className="text-gray-700 dark:text-gray-300">
+                <b>Discipline:</b> {vacancy.discipline || "N/A"}
+              </p>
+
+              <p className="text-gray-700 dark:text-gray-300">
+                <b>Exam Required:</b> {vacancy.examTypeRequired || "N/A"}
+              </p>
+
+              <p className="text-gray-700 dark:text-gray-300">
+                <b>Min Graduation %:</b>{" "}
+                {vacancy.minGraduationPercentage ?? "N/A"}
+              </p>
+
+              <p className="text-gray-700 dark:text-gray-300">
+                <b>Min GATE Score:</b> {vacancy.minGateScore ?? "N/A"}
+              </p>
+            </div>
           </Card>
 
-          {/* PROFILE WARNING */}
-          {!profileComplete && (
+          <Card>
+            <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              Description
+            </h2>
+            <p className="leading-7 text-gray-600 dark:text-gray-300">
+              {vacancy.description || "No description available."}
+            </p>
+          </Card>
+
+          {existingApplication && (
             <Card>
-              <p className="text-red-500">
-                ⚠ Please complete your profile before applying
+              <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                Your Application Status
+              </h2>
+
+              <div className="flex flex-wrap gap-2">
+                <Badge
+                  variant={
+                    existingApplication.verificationStatus === "ELIGIBLE"
+                      ? "success"
+                      : existingApplication.verificationStatus === "REJECTED"
+                      ? "danger"
+                      : "warning"
+                  }
+                >
+                  {existingApplication.verificationStatus}
+                </Badge>
+
+                <Badge variant="info">
+                  {existingApplication.currentStage}
+                </Badge>
+              </div>
+
+              {existingApplication.verificationReason && (
+                <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+                  <b>Reason:</b> {existingApplication.verificationReason}
+                </p>
+              )}
+            </Card>
+          )}
+
+          {!profileComplete && !applied && (
+            <Card>
+              <p className="text-sm font-medium text-red-600 dark:text-red-400">
+                ⚠ Please complete your profile before applying.
               </p>
             </Card>
           )}
 
-          {/* ACTION BUTTONS */}
-          <div className="flex gap-3">
-            <Button onClick={() => navigate("/applicant/vacancies")}>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/applicant/vacancies")}
+            >
               Back
             </Button>
 
             <Button
               onClick={handleApply}
-              disabled={applied}
+              disabled={
+                applied ||
+                applying ||
+                !profileComplete ||
+                vacancy.status !== "OPEN"
+              }
             >
               {applied
                 ? "Applied"
-                : profileComplete
-                ? "Apply Now"
-                : "Complete Profile First"}
+                : applying
+                ? "Applying..."
+                : !profileComplete
+                ? "Complete Profile First"
+                : vacancy.status !== "OPEN"
+                ? "Vacancy Closed"
+                : "Apply Now"}
             </Button>
-          </div>
 
+            {applied && (
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/applicant/applications")}
+              >
+                View My Application
+              </Button>
+            )}
+          </div>
         </div>
       </main>
     </div>

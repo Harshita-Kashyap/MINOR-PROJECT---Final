@@ -56,28 +56,40 @@ exports.apply = async (req, res) => {
 
     // 4. create application
    let application = await Application.create({
-  applicationId: `APP-${Date.now()}`,
-  userId,
-  profileId: profile._id,
-  vacancyId: vacancy._id,
-  vacancyTitle: vacancy.title,
-  department: vacancy.department,
-  appliedAt: new Date(),
+    applicationId: `APP-${Date.now()}`,
+    userId,
+    profileId: profile._id,
+    vacancyId: vacancy._id,
+    vacancyTitle: vacancy.title,
+    department: vacancy.department,
+    appliedAt: new Date(),
 
-  currentStage: "APPLIED",
-  verificationStatus: "PENDING",
+    currentStage: "VERIFICATION_PENDING",
+    verificationStatus: "PENDING",
+    timeline: [
+      {
+        stage: "APPLIED",
+        note: "Application submitted successfully.",
+        date: new Date(),
+      },
+      {
+        stage: "VERIFICATION_PENDING",
+        note: "Profile verification started automatically.",
+        date: new Date(),
+      },
+    ],
 
-  technicalTestStatus: "NOT_ASSIGNED",
-  technicalScore: null,
-  technicalRemarks: "",
+    technicalTestStatus: "NOT_ASSIGNED",
+    technicalScore: null,
+    technicalRemarks: "",
 
-  personalityTestStatus: "NOT_ASSIGNED",
-  personalityScore: null,
-  personalityRemarks: "",
+    personalityTestStatus: "NOT_ASSIGNED",
+    personalityScore: null,
+    personalityRemarks: "",
 
-  finalStatus: "NOT_DECIDED",
-  finalRemarks: "",
-});
+    finalStatus: "NOT_DECIDED",
+    finalRemarks: "",
+  });
     // ================= AUTO VERIFICATION =================
     const clean = (str) => (str || "").toString().toLowerCase().trim();
 
@@ -137,17 +149,37 @@ exports.apply = async (req, res) => {
     // RESULT
     if (matchPercent >= 75) {
       application.verificationStatus = "ELIGIBLE";
-      application.currentStage = "TECHNICAL";
-      application.technicalTestStatus = "ASSIGNED";
-      application.verificationReason = `High match (${matchPercent.toFixed(1)}%)`;
+      application.currentStage = "VERIFICATION_ELIGIBLE";
+      application.technicalTestStatus = "NOT_ASSIGNED";
+      application.verificationReason = `High match (${matchPercent.toFixed(1)}%). Candidate is eligible. Technical test will be assigned after vacancy deadline.`;
+
+      application.timeline.push({
+        stage: "VERIFICATION_ELIGIBLE",
+        note: "Candidate verified as eligible.",
+        date: new Date(),
+      });
     } else if (matchPercent >= 50) {
       application.verificationStatus = "REVIEW";
-      application.currentStage = "APPLIED";
-      application.verificationReason = `Needs review (${matchPercent.toFixed(1)}%)`;
+      application.currentStage = "VERIFICATION_REVIEW";
+      application.technicalTestStatus = "NOT_ASSIGNED";
+      application.verificationReason = `Needs manual review (${matchPercent.toFixed(1)}%).`;
+
+      application.timeline.push({
+        stage: "VERIFICATION_REVIEW",
+        note: "Candidate profile requires manual review.",
+        date: new Date(),
+      });
     } else {
       application.verificationStatus = "REJECTED";
-      application.currentStage = "COMPLETED";
-      application.verificationReason = `Low match (${matchPercent.toFixed(1)}%)`;
+      application.currentStage = "VERIFICATION_REJECTED";
+      application.technicalTestStatus = "NOT_ASSIGNED";
+      application.verificationReason = `Low match (${matchPercent.toFixed(1)}%). Candidate rejected in verification.`;
+
+      application.timeline.push({
+        stage: "VERIFICATION_REJECTED",
+        note: "Candidate rejected during eligibility verification.",
+        date: new Date(),
+      });
     }
 
     await application.save();
@@ -290,16 +322,19 @@ exports.updateVerification = async (req, res) => {
       });
     }
 
-    let currentStage = "APPLIED";
+    let currentStage = "VERIFICATION_PENDING";
     let technicalTestStatus = "NOT_ASSIGNED";
 
     if (verificationStatus === "ELIGIBLE") {
-      currentStage = "TECHNICAL";
-      technicalTestStatus = "ASSIGNED";
+      currentStage = "VERIFICATION_ELIGIBLE";
+    }
+
+    if (verificationStatus === "REVIEW") {
+      currentStage = "VERIFICATION_REVIEW";
     }
 
     if (verificationStatus === "REJECTED") {
-      currentStage = "COMPLETED";
+      currentStage = "VERIFICATION_REJECTED";
     }
 
     const application = await Application.findByIdAndUpdate(
@@ -311,7 +346,7 @@ exports.updateVerification = async (req, res) => {
         technicalTestStatus,
         $push: {
           timeline: {
-            stage: "VERIFICATION",
+            stage: currentStage,
             note: `Verification status updated to ${verificationStatus}`,
             date: new Date(),
           },
