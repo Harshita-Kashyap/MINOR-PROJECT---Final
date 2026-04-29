@@ -28,3 +28,8 @@ export const submitEvaluation = async (data) => {
   const res = await API.post("/api/selector/evaluation", data);
   return res.data;
 };
+
+export const scheduleTechnicalTest = async (data) => {
+  const res = await API.post("/api/selector/tests/schedule-technical", data);
+  return res.data;
+};

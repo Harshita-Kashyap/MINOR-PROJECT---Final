@@ -55,41 +55,41 @@ exports.apply = async (req, res) => {
     }
 
     // 4. create application
-   let application = await Application.create({
-    applicationId: `APP-${Date.now()}`,
-    userId,
-    profileId: profile._id,
-    vacancyId: vacancy._id,
-    vacancyTitle: vacancy.title,
-    department: vacancy.department,
-    appliedAt: new Date(),
+    let application = await Application.create({
+      applicationId: `APP-${Date.now()}`,
+      userId,
+      profileId: profile._id,
+      vacancyId: vacancy._id,
+      vacancyTitle: vacancy.title,
+      department: vacancy.department,
+      appliedAt: new Date(),
 
-    currentStage: "VERIFICATION_PENDING",
-    verificationStatus: "PENDING",
-    timeline: [
-      {
-        stage: "APPLIED",
-        note: "Application submitted successfully.",
-        date: new Date(),
-      },
-      {
-        stage: "VERIFICATION_PENDING",
-        note: "Profile verification started automatically.",
-        date: new Date(),
-      },
-    ],
+      currentStage: "VERIFICATION_PENDING",
+      verificationStatus: "PENDING",
+      timeline: [
+        {
+          stage: "APPLIED",
+          note: "Application submitted successfully.",
+          date: new Date(),
+        },
+        {
+          stage: "VERIFICATION_PENDING",
+          note: "Profile verification started automatically.",
+          date: new Date(),
+        },
+      ],
 
-    technicalTestStatus: "NOT_ASSIGNED",
-    technicalScore: null,
-    technicalRemarks: "",
+      technicalTestStatus: "NOT_ASSIGNED",
+      technicalScore: null,
+      technicalRemarks: "",
 
-    personalityTestStatus: "NOT_ASSIGNED",
-    personalityScore: null,
-    personalityRemarks: "",
+      personalityTestStatus: "NOT_ASSIGNED",
+      personalityScore: null,
+      personalityRemarks: "",
 
-    finalStatus: "NOT_DECIDED",
-    finalRemarks: "",
-  });
+      finalStatus: "NOT_DECIDED",
+      finalRemarks: "",
+    });
     // ================= AUTO VERIFICATION =================
     const clean = (str) => (str || "").toString().toLowerCase().trim();
 
@@ -208,7 +208,15 @@ exports.getMyApplications = async (req, res) => {
 
     const applications = await Application.find({ userId })
       .sort({ createdAt: -1 })
-      .populate("vacancyId", "title department status");
+      .populate("vacancyId", "title department status")
+      .populate(
+        "technicalTestScheduleId",
+        "testType startTime endTime resultDeclarationDate cutoff"
+      )
+      .populate(
+        "personalityTestScheduleId",
+        "testType startTime endTime resultDeclarationDate cutoff"
+      );
 
     return res.status(200).json({
       success: true,
@@ -231,7 +239,15 @@ exports.getApplicationById = async (req, res) => {
     const application = await Application.findById(req.params.id)
       .populate("userId", "name email phone")
       .populate("profileId")
-      .populate("vacancyId", "title department status");
+      .populate("vacancyId", "title department status")
+      .populate(
+        "technicalTestScheduleId",
+        "testType startTime endTime resultDeclarationDate cutoff"
+      )
+      .populate(
+        "personalityTestScheduleId",
+        "testType startTime endTime resultDeclarationDate cutoff"
+      );
 
     if (!application) {
       return res.status(404).json({

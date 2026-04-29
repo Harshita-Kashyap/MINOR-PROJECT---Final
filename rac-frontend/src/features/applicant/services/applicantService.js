@@ -87,3 +87,62 @@ export const getApplicantApplications = async () => {
 
   return data.applications;
 };
+
+export const getApplicationById = async (id) => {
+  const res = await fetch(`http://localhost:5000/api/applications/${id}`, {
+    method: "GET",
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token"),
+    },
+  });
+
+  const data = await res.json();
+
+  if (!data.success) {
+    throw new Error(data.message);
+  }
+
+  return data.application;
+};
+
+export const getTechnicalTestByApplication = async (applicationId) => {
+  const res = await fetch(
+    `http://localhost:5000/api/tests/technical/${applicationId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    }
+  );
+
+  const data = await res.json();
+
+  if (!data.success) {
+    throw new Error(data.message);
+  }
+
+  return data;
+};
+
+export const submitTechnicalTest = async (applicationId, answers) => {
+  const res = await fetch(
+    `http://localhost:5000/api/tests/technical/${applicationId}/submit`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify({ answers }),
+    }
+  );
+
+  const data = await res.json();
+
+  if (!data.success) {
+    throw new Error(data.message);
+  }
+
+  return data;
+};

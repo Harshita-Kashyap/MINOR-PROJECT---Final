@@ -17,6 +17,17 @@ function formatDate(dateValue) {
   });
 }
 
+function formatDateTime(dateValue) {
+  if (!dateValue) return "-";
+
+  return new Date(dateValue).toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function ApplicationStatusCard({ application }) {
   const navigate = useNavigate();
 
@@ -58,22 +69,44 @@ export default function ApplicationStatusCard({ application }) {
         </div>
       </div>
 
-      {(application.verificationReason ||
-        application.technicalRemarks ||
-        application.finalReason) && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 dark:border-amber-900/60 dark:bg-amber-950/20">
-          <p className="text-xs uppercase tracking-wide text-amber-700 dark:text-amber-400">
-            Remark / Reason
+      {application.technicalTestScheduleId && (
+        <div className="rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3 dark:border-blue-900/50 dark:bg-blue-950/20">
+          <p className="text-xs uppercase tracking-wide text-blue-700 dark:text-blue-400">
+            Technical Test
           </p>
-          <p className="mt-1 text-sm leading-6 text-gray-800 dark:text-gray-200">
-            {application.finalReason ||
-              application.technicalRemarks ||
-              application.verificationReason}
+          <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
+            {formatDateTime(application.technicalTestScheduleId.startTime)}
+            {" - "}
+            {formatDateTime(application.technicalTestScheduleId.endTime)}
           </p>
         </div>
       )}
 
-      <div className="flex justify-end">
+      {(application.verificationReason ||
+        application.technicalRemarks ||
+        application.finalReason) && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 dark:border-amber-900/60 dark:bg-amber-950/20">
+            <p className="text-xs uppercase tracking-wide text-amber-700 dark:text-amber-400">
+              Remark / Reason
+            </p>
+            <p className="mt-1 text-sm leading-6 text-gray-800 dark:text-gray-200">
+              {application.finalReason ||
+                application.technicalRemarks ||
+                application.verificationReason}
+            </p>
+          </div>
+        )}
+
+      <div className="flex justify-end gap-2">
+        {application.currentStage === "TECHNICAL_TEST_ASSIGNED" && (
+          <Button
+            size="sm"
+            onClick={() => navigate(`/applicant/technical-test/${application._id}`)}
+          >
+            Start Technical Test
+          </Button>
+        )}
+
         <Button
           size="sm"
           variant="outline"

@@ -1,6 +1,8 @@
 // selectorController
 
 const Application = require("../models/Application");
+const Vacancy = require("../models/Vacancy");
+const TestSchedule = require("../models/TestSchedule");
 
 // ========================
 // 📊 DASHBOARD
@@ -251,6 +253,101 @@ exports.submitSelectorEvaluation = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Evaluation Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ========================
+// 🗓️ SCHEDULE TECHNICAL TEST
+// ========================
+exports.scheduleTechnicalTest = async (req, res) => {
+  try {
+    const {
+      vacancyId,
+      startTime,
+      endTime,
+      resultDeclarationDate = null,
+    } = req.body;
+
+    if (!vacancyId || !startTime || !endTime) {
+      return res.status(400).json({
+        success: false,
+        message: "vacancyId, startTime and endTime are required",
+      });
+    }
+
+    const vacancy = await Vacancy.findById(vacancyId);
+
+    if (!vacancy) {
+      return res.status(404).json({
+        success: false,
+        message: "Vacancy not found",
+      });
+    }
+
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid startTime or endTime",
+      });
+    }
+
+    if (end <= start) {
+      return res.status(400).json({
+        success: false,
+        message: "End time must be after start time",
+      });
+    }
+
+    const schedule = await TestSchedule.create({
+      vacancyId,
+      testType: "TECHNICAL",
+      startTime: start,
+      endTime: end,
+      resultDeclarationDate: resultDeclarationDate
+        ? new Date(resultDeclarationDate)
+        : null,
+      createdBy: req.user?.id || null,
+    });
+
+    const result = await Application.updateMany(
+      {
+        vacancyId,
+        currentStage: "VERIFICATION_ELIGIBLE",
+        verificationStatus: "ELIGIBLE",
+        technicalTestStatus: "NOT_ASSIGNED",
+      },
+      {
+        $set: {
+          currentStage: "TECHNICAL_TEST_ASSIGNED",
+          technicalTestStatus: "ASSIGNED",
+          technicalTestScheduleId: schedule._id,
+        },
+        $push: {
+          timeline: {
+            stage: "TECHNICAL_TEST_ASSIGNED",
+            note: "Technical test assigned by selector.",
+            date: new Date(),
+          },
+        },
+      }
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "Technical test scheduled and assigned successfully",
+      schedule,
+      assignedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error("❌ Schedule Technical Test Error:", error);
 
     return res.status(500).json({
       success: false,

@@ -54,6 +54,7 @@ import SelectorCandidateDetail from "../../features/selector/pages/SelectorCandi
 import SelectorEvaluation from "../../features/selector/pages/SelectorEvaluation";
 import SelectorAnalytics from "../../features/selector/pages/SelectorAnalytics";
 import SelectorEvaluationQueue from "../../features/selector/pages/SelectorEvaluationQueue";
+import ScheduleTechnicalTest from "../../features/selector/pages/ScheduleTechnicalTest";
 
 function AppRoutes() {
   return (
@@ -209,19 +210,28 @@ function AppRoutes() {
         />
 
         <Route
-         path="/applicant/technical-test/:id"
-         element={
-          <ProtectedRoute allowedRoles={["applicant"]}>
-            <TechnicalTest />
-          </ProtectedRoute>
-         }
+          path="/applicant/technical-test/:id"
+          element={
+            <ProtectedRoute allowedRoles={["applicant"]}>
+              <TechnicalTest />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/applicant/technical-test"
+          element={
+            <ProtectedRoute allowedRoles={["applicant"]}>
+              <Navigate to="/applicant/applications" replace />
+            </ProtectedRoute>
+          }
         />
 
         <Route
           path="/applicant/personality-test"
           element={
             <ProtectedRoute allowedRoles={["applicant"]}>
-              <PersonalityTest />
+              <Navigate to="/applicant/applications" replace />
             </ProtectedRoute>
           }
         />
@@ -288,6 +298,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["selector"]}>
               <SelectorAnalytics />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/selector/schedule-technical-test"
+          element={
+            <ProtectedRoute allowedRoles={["selector"]}>
+              <ScheduleTechnicalTest />
             </ProtectedRoute>
           }
         />

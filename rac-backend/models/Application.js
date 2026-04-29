@@ -57,33 +57,33 @@ const applicationSchema = new mongoose.Schema(
     },
 
     // Overall workflow stage
-      currentStage: {
-        type: String,
-        enum: [
-          "APPLIED",
+    currentStage: {
+      type: String,
+      enum: [
+        "APPLIED",
 
-          "VERIFICATION_PENDING",
-          "VERIFICATION_ELIGIBLE",
-          "VERIFICATION_REVIEW",
-          "VERIFICATION_REJECTED",
+        "VERIFICATION_PENDING",
+        "VERIFICATION_ELIGIBLE",
+        "VERIFICATION_REVIEW",
+        "VERIFICATION_REJECTED",
 
-          "TECHNICAL_TEST_ASSIGNED",
-          "TECHNICAL_TEST_IN_PROGRESS",
-          "TECHNICAL_TEST_SUBMITTED",
-          "TECHNICAL_QUALIFIED",
-          "TECHNICAL_REJECTED",
+        "TECHNICAL_TEST_ASSIGNED",
+        "TECHNICAL_TEST_IN_PROGRESS",
+        "TECHNICAL_TEST_SUBMITTED",
+        "TECHNICAL_QUALIFIED",
+        "TECHNICAL_REJECTED",
 
-          "PERSONALITY_TEST_ASSIGNED",
-          "PERSONALITY_TEST_IN_PROGRESS",
-          "PERSONALITY_TEST_SUBMITTED",
+        "PERSONALITY_TEST_ASSIGNED",
+        "PERSONALITY_TEST_IN_PROGRESS",
+        "PERSONALITY_TEST_SUBMITTED",
 
-          "FINAL_REVIEW",
-          "SELECTED",
-          "WAITLISTED",
-          "FINAL_REJECTED",
-        ],
-        default: "APPLIED",
-      },
+        "FINAL_REVIEW",
+        "SELECTED",
+        "WAITLISTED",
+        "FINAL_REJECTED",
+      ],
+      default: "APPLIED",
+    },
 
     // Verification stage
     verificationStatus: {
@@ -123,6 +123,14 @@ const applicationSchema = new mongoose.Schema(
       default: "",
     },
 
+    technicalTestScheduleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TestSchedule",
+      default: null,
+    },
+
+
+
     // Personality stage
     personalityTestStatus: {
       type: String,
@@ -140,6 +148,12 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: "",
+    },
+
+    personalityTestScheduleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TestSchedule",
+      default: null,
     },
 
     // Final evaluation

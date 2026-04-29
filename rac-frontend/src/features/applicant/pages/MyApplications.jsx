@@ -9,10 +9,12 @@ import { getApplicantApplications } from "../services/applicantService";
 
 function formatDate(dateValue) {
   if (!dateValue) return "-";
-  return new Date(dateValue).toLocaleDateString("en-GB", {
+  return new Date(dateValue).toLocaleString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -95,8 +97,8 @@ export default function MyApplications() {
                           app.verificationStatus === "ELIGIBLE"
                             ? "success"
                             : app.verificationStatus === "REJECTED"
-                            ? "danger"
-                            : "warning"
+                              ? "danger"
+                              : "warning"
                         }
                       >
                         {app.verificationStatus || "PENDING"}
@@ -134,6 +136,31 @@ export default function MyApplications() {
                         <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                           <strong>Reason:</strong> {app.verificationReason}
                         </p>
+                      )}
+
+                      {app.technicalTestScheduleId && (
+                        <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/70 p-4 dark:border-blue-900/50 dark:bg-blue-950/20">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-400">
+                            Technical Test Schedule
+                          </p>
+
+                          <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
+                            <strong>Start:</strong>{" "}
+                            {formatDateTime(app.technicalTestScheduleId.startTime)}
+                          </p>
+
+                          <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">
+                            <strong>End:</strong>{" "}
+                            {formatDateTime(app.technicalTestScheduleId.endTime)}
+                          </p>
+
+                          {app.technicalTestScheduleId.resultDeclarationDate && (
+                            <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">
+                              <strong>Result Declaration:</strong>{" "}
+                              {formatDateTime(app.technicalTestScheduleId.resultDeclarationDate)}
+                            </p>
+                          )}
+                        </div>
                       )}
 
                       {/* DATES */}

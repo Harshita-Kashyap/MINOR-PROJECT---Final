@@ -50,20 +50,31 @@ export default function SelectorDashboard() {
     return {
       total: dashboardStats.total ?? candidates.length,
 
-      verificationReview: candidates.filter(
-        (c) =>
-          c.currentStage === "VERIFICATION" ||
-          c.verificationStatus === "REVIEW" ||
-          c.verificationStatus === "PENDING"
+      verificationReview: candidates.filter((c) =>
+        ["VERIFICATION_PENDING", "VERIFICATION_REVIEW"].includes(c.currentStage)
       ).length,
 
       verificationRejected: candidates.filter(
         (c) => c.verificationStatus === "REJECTED"
       ).length,
 
-      technical: candidates.filter((c) => c.currentStage === "TECHNICAL").length,
+      technical: candidates.filter((c) =>
+        [
+          "TECHNICAL_TEST_ASSIGNED",
+          "TECHNICAL_TEST_IN_PROGRESS",
+          "TECHNICAL_TEST_SUBMITTED",
+          "TECHNICAL_QUALIFIED",
+          "TECHNICAL_REJECTED",
+        ].includes(c.currentStage)
+      ).length,
 
-      personality: candidates.filter((c) => c.currentStage === "PERSONALITY").length,
+      personality: candidates.filter((c) =>
+        [
+          "PERSONALITY_TEST_ASSIGNED",
+          "PERSONALITY_TEST_IN_PROGRESS",
+          "PERSONALITY_TEST_SUBMITTED",
+        ].includes(c.currentStage)
+      ).length,
 
       finalReview:
         dashboardStats.finalReview ??
@@ -71,7 +82,9 @@ export default function SelectorDashboard() {
 
       completed:
         dashboardStats.completed ??
-        candidates.filter((c) => c.currentStage === "COMPLETED").length,
+        candidates.filter((c) =>
+          ["SELECTED", "WAITLISTED", "FINAL_REJECTED"].includes(c.currentStage)
+        ).length,
 
       readyForEvaluation: candidates.filter(isReadyForEvaluation).length,
 
@@ -322,9 +335,8 @@ function MetricCard({ title, value, description, tone }) {
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${
-        toneMap[tone || "default"]
-      }`}
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${toneMap[tone || "default"]
+        }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {title}
@@ -371,9 +383,8 @@ function DecisionBox({ label, value, tone }) {
     <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
       <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
       <span
-        className={`mt-3 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
-          toneMap[tone]
-        }`}
+        className={`mt-3 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${toneMap[tone]
+          }`}
       >
         {value ?? 0}
       </span>

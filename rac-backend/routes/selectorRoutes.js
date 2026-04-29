@@ -12,6 +12,7 @@ const {
   getSelectorCandidateById,
   getSelectorAnalytics,
   submitSelectorEvaluation,
+  scheduleTechnicalTest,
 } = require("../controllers/selectorController");
 
 // ===============================
@@ -19,29 +20,18 @@ const {
 // ===============================
 router.use(protect, authorize("selector", "admin"));
 
-// ===============================
-// 📊 Dashboard
-// ===============================
 router.get("/dashboard", getSelectorDashboard);
 
-// ===============================
-// 📋 Candidates
-// ===============================
 router.get("/candidates", getSelectorCandidates);
 
-// ===============================
-// 👤 Candidate by ID
-// ===============================
+router.post("/tests/schedule-technical", scheduleTechnicalTest);
+
 router.get("/candidates/:id", getSelectorCandidateById);
 
-// ===============================
-// 📈 Analytics
-// ===============================
 router.get("/analytics", getSelectorAnalytics);
 
-// ===============================
-// 🧑‍⚖️ Submit Evaluation
-// ===============================
 router.post("/evaluation", submitSelectorEvaluation);
+
+
 
 module.exports = router;

@@ -38,9 +38,11 @@ app.use("/api/profile", require("./routes/applicantProfileRoutes"));
 
 app.use("/api/applications", require("./routes/applicationRoutes"));
 app.use("/api/vacancies", require("./routes/vacancyRoutes"));
+app.use("/api/tests", require("./routes/testRoutes"));
 
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/selector", require("./routes/selectorRoutes"));
+
 
 // ========================
 // ❗ 404 Handler
