@@ -13,6 +13,8 @@ const {
   getSelectorAnalytics,
   submitSelectorEvaluation,
   scheduleTechnicalTest,
+  getTechnicalResultsByVacancy,
+  setTechnicalCutoff,
 } = require("../controllers/selectorController");
 
 // ===============================
@@ -25,6 +27,10 @@ router.get("/dashboard", getSelectorDashboard);
 router.get("/candidates", getSelectorCandidates);
 
 router.post("/tests/schedule-technical", scheduleTechnicalTest);
+
+router.get("/technical-results/:vacancyId", getTechnicalResultsByVacancy);
+
+router.post("/technical-cutoff", setTechnicalCutoff);
 
 router.get("/candidates/:id", getSelectorCandidateById);
 

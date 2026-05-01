@@ -33,3 +33,13 @@ export const scheduleTechnicalTest = async (data) => {
   const res = await API.post("/api/selector/tests/schedule-technical", data);
   return res.data;
 };
+
+export const getTechnicalResultsByVacancy = async (vacancyId) => {
+  const res = await API.get(`/api/selector/technical-results/${vacancyId}`);
+  return res.data;
+};
+
+export const setTechnicalCutoff = async (data) => {
+  const res = await API.post("/api/selector/technical-cutoff", data);
+  return res.data;
+};

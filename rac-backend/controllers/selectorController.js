@@ -3,6 +3,7 @@
 const Application = require("../models/Application");
 const Vacancy = require("../models/Vacancy");
 const TestSchedule = require("../models/TestSchedule");
+const TestSubmission = require("../models/TestSubmission");
 
 // ========================
 // 📊 DASHBOARD
@@ -349,6 +350,136 @@ exports.scheduleTechnicalTest = async (req, res) => {
   } catch (error) {
     console.error("❌ Schedule Technical Test Error:", error);
 
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ========================
+// 📊 TECHNICAL RESULTS BY VACANCY
+// ========================
+exports.getTechnicalResultsByVacancy = async (req, res) => {
+  try {
+    const { vacancyId } = req.params;
+
+    const submissions = await TestSubmission.find({
+      vacancyId,
+      testType: "TECHNICAL",
+    })
+      .sort({ finalScore: -1, submittedAt: 1 })
+      .populate("applicantId", "name email phone")
+      .populate("applicationId", "applicationId currentStage technicalScore technicalTestStatus")
+      .populate("vacancyId", "title department");
+
+    const scores = submissions.map((s) => Number(s.finalScore || 0));
+
+    const highest = scores.length ? Math.max(...scores) : 0;
+    const lowest = scores.length ? Math.min(...scores) : 0;
+    const average = scores.length
+      ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+      : 0;
+
+    return res.status(200).json({
+      success: true,
+      count: submissions.length,
+      analytics: {
+        totalSubmitted: submissions.length,
+        highest,
+        lowest,
+        average: Number(average.toFixed(2)),
+      },
+      results: submissions,
+    });
+  } catch (error) {
+    console.error("❌ Technical Results Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ========================
+// 🎯 SET TECHNICAL CUTOFF
+// ========================
+exports.setTechnicalCutoff = async (req, res) => {
+  try {
+    const { vacancyId, cutoff } = req.body;
+
+    if (!vacancyId || cutoff === undefined || cutoff === null) {
+      return res.status(400).json({
+        success: false,
+        message: "vacancyId and cutoff are required",
+      });
+    }
+
+    const numericCutoff = Number(cutoff);
+
+    if (Number.isNaN(numericCutoff) || numericCutoff < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid cutoff value",
+      });
+    }
+
+    const submissions = await TestSubmission.find({
+      vacancyId,
+      testType: "TECHNICAL",
+    });
+
+    let qualifiedCount = 0;
+    let rejectedCount = 0;
+
+    for (const submission of submissions) {
+      const application = await Application.findById(submission.applicationId);
+
+      if (!application) continue;
+
+      if (Number(submission.finalScore || 0) >= numericCutoff) {
+        application.currentStage = "TECHNICAL_QUALIFIED";
+        application.technicalTestStatus = "SHORTLISTED";
+        application.technicalRemarks = `Qualified technical cutoff. Score: ${submission.finalScore}, Cutoff: ${numericCutoff}`;
+        qualifiedCount++;
+      } else {
+        application.currentStage = "TECHNICAL_REJECTED";
+        application.technicalTestStatus = "REJECTED";
+        application.technicalRemarks = `Did not meet technical cutoff. Score: ${submission.finalScore}, Cutoff: ${numericCutoff}`;
+        rejectedCount++;
+      }
+
+      application.timeline.push({
+        stage: application.currentStage,
+        note: application.technicalRemarks,
+        date: new Date(),
+      });
+
+      await application.save();
+    }
+
+    await TestSchedule.findOneAndUpdate(
+      {
+        vacancyId,
+        testType: "TECHNICAL",
+      },
+      {
+        cutoff: numericCutoff,
+      },
+      {
+        sort: { createdAt: -1 },
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Technical cutoff applied successfully",
+      cutoff: numericCutoff,
+      qualifiedCount,
+      rejectedCount,
+    });
+  } catch (error) {
+    console.error("❌ Set Cutoff Error:", error);
     return res.status(500).json({
       success: false,
       message: error.message,
