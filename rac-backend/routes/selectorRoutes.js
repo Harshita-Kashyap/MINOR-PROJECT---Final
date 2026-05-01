@@ -15,7 +15,7 @@ const {
   scheduleTechnicalTest,
   getTechnicalResultsByVacancy,
   setTechnicalCutoff,
-} = require("../controllers/selectorController");
+  schedulePersonalityTest,} = require("../controllers/selectorController");
 
 // ===============================
 // 🔒 Protect all selector routes
@@ -38,6 +38,6 @@ router.get("/analytics", getSelectorAnalytics);
 
 router.post("/evaluation", submitSelectorEvaluation);
 
-
+router.post("/tests/schedule-personality", schedulePersonalityTest);
 
 module.exports = router;

@@ -7,6 +7,8 @@ const { authorize } = require("../middleware/roleMiddleware");
 const {
   getTechnicalTestForApplication,
   submitTechnicalTest,
+  getPersonalityTestForApplication,
+  submitPersonalityTest,
 } = require("../controllers/testController");
 
 router.get(
@@ -22,4 +24,19 @@ router.post(
   authorize("applicant"),
   submitTechnicalTest
 );
+
+router.get(
+  "/personality/:applicationId",
+  protect,
+  authorize("applicant"),
+  getPersonalityTestForApplication
+);
+
+router.post(
+  "/personality/:applicationId/submit",
+  protect,
+  authorize("applicant"),
+  submitPersonalityTest
+);
+
 module.exports = router;

@@ -222,21 +222,28 @@ exports.submitSelectorEvaluation = async (req, res) => {
     application.selectorId = req.user?.id || null;
     application.selectorDecisionAt = new Date();
 
-    // final status mapping
-    if (decision === "NOT_RECOMMENDED") {
+    if (decision === "RECOMMENDED") {
+      application.currentStage = "SELECTED";
+      application.finalStatus = "SELECTED";
+      application.finalReason = remarks || "Recommended by selector";
+    } else if (decision === "WAITLISTED") {
+      application.currentStage = "WAITLISTED";
+      application.finalStatus = "WAITLISTED";
+      application.finalReason = remarks || "Waitlisted by selector";
+    } else if (decision === "HOLD") {
+      application.currentStage = "FINAL_REVIEW";
+      application.finalStatus = "HOLD";
+      application.finalReason = remarks || "Kept on hold by selector";
+    } else if (decision === "NOT_RECOMMENDED") {
+      application.currentStage = "FINAL_REJECTED";
       application.finalStatus = "REJECTED";
       application.finalReason = remarks || "Not recommended by selector";
-    } else {
-      application.finalStatus = decision;
-      application.finalReason = remarks || "";
     }
 
     application.finalRemarks = remarks;
-    application.currentStage = "COMPLETED";
 
-    // timeline entry
     application.timeline.push({
-      stage: "COMPLETED",
+      stage: application.currentStage,
       note: `Selector decision submitted: ${decision}${remarks ? ` - ${remarks}` : ""}`,
       date: new Date(),
     });
@@ -480,6 +487,100 @@ exports.setTechnicalCutoff = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Set Cutoff Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ========================
+// 🗓️ SCHEDULE PERSONALITY TEST
+// ========================
+exports.schedulePersonalityTest = async (req, res) => {
+  try {
+    const {
+      vacancyId,
+      startTime,
+      endTime,
+      resultDeclarationDate = null,
+    } = req.body;
+
+    if (!vacancyId || !startTime || !endTime) {
+      return res.status(400).json({
+        success: false,
+        message: "vacancyId, startTime and endTime are required",
+      });
+    }
+
+    const vacancy = await Vacancy.findById(vacancyId);
+
+    if (!vacancy) {
+      return res.status(404).json({
+        success: false,
+        message: "Vacancy not found",
+      });
+    }
+
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid startTime or endTime",
+      });
+    }
+
+    if (end <= start) {
+      return res.status(400).json({
+        success: false,
+        message: "End time must be after start time",
+      });
+    }
+
+    const schedule = await TestSchedule.create({
+      vacancyId,
+      testType: "PERSONALITY",
+      startTime: start,
+      endTime: end,
+      resultDeclarationDate: resultDeclarationDate
+        ? new Date(resultDeclarationDate)
+        : null,
+      createdBy: req.user?.id || null,
+    });
+
+    const result = await Application.updateMany(
+      {
+        vacancyId,
+        currentStage: "TECHNICAL_QUALIFIED",
+        technicalTestStatus: "SHORTLISTED",
+      },
+      {
+        $set: {
+          currentStage: "PERSONALITY_TEST_ASSIGNED",
+          personalityTestStatus: "ASSIGNED",
+          personalityTestScheduleId: schedule._id,
+        },
+        $push: {
+          timeline: {
+            stage: "PERSONALITY_TEST_ASSIGNED",
+            note: "Personality test assigned by selector.",
+            date: new Date(),
+          },
+        },
+      }
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "Personality test scheduled and assigned successfully",
+      schedule,
+      assignedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error("❌ Schedule Personality Test Error:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,
