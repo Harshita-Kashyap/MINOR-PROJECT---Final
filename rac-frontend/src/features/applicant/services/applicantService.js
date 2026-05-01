@@ -146,3 +146,45 @@ export const submitTechnicalTest = async (applicationId, answers) => {
 
   return data;
 };
+
+export const getPersonalityTestByApplication = async (applicationId) => {
+  const res = await fetch(
+    `http://localhost:5000/api/tests/personality/${applicationId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    }
+  );
+
+  const data = await res.json();
+
+  if (!data.success) {
+    throw new Error(data.message);
+  }
+
+  return data;
+};
+
+export const submitPersonalityTest = async (applicationId, answers) => {
+  const res = await fetch(
+    `http://localhost:5000/api/tests/personality/${applicationId}/submit`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify({ answers }),
+    }
+  );
+
+  const data = await res.json();
+
+  if (!data.success) {
+    throw new Error(data.message);
+  }
+
+  return data;
+};

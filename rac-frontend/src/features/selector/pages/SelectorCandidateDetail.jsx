@@ -7,6 +7,8 @@ import Badge from "../../../shared/components/ui/Badge";
 import { getSelectorCandidateById } from "../services/selectorService";
 import { useEffect, useMemo, useState } from "react";
 import {
+  SELECTOR_STAGES,
+  normalizeStage,
   formatStage,
   getCandidateEmail,
   getCandidateName,
@@ -15,15 +17,20 @@ import {
   getStageBadgeVariant,
   getTechnicalScore,
   getVacancyTitle,
+  isReadyForEvaluation,
 } from "../utils/selectorHelpers";
 
 const workflowSteps = [
-  "APPLIED",
-  "VERIFICATION",
-  "TECHNICAL",
-  "PERSONALITY",
-  "FINAL_REVIEW",
-  "COMPLETED",
+  SELECTOR_STAGES.APPLIED,
+  SELECTOR_STAGES.VERIFICATION_PENDING,
+  SELECTOR_STAGES.VERIFICATION_ELIGIBLE,
+  SELECTOR_STAGES.TECHNICAL_TEST_ASSIGNED,
+  SELECTOR_STAGES.TECHNICAL_TEST_SUBMITTED,
+  SELECTOR_STAGES.TECHNICAL_QUALIFIED,
+  SELECTOR_STAGES.PERSONALITY_TEST_ASSIGNED,
+  SELECTOR_STAGES.PERSONALITY_TEST_SUBMITTED,
+  SELECTOR_STAGES.FINAL_REVIEW,
+  SELECTOR_STAGES.SELECTED,
 ];
 
 export default function SelectorCandidateDetail() {
@@ -52,7 +59,7 @@ export default function SelectorCandidateDetail() {
 
   const total = useMemo(() => {
     if (!candidate) return 0;
-    return getCompositeScore(candidate);
+    return candidate.overallScore || getCompositeScore(candidate);
   }, [candidate]);
 
   if (loading) {
@@ -74,9 +81,11 @@ export default function SelectorCandidateDetail() {
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
             Candidate not found
           </h1>
+
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             The candidate may not exist or the record could not be loaded.
           </p>
+
           <div className="mt-5">
             <Button onClick={() => navigate("/selector/candidates")}>
               Back to Candidates
@@ -89,7 +98,8 @@ export default function SelectorCandidateDetail() {
 
   const profile = candidate.profileId || {};
   const timeline = Array.isArray(candidate.timeline) ? candidate.timeline : [];
-  const canEvaluate = candidate.currentStage === "FINAL_REVIEW";
+  const normalizedStage = normalizeStage(candidate.currentStage, candidate);
+  const canEvaluate = isReadyForEvaluation(candidate);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -103,7 +113,7 @@ export default function SelectorCandidateDetail() {
 
             <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-blue-100">
+                <p className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-blue-100">
                   Candidate Profile
                 </p>
 
@@ -120,8 +130,8 @@ export default function SelectorCandidateDetail() {
                 </p>
 
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Badge variant={getStageBadgeVariant(candidate.currentStage)}>
-                    {formatStage(candidate.currentStage)}
+                  <Badge variant={getStageBadgeVariant(candidate.currentStage, candidate)}>
+                    {formatStage(candidate.currentStage, candidate)}
                   </Badge>
 
                   <Badge variant={getVerificationVariant(candidate.verificationStatus)}>
@@ -142,13 +152,14 @@ export default function SelectorCandidateDetail() {
                   Back to Candidates
                 </Button>
 
-                <Button
-                  variant="outlineWhite"
-                  onClick={() => navigate(`/selector/evaluation/${candidate._id}`)}
-                  disabled={!canEvaluate}
-                >
-                  Open Evaluation
-                </Button>
+                {canEvaluate && (
+                  <Button
+                    variant="outlineWhite"
+                    onClick={() => navigate(`/selector/evaluation/${candidate._id}`)}
+                  >
+                    Open Evaluation
+                  </Button>
+                )}
               </div>
             </div>
           </section>
@@ -159,36 +170,33 @@ export default function SelectorCandidateDetail() {
               value={`${candidate.verificationScore || 0}%`}
               note={candidate.verificationStatus || "N/A"}
             />
+
             <ScoreMetric
               label="Technical"
               value={getTechnicalScore(candidate)}
-              note={candidate.technicalTestStatus || "N/A"}
+              note={candidate.technicalTestStatus || "Not assigned"}
             />
+
             <ScoreMetric
               label="Personality"
               value={getPersonalityScore(candidate)}
-              note={candidate.personalityTestStatus || "N/A"}
+              note={candidate.personalityTestStatus || "Not assigned"}
             />
+
             <ScoreMetric
               label="Overall"
-              value={candidate.overallScore || total}
+              value={total}
               note={candidate.finalStatus || "N/A"}
             />
           </div>
 
           <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
-            <div className="mb-5 flex items-center justify-between gap-3 border-b border-gray-200 pb-4 dark:border-gray-700">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Workflow Progress
-                </h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Current application stage across the selector workflow.
-                </p>
-              </div>
-            </div>
+            <SectionHeader
+              title="Workflow Progress"
+              subtitle="Current application movement across the selector workflow."
+            />
 
-            <Progress stage={candidate.currentStage} />
+            <Progress stage={normalizedStage} candidate={candidate} />
           </Card>
 
           <div className="grid gap-6 xl:grid-cols-12">
@@ -211,7 +219,7 @@ export default function SelectorCandidateDetail() {
             <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80 xl:col-span-4">
               <SectionHeader
                 title="Decision Readiness"
-                subtitle="Whether this candidate can be evaluated now."
+                subtitle="Whether this candidate can receive a selector decision now."
               />
 
               <div
@@ -224,14 +232,16 @@ export default function SelectorCandidateDetail() {
                 <p className="text-sm font-semibold">
                   {canEvaluate ? "Ready for Evaluation" : "Not Ready Yet"}
                 </p>
+
                 <p className="mt-2 text-sm leading-6">
                   {canEvaluate
-                    ? "Candidate has reached FINAL REVIEW and can receive selector decision."
-                    : "Candidate must reach FINAL REVIEW before final selector decision."}
+                    ? "Candidate has reached final review and can receive selector decision."
+                    : "Candidate must reach final review before selector decision."}
                 </p>
               </div>
 
               <div className="mt-4 space-y-3">
+                <ScoreRow label="Current Stage" value={formatStage(candidate.currentStage, candidate)} />
                 <ScoreRow label="Selector Decision" value={candidate.selectorDecision || "PENDING"} />
                 <ScoreRow label="Final Status" value={candidate.finalStatus || "N/A"} />
               </div>
@@ -265,9 +275,11 @@ export default function SelectorCandidateDetail() {
                   label="Verification Status"
                   status={getVerificationChecklistStatus(candidate.verificationStatus)}
                 />
+
                 <DetailItem label="Verification Reason">
                   {candidate.verificationReason || "No verification reason available."}
                 </DetailItem>
+
                 <DetailItem label="Verification Score">
                   {candidate.verificationScore || 0}%
                 </DetailItem>
@@ -277,14 +289,17 @@ export default function SelectorCandidateDetail() {
             <Section title="Evaluation Summary">
               <div className="space-y-3">
                 <DetailItem label="Technical Test Status">
-                  {candidate.technicalTestStatus || "N/A"}
+                  {candidate.technicalTestStatus || "Not assigned"}
                 </DetailItem>
+
                 <DetailItem label="Technical Score">
                   {getTechnicalScore(candidate)}
                 </DetailItem>
+
                 <DetailItem label="Personality Test Status">
-                  {candidate.personalityTestStatus || "N/A"}
+                  {candidate.personalityTestStatus || "Not assigned"}
                 </DetailItem>
+
                 <DetailItem label="Personality Score">
                   {getPersonalityScore(candidate)}
                 </DetailItem>
@@ -296,6 +311,7 @@ export default function SelectorCandidateDetail() {
                 <DetailItem label="Selector Decision">
                   {candidate.selectorDecision || "PENDING"}
                 </DetailItem>
+
                 <DetailItem label="Remarks">
                   {candidate.selectorRemarks || candidate.finalRemarks || "No remarks added yet."}
                 </DetailItem>
@@ -311,6 +327,7 @@ export default function SelectorCandidateDetail() {
                       stage={item.stage}
                       note={item.note}
                       date={item.date}
+                      candidate={candidate}
                     />
                   ))
                 ) : (
@@ -327,12 +344,11 @@ export default function SelectorCandidateDetail() {
               Back to Candidates
             </Button>
 
-            <Button
-              onClick={() => navigate(`/selector/evaluation/${candidate._id}`)}
-              disabled={!canEvaluate}
-            >
-              Open Evaluation
-            </Button>
+            {canEvaluate && (
+              <Button onClick={() => navigate(`/selector/evaluation/${candidate._id}`)}>
+                Open Evaluation
+              </Button>
+            )}
           </div>
         </div>
       </main>
@@ -365,6 +381,7 @@ function SectionHeader({ title, subtitle }) {
       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
         {title}
       </h2>
+
       {subtitle && (
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           {subtitle}
@@ -384,6 +401,7 @@ function InfoCard({ label, value }) {
       <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
         {label}
       </p>
+
       <p className="mt-2 break-words text-sm font-semibold text-gray-900 dark:text-white">
         {value || "N/A"}
       </p>
@@ -397,6 +415,7 @@ function DetailItem({ label, children }) {
       <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
         {label}
       </p>
+
       <div className="mt-2 break-words text-sm font-medium leading-6 text-gray-900 dark:text-white">
         {children || "N/A"}
       </div>
@@ -406,13 +425,15 @@ function DetailItem({ label, children }) {
 
 function ScoreMetric({ label, value, note }) {
   return (
-    <Card className="border border-gray-200/80 bg-gradient-to-br from-white to-gray-50 shadow-sm dark:border-gray-700/80 dark:from-gray-800 dark:to-gray-900">
+    <Card className="border border-gray-200/80 bg-gradient-to-br from-white to-gray-50 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 dark:from-gray-800 dark:to-gray-900">
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {label}
       </p>
+
       <h2 className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
         {value || "N/A"}
       </h2>
+
       <p className="mt-2 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
         {note || "N/A"}
       </p>
@@ -424,6 +445,7 @@ function ScoreRow({ label, value }) {
   return (
     <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 dark:bg-gray-900/40">
       <span className="text-sm text-gray-600 dark:text-gray-300">{label}</span>
+
       <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
         {value || "N/A"}
       </span>
@@ -457,40 +479,64 @@ function ChecklistItem({ label, status = "warning" }) {
   );
 }
 
-function Progress({ stage }) {
-  const currentIndex = workflowSteps.indexOf(stage);
+function Progress({ stage, candidate }) {
+  const normalizedStage = normalizeStage(stage, candidate);
+
+  let currentIndex = workflowSteps.indexOf(normalizedStage);
+
+  if (normalizedStage === SELECTOR_STAGES.VERIFICATION_REVIEW) currentIndex = 1;
+  if (normalizedStage === SELECTOR_STAGES.TECHNICAL_TEST_IN_PROGRESS) {
+    currentIndex = workflowSteps.indexOf(SELECTOR_STAGES.TECHNICAL_TEST_ASSIGNED);
+  }
+  if (normalizedStage === SELECTOR_STAGES.TECHNICAL_SHORTLISTED) {
+    currentIndex = workflowSteps.indexOf(SELECTOR_STAGES.TECHNICAL_QUALIFIED);
+  }
+  if (normalizedStage === SELECTOR_STAGES.PERSONALITY_TEST_IN_PROGRESS) {
+    currentIndex = workflowSteps.indexOf(SELECTOR_STAGES.PERSONALITY_TEST_ASSIGNED);
+  }
+  if (normalizedStage === SELECTOR_STAGES.WAITLISTED || normalizedStage === SELECTOR_STAGES.FINAL_REJECTED) {
+    currentIndex = workflowSteps.length - 1;
+  }
+
+  if (currentIndex < 0) currentIndex = 0;
 
   return (
-    <div className="grid gap-3 md:grid-cols-6">
+    <div className="grid gap-3 sm:grid-cols-5 xl:grid-cols-10">
       {workflowSteps.map((step, index) => {
         const active = currentIndex >= index;
+        const current = currentIndex === index;
 
         return (
           <div
             key={step}
-            className={`rounded-2xl border px-4 py-4 transition ${
+            className={`rounded-2xl border px-3 py-4 transition ${
               active
-                ? "border-green-200 bg-green-50 dark:border-green-900/60 dark:bg-green-950/20"
+                ? "border-blue-200 bg-blue-50 dark:border-blue-900/60 dark:bg-blue-950/20"
                 : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40"
             }`}
           >
             <div
-              className={`mb-3 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
-                active
-                  ? "bg-green-600 text-white"
+              className={`mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
+                current
+                  ? "bg-blue-700 text-white ring-4 ring-blue-100 dark:ring-blue-900/40"
+                  : active
+                  ? "bg-blue-700 text-white"
                   : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-300"
               }`}
             >
-              {index + 1}
+              {active ? "✓" : index + 1}
             </div>
+
             <p
-              className={`text-sm font-semibold ${
-                active
-                  ? "text-green-700 dark:text-green-300"
-                  : "text-gray-600 dark:text-gray-300"
+              className={`text-center text-[11px] font-semibold leading-4 ${
+                current
+                  ? "text-gray-900 dark:text-white"
+                  : active
+                  ? "text-blue-700 dark:text-blue-300"
+                  : "text-gray-500 dark:text-gray-400"
               }`}
             >
-              {formatStage(step)}
+              {formatStage(step, candidate)}
             </p>
           </div>
         );
@@ -499,18 +545,20 @@ function Progress({ stage }) {
   );
 }
 
-function TimelineItem({ stage, note, date }) {
+function TimelineItem({ stage, note, date, candidate }) {
   return (
     <div className="relative rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-            {formatStage(stage)}
+            {formatStage(stage, candidate)}
           </p>
+
           <p className="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-300">
             {note || "No note available."}
           </p>
         </div>
+
         <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-400">
           {formatDate(date)}
         </span>

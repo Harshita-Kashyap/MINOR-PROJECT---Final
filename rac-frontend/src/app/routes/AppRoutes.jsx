@@ -237,6 +237,15 @@ function AppRoutes() {
         />
 
         <Route
+          path="/applicant/personality-test/:id"
+          element={
+            <ProtectedRoute allowedRoles={["applicant"]}>
+              <PersonalityTest />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/applicant/profile"
           element={
             <ProtectedRoute allowedRoles={["applicant"]}>
