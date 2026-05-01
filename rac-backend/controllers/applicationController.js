@@ -145,42 +145,52 @@ exports.apply = async (req, res) => {
     const matchPercent = totalFields
       ? (matchedFields / totalFields) * 100
       : 0;
+// store score separately
+application.verificationScore = Number(matchPercent.toFixed(1));
 
-    // RESULT
-    if (matchPercent >= 75) {
-      application.verificationStatus = "ELIGIBLE";
-      application.currentStage = "VERIFICATION_ELIGIBLE";
-      application.technicalTestStatus = "NOT_ASSIGNED";
-      application.verificationReason = `High match (${matchPercent.toFixed(1)}%). Candidate is eligible. Technical test will be assigned after vacancy deadline.`;
+// RESULT
+if (matchPercent >= 70) {
+  application.verificationStatus = "ELIGIBLE";
+  application.currentStage = "VERIFICATION_ELIGIBLE";
+  application.technicalTestStatus = "NOT_ASSIGNED";
 
-      application.timeline.push({
-        stage: "VERIFICATION_ELIGIBLE",
-        note: "Candidate verified as eligible.",
-        date: new Date(),
-      });
-    } else if (matchPercent >= 50) {
-      application.verificationStatus = "REVIEW";
-      application.currentStage = "VERIFICATION_REVIEW";
-      application.technicalTestStatus = "NOT_ASSIGNED";
-      application.verificationReason = `Needs manual review (${matchPercent.toFixed(1)}%).`;
+  application.verificationReason =
+    "High data match. Candidate is eligible for next stage.";
 
-      application.timeline.push({
-        stage: "VERIFICATION_REVIEW",
-        note: "Candidate profile requires manual review.",
-        date: new Date(),
-      });
-    } else {
-      application.verificationStatus = "REJECTED";
-      application.currentStage = "VERIFICATION_REJECTED";
-      application.technicalTestStatus = "NOT_ASSIGNED";
-      application.verificationReason = `Low match (${matchPercent.toFixed(1)}%). Candidate rejected in verification.`;
+  application.timeline.push({
+    stage: "VERIFICATION_ELIGIBLE",
+    note: "Candidate verified as eligible.",
+    date: new Date(),
+  });
 
-      application.timeline.push({
-        stage: "VERIFICATION_REJECTED",
-        note: "Candidate rejected during eligibility verification.",
-        date: new Date(),
-      });
-    }
+} else if (matchPercent >= 50) {
+  application.verificationStatus = "REVIEW";
+  application.currentStage = "VERIFICATION_REVIEW";
+  application.technicalTestStatus = "NOT_ASSIGNED";
+
+  application.verificationReason =
+    "Partial data mismatch. Requires manual review.";
+
+  application.timeline.push({
+    stage: "VERIFICATION_REVIEW",
+    note: "Candidate profile requires manual review.",
+    date: new Date(),
+  });
+
+} else {
+  application.verificationStatus = "REJECTED";
+  application.currentStage = "VERIFICATION_REJECTED";
+  application.technicalTestStatus = "NOT_ASSIGNED";
+
+  application.verificationReason =
+    "Significant data mismatch. Candidate rejected in verification.";
+
+  application.timeline.push({
+    stage: "VERIFICATION_REJECTED",
+    note: "Candidate rejected during eligibility verification.",
+    date: new Date(),
+  });
+}
 
     await application.save();
 
