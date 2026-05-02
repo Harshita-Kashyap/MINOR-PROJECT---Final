@@ -55,6 +55,7 @@ import SelectorEvaluation from "../../features/selector/pages/SelectorEvaluation
 import SelectorAnalytics from "../../features/selector/pages/SelectorAnalytics";
 import SelectorEvaluationQueue from "../../features/selector/pages/SelectorEvaluationQueue";
 import ScheduleTechnicalTest from "../../features/selector/pages/ScheduleTechnicalTest";
+import TechnicalResultsCutoff from "../../features/selector/pages/TechnicalResultsCutoff";
 
 function AppRoutes() {
   return (
@@ -228,15 +229,6 @@ function AppRoutes() {
         />
 
         <Route
-          path="/applicant/personality-test"
-          element={
-            <ProtectedRoute allowedRoles={["applicant"]}>
-              <Navigate to="/applicant/applications" replace />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
           path="/applicant/personality-test/:id"
           element={
             <ProtectedRoute allowedRoles={["applicant"]}>
@@ -244,6 +236,16 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/applicant/personality-test"
+          element={
+            <ProtectedRoute allowedRoles={["applicant"]}>
+              <Navigate to="/applicant/applications" replace />
+            </ProtectedRoute>
+          }
+        />
+        
 
         <Route
           path="/applicant/profile"
@@ -316,6 +318,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["selector"]}>
               <ScheduleTechnicalTest />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/selector/technical-results"
+          element={
+            <ProtectedRoute allowedRoles={["selector"]}>
+              <TechnicalResultsCutoff />
             </ProtectedRoute>
           }
         />

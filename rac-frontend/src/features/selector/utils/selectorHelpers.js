@@ -64,6 +64,11 @@ export const getVacancyTitle = (candidate) =>
   candidate?.vacancy ||
   "N/A";
 
+export const getVacancyId = (candidate) =>
+  typeof candidate?.vacancyId === "object"
+    ? candidate?.vacancyId?._id
+    : candidate?.vacancyId;
+
 export const formatStage = (stage, candidate = {}) => {
   const normalized = normalizeStage(stage, candidate);
 
@@ -87,7 +92,7 @@ export const formatStage = (stage, candidate = {}) => {
     FINAL_REVIEW: "Final Review",
     SELECTED: "Selected",
     WAITLISTED: "Waitlisted",
-    FINAL_REJECTED: "Final Rejected",
+    FINAL_REJECTED: "Not Selected",
   };
 
   return labels[normalized] || normalized.replaceAll("_", " ");
@@ -100,8 +105,11 @@ export const getPersonalityScore = (candidate) =>
   candidate?.personalityScore ?? candidate?.personality ?? "-";
 
 export const getCompositeScore = (candidate) =>
-  Number(candidate?.technicalScore || 0) +
-  Number(candidate?.personalityScore || 0);
+  Number(
+    candidate?.overallScore ??
+      Number(candidate?.technicalScore || 0) +
+        Number(candidate?.personalityScore || 0)
+  );
 
 export const isReadyForEvaluation = (candidate) => {
   const stage = normalizeStage(candidate?.currentStage, candidate);
@@ -149,3 +157,24 @@ export const getStageBadgeVariant = (stage, candidate = {}) => {
 
   return "info";
 };
+
+export const canScheduleTechnicalTest = (candidate) =>
+  normalizeStage(candidate?.currentStage, candidate) ===
+    SELECTOR_STAGES.VERIFICATION_ELIGIBLE &&
+  candidate?.verificationStatus === "ELIGIBLE";
+
+export const canSetTechnicalCutoff = (candidate) =>
+  normalizeStage(candidate?.currentStage, candidate) ===
+    SELECTOR_STAGES.TECHNICAL_TEST_SUBMITTED ||
+  candidate?.technicalTestStatus === "SUBMITTED";
+
+export const canSchedulePersonalityTest = (candidate) =>
+  normalizeStage(candidate?.currentStage, candidate) ===
+  SELECTOR_STAGES.TECHNICAL_QUALIFIED;
+
+export const isFinalDecisionCompleted = (candidate) =>
+  [
+    SELECTOR_STAGES.SELECTED,
+    SELECTOR_STAGES.WAITLISTED,
+    SELECTOR_STAGES.FINAL_REJECTED,
+  ].includes(normalizeStage(candidate?.currentStage, candidate));

@@ -34,6 +34,11 @@ export const scheduleTechnicalTest = async (data) => {
   return res.data;
 };
 
+export const schedulePersonalityTest = async (data) => {
+  const res = await API.post("/api/selector/tests/schedule-personality", data);
+  return res.data;
+};
+
 export const getTechnicalResultsByVacancy = async (vacancyId) => {
   const res = await API.get(`/api/selector/technical-results/${vacancyId}`);
   return res.data;

@@ -223,11 +223,10 @@ export default function SelectorCandidateDetail() {
               />
 
               <div
-                className={`rounded-2xl border px-4 py-4 ${
-                  canEvaluate
+                className={`rounded-2xl border px-4 py-4 ${canEvaluate
                     ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900/60 dark:bg-green-950/20 dark:text-green-300"
                     : "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-300"
-                }`}
+                  }`}
               >
                 <p className="text-sm font-semibold">
                   {canEvaluate ? "Ready for Evaluation" : "Not Ready Yet"}
@@ -431,7 +430,7 @@ function ScoreMetric({ label, value, note }) {
       </p>
 
       <h2 className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-        {value || "N/A"}
+        {value === null || value === undefined || value === "" ? "N/A" : value}
       </h2>
 
       <p className="mt-2 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
@@ -447,7 +446,7 @@ function ScoreRow({ label, value }) {
       <span className="text-sm text-gray-600 dark:text-gray-300">{label}</span>
 
       <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-        {value || "N/A"}
+        {value === null || value === undefined || value === "" ? "N/A" : value}
       </span>
     </div>
   );
@@ -488,9 +487,7 @@ function Progress({ stage, candidate }) {
   if (normalizedStage === SELECTOR_STAGES.TECHNICAL_TEST_IN_PROGRESS) {
     currentIndex = workflowSteps.indexOf(SELECTOR_STAGES.TECHNICAL_TEST_ASSIGNED);
   }
-  if (normalizedStage === SELECTOR_STAGES.TECHNICAL_SHORTLISTED) {
-    currentIndex = workflowSteps.indexOf(SELECTOR_STAGES.TECHNICAL_QUALIFIED);
-  }
+
   if (normalizedStage === SELECTOR_STAGES.PERSONALITY_TEST_IN_PROGRESS) {
     currentIndex = workflowSteps.indexOf(SELECTOR_STAGES.PERSONALITY_TEST_ASSIGNED);
   }
@@ -509,32 +506,29 @@ function Progress({ stage, candidate }) {
         return (
           <div
             key={step}
-            className={`rounded-2xl border px-3 py-4 transition ${
-              active
+            className={`rounded-2xl border px-3 py-4 transition ${active
                 ? "border-blue-200 bg-blue-50 dark:border-blue-900/60 dark:bg-blue-950/20"
                 : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40"
-            }`}
+              }`}
           >
             <div
-              className={`mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
-                current
+              className={`mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${current
                   ? "bg-blue-700 text-white ring-4 ring-blue-100 dark:ring-blue-900/40"
                   : active
-                  ? "bg-blue-700 text-white"
-                  : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-300"
-              }`}
+                    ? "bg-blue-700 text-white"
+                    : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-300"
+                }`}
             >
               {active ? "✓" : index + 1}
             </div>
 
             <p
-              className={`text-center text-[11px] font-semibold leading-4 ${
-                current
+              className={`text-center text-[11px] font-semibold leading-4 ${current
                   ? "text-gray-900 dark:text-white"
                   : active
-                  ? "text-blue-700 dark:text-blue-300"
-                  : "text-gray-500 dark:text-gray-400"
-              }`}
+                    ? "text-blue-700 dark:text-blue-300"
+                    : "text-gray-500 dark:text-gray-400"
+                }`}
             >
               {formatStage(step, candidate)}
             </p>

@@ -283,9 +283,9 @@ export default function SelectorEvaluationQueue() {
                 </Button>
 
                 <Button
-                  onClick={() => navigate("/selector/schedule-technical-test")}
+                  onClick={() => navigate("/selector/technical-results")}
                 >
-                  Schedule Technical Test
+                  Go to Technical Results
                 </Button>
               </div>
             </Card>
@@ -309,9 +309,8 @@ function QueueMetric({ title, value, note, tone = "default" }) {
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${
-        toneMap[tone] || toneMap.default
-      }`}
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${toneMap[tone] || toneMap.default
+        }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {title}

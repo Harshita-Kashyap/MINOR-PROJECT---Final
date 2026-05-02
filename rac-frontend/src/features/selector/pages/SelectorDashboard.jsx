@@ -10,6 +10,8 @@ import {
   getSelectorCandidates,
 } from "../services/selectorService";
 import {
+  SELECTOR_STAGES,
+  normalizeStage,
   formatStage,
   getCandidateName,
   getStageBadgeVariant,
@@ -27,17 +29,15 @@ export default function SelectorDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        setLoading(true);
-
         const [dashboard, candidateRes] = await Promise.all([
           getSelectorDashboard(),
           getSelectorCandidates(),
         ]);
 
-        setDashboardStats(dashboard.stats || {});
-        setCandidates(Array.isArray(candidateRes.candidates) ? candidateRes.candidates : []);
+        setDashboardStats(dashboard?.stats || {});
+        setCandidates(Array.isArray(candidateRes?.candidates) ? candidateRes.candidates : []);
       } catch (err) {
-        console.error(err);
+        console.error("Selector dashboard error:", err);
       } finally {
         setLoading(false);
       }
@@ -47,47 +47,38 @@ export default function SelectorDashboard() {
   }, []);
 
   const derivedStats = useMemo(() => {
+    const technicalPending = candidates.filter(
+      (c) => normalizeStage(c.currentStage, c) === SELECTOR_STAGES.VERIFICATION_ELIGIBLE
+    ).length;
+
+    const cutoffPending = candidates.filter(
+      (c) => normalizeStage(c.currentStage, c) === SELECTOR_STAGES.TECHNICAL_TEST_SUBMITTED
+    ).length;
+
+    const personalityPending = candidates.filter(
+      (c) => normalizeStage(c.currentStage, c) === SELECTOR_STAGES.TECHNICAL_QUALIFIED
+    ).length;
+
+    const finalReview = candidates.filter(
+      (c) => normalizeStage(c.currentStage, c) === SELECTOR_STAGES.FINAL_REVIEW
+    ).length;
+
+    const completed = candidates.filter((c) =>
+      [
+        SELECTOR_STAGES.SELECTED,
+        SELECTOR_STAGES.WAITLISTED,
+        SELECTOR_STAGES.FINAL_REJECTED,
+      ].includes(normalizeStage(c.currentStage, c))
+    ).length;
+
     return {
       total: dashboardStats.total ?? candidates.length,
-
-      verificationReview: candidates.filter((c) =>
-        ["VERIFICATION_PENDING", "VERIFICATION_REVIEW"].includes(c.currentStage)
-      ).length,
-
-      verificationRejected: candidates.filter(
-        (c) => c.verificationStatus === "REJECTED"
-      ).length,
-
-      technical: candidates.filter((c) =>
-        [
-          "TECHNICAL_TEST_ASSIGNED",
-          "TECHNICAL_TEST_IN_PROGRESS",
-          "TECHNICAL_TEST_SUBMITTED",
-          "TECHNICAL_QUALIFIED",
-          "TECHNICAL_REJECTED",
-        ].includes(c.currentStage)
-      ).length,
-
-      personality: candidates.filter((c) =>
-        [
-          "PERSONALITY_TEST_ASSIGNED",
-          "PERSONALITY_TEST_IN_PROGRESS",
-          "PERSONALITY_TEST_SUBMITTED",
-        ].includes(c.currentStage)
-      ).length,
-
-      finalReview:
-        dashboardStats.finalReview ??
-        candidates.filter((c) => c.currentStage === "FINAL_REVIEW").length,
-
-      completed:
-        dashboardStats.completed ??
-        candidates.filter((c) =>
-          ["SELECTED", "WAITLISTED", "FINAL_REJECTED"].includes(c.currentStage)
-        ).length,
-
+      technicalPending,
+      cutoffPending,
+      personalityPending,
+      finalReview,
+      completed,
       readyForEvaluation: candidates.filter(isReadyForEvaluation).length,
-
       recommended: dashboardStats.recommended ?? 0,
       rejected: dashboardStats.rejected ?? 0,
       hold: dashboardStats.hold ?? 0,
@@ -97,33 +88,33 @@ export default function SelectorDashboard() {
 
   const stageBuckets = [
     {
-      title: "Total Candidates",
-      value: derivedStats.total,
-      tone: "default",
-      description: "All applications available to selector.",
+      title: "Schedule Technical",
+      value: derivedStats.technicalPending,
+      tone: "warning",
+      description: "Verified eligible candidates waiting for technical test.",
     },
     {
-      title: "Verification Review",
-      value: derivedStats.verificationReview,
-      tone: "warning",
-      description: "Profiles pending or needing review.",
+      title: "Apply Cutoff",
+      value: derivedStats.cutoffPending,
+      tone: "danger",
+      description: "Technical submissions waiting for cutoff.",
+    },
+    {
+      title: "Schedule Personality",
+      value: derivedStats.personalityPending,
+      tone: "info",
+      description: "Technically qualified candidates waiting for personality test.",
     },
     {
       title: "Final Review",
-      value: derivedStats.finalReview,
-      tone: "info",
-      description: "Candidates close to final selector decision.",
-    },
-    {
-      title: "Ready to Evaluate",
       value: derivedStats.readyForEvaluation,
-      tone: "danger",
-      description: "Candidates waiting for selector action.",
+      tone: "success",
+      description: "Candidates ready for final selector decision.",
     },
   ];
 
-  const recentCandidates = candidates.slice(0, 3);
   const priorityCandidates = candidates.filter(isReadyForEvaluation).slice(0, 3);
+  const recentCandidates = candidates.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 via-gray-100 to-gray-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -142,28 +133,28 @@ export default function SelectorDashboard() {
                 </p>
 
                 <h1 className="text-2xl font-semibold sm:text-3xl">
-                  Review candidate progress and complete selector decisions
+                  Manage tests, cutoff, and final review decisions
                 </h1>
 
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-blue-100">
-                  Monitor verification, technical assessment, personality assessment,
-                  final review status, and selector recommendations from one place.
+                  The system automates eligibility, scoring, shortlisting, and stage movement.
+                  Selector actions are limited to scheduling tests, applying cutoff, and final judgement.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-3">
                 <Button
                   variant="secondary"
-                  onClick={() => navigate("/selector/evaluation")}
+                  onClick={() => navigate("/selector/schedule-technical-test")}
                 >
-                  Open Evaluation Queue
+                  Schedule Technical
                 </Button>
 
                 <Button
                   variant="outlineWhite"
-                  onClick={() => navigate("/selector/candidates")}
+                  onClick={() => navigate("/selector/technical-results")}
                 >
-                  Candidate Directory
+                  Technical Results
                 </Button>
               </div>
             </div>
@@ -185,57 +176,48 @@ export default function SelectorDashboard() {
 
               <div className="grid gap-6 xl:grid-cols-12">
                 <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80 xl:col-span-7">
-                  <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
-                    <div>
-                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Stage-wise Workload
-                      </h2>
-                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Live workload calculated from backend application records.
-                      </p>
-                    </div>
-                  </div>
+                  <SectionHeader
+                    title="Workflow Action Summary"
+                    subtitle="Selector workload based on the automated recruitment pipeline."
+                  />
 
                   <div className="space-y-4">
                     <QueueRow
-                      label="Verification Review"
-                      value={derivedStats.verificationReview}
-                      note="Pending or review-flagged applications"
+                      label="Verified Eligible"
+                      value={derivedStats.technicalPending}
+                      note="Ready for vacancy-wise technical test assignment"
+                      action="Schedule"
+                      onClick={() => navigate("/selector/schedule-technical-test")}
                     />
                     <QueueRow
-                      label="Technical Stage"
-                      value={derivedStats.technical}
-                      note="Candidates currently in technical assessment stage"
+                      label="Technical Submitted"
+                      value={derivedStats.cutoffPending}
+                      note="Ready for cutoff filtering"
+                      action="Set Cutoff"
+                      onClick={() => navigate("/selector/technical-results")}
                     />
                     <QueueRow
-                      label="Personality Stage"
-                      value={derivedStats.personality}
-                      note="Candidates currently in personality/interview stage"
+                      label="Technical Qualified"
+                      value={derivedStats.personalityPending}
+                      note="Ready for personality test scheduling"
+                      action="Schedule Personality"
+                      onClick={() => navigate("/selector/technical-results")}
                     />
                     <QueueRow
                       label="Final Review"
-                      value={derivedStats.finalReview}
-                      note="Candidates waiting near final decision"
-                    />
-                    <QueueRow
-                      label="Completed"
-                      value={derivedStats.completed}
-                      note="Applications where selector decision is completed"
+                      value={derivedStats.readyForEvaluation}
+                      note="Ready for manual final selector decision"
+                      action="Evaluate"
+                      onClick={() => navigate("/selector/evaluation")}
                     />
                   </div>
                 </Card>
 
                 <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80 xl:col-span-5">
-                  <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
-                    <div>
-                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Decision Summary
-                      </h2>
-                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Final selector outcomes from backend records.
-                      </p>
-                    </div>
-                  </div>
+                  <SectionHeader
+                    title="Decision Summary"
+                    subtitle="Final outcomes submitted by selector."
+                  />
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <DecisionBox label="Recommended" value={derivedStats.recommended} tone="success" />
@@ -247,24 +229,19 @@ export default function SelectorDashboard() {
               </div>
 
               <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
-                <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Priority Evaluation Queue
-                    </h2>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      Candidates currently ready for selector decision.
-                    </p>
-                  </div>
-
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => navigate("/selector/evaluation")}
-                  >
-                    View Queue
-                  </Button>
-                </div>
+                <SectionHeader
+                  title="Priority Final Review Queue"
+                  subtitle="Candidates currently ready for final selector decision."
+                  action={
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => navigate("/selector/evaluation")}
+                    >
+                      View Queue
+                    </Button>
+                  }
+                />
 
                 {priorityCandidates.length > 0 ? (
                   <div className="grid gap-4 md:grid-cols-3">
@@ -283,24 +260,19 @@ export default function SelectorDashboard() {
               </Card>
 
               <Card className="border border-gray-200/80 shadow-sm dark:border-gray-700/80">
-                <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Recent Candidate Activity
-                    </h2>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      Latest applications received from backend.
-                    </p>
-                  </div>
-
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => navigate("/selector/candidates")}
-                  >
-                    View All
-                  </Button>
-                </div>
+                <SectionHeader
+                  title="Recent Candidate Activity"
+                  subtitle="Latest application records from backend."
+                  action={
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => navigate("/selector/candidates")}
+                    >
+                      View All
+                    </Button>
+                  }
+                />
 
                 {recentCandidates.length > 0 ? (
                   <div className="grid gap-4 md:grid-cols-3">
@@ -325,18 +297,39 @@ export default function SelectorDashboard() {
   );
 }
 
+function SectionHeader({ title, subtitle, action }) {
+  return (
+    <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {subtitle}
+          </p>
+        )}
+      </div>
+
+      {action}
+    </div>
+  );
+}
+
 function MetricCard({ title, value, description, tone }) {
   const toneMap = {
     default: "from-gray-50 to-white dark:from-gray-800 dark:to-gray-800",
     info: "from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-gray-800",
     warning: "from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-gray-800",
     danger: "from-red-50 to-rose-50 dark:from-red-950/20 dark:to-gray-800",
+    success: "from-emerald-50 to-green-50 dark:from-emerald-950/20 dark:to-gray-800",
   };
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${toneMap[tone || "default"]
-        }`}
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/80 ${
+        toneMap[tone || "default"]
+      }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {title}
@@ -351,10 +344,10 @@ function MetricCard({ title, value, description, tone }) {
   );
 }
 
-function QueueRow({ label, value, note }) {
+function QueueRow({ label, value, note, action, onClick }) {
   return (
     <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4 dark:border-gray-700 dark:bg-gray-900/40">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-base font-medium text-gray-900 dark:text-white">
             {label}
@@ -363,9 +356,16 @@ function QueueRow({ label, value, note }) {
             {note}
           </p>
         </div>
-        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-          {value ?? 0}
-        </span>
+
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+            {value ?? 0}
+          </span>
+
+          <Button size="sm" variant="outline" onClick={onClick}>
+            {action}
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -383,8 +383,7 @@ function DecisionBox({ label, value, tone }) {
     <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
       <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
       <span
-        className={`mt-3 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${toneMap[tone]
-          }`}
+        className={`mt-3 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${toneMap[tone]}`}
       >
         {value ?? 0}
       </span>
@@ -393,11 +392,13 @@ function DecisionBox({ label, value, tone }) {
 }
 
 function CandidateCard({ candidate, actionLabel, onClick }) {
+  const stage = normalizeStage(candidate.currentStage, candidate);
+
   return (
     <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm dark:border-gray-700 dark:bg-gray-900/40">
       <div className="flex flex-wrap gap-2">
-        <Badge variant={getStageBadgeVariant(candidate.currentStage)}>
-          {formatStage(candidate.currentStage)}
+        <Badge variant={getStageBadgeVariant(stage, candidate)}>
+          {formatStage(stage, candidate)}
         </Badge>
       </div>
 

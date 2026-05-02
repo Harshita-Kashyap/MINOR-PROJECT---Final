@@ -14,11 +14,15 @@ import {
 } from "recharts";
 import { getSelectorCandidates } from "../services/selectorService";
 import {
+  SELECTOR_STAGES,
+  normalizeStage,
   formatStage,
   getCandidateName,
   getCompositeScore,
   getVacancyTitle,
+  getStageBadgeVariant,
 } from "../utils/selectorHelpers";
+import Badge from "../../../shared/components/ui/Badge";
 
 export default function SelectorAnalytics() {
   const { dark } = useTheme();
@@ -28,11 +32,10 @@ export default function SelectorAnalytics() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         const res = await getSelectorCandidates();
         setCandidates(Array.isArray(res.candidates) ? res.candidates : []);
       } catch (err) {
-        console.error(err);
+        console.error("Selector analytics error:", err);
       } finally {
         setLoading(false);
       }
@@ -44,9 +47,12 @@ export default function SelectorAnalytics() {
   const analytics = useMemo(() => {
     const total = candidates.length || 1;
 
+    const scoredCandidates = candidates.filter(
+      (c) => c.technicalScore !== null || c.personalityScore !== null
+    );
+
     const data = candidates.map((c) => ({
       name: getCandidateName(c),
-      verification: c.verificationScore || 0,
       technical: c.technicalScore || 0,
       personality: c.personalityScore || 0,
       overall: c.overallScore || getCompositeScore(c),
@@ -55,6 +61,7 @@ export default function SelectorAnalytics() {
     const rankedData = [...candidates]
       .map((c) => ({
         ...c,
+        normalizedStage: normalizeStage(c.currentStage, c),
         total: c.overallScore || getCompositeScore(c),
       }))
       .sort((a, b) => b.total - a.total);
@@ -62,21 +69,54 @@ export default function SelectorAnalytics() {
     return {
       data,
       rankedData,
-      averageVerificationScore: Math.round(
-        candidates.reduce((sum, c) => sum + (c.verificationScore || 0), 0) / total
-      ),
+
       averageTechnicalScore: Math.round(
-        candidates.reduce((sum, c) => sum + (c.technicalScore || 0), 0) / total
+        scoredCandidates.reduce((sum, c) => sum + Number(c.technicalScore || 0), 0) /
+          (scoredCandidates.length || 1)
       ),
+
       averagePersonalityScore: Math.round(
-        candidates.reduce((sum, c) => sum + (c.personalityScore || 0), 0) / total
+        scoredCandidates.reduce((sum, c) => sum + Number(c.personalityScore || 0), 0) /
+          (scoredCandidates.length || 1)
       ),
-      finalReviewCount: candidates.filter((c) => c.currentStage === "FINAL_REVIEW").length,
-      completedCount: candidates.filter((c) => c.currentStage === "COMPLETED").length,
-      verifiedEligibleCount: candidates.filter((c) => c.verificationStatus === "ELIGIBLE").length,
-      reviewCount: candidates.filter((c) => c.verificationStatus === "REVIEW").length,
-      pendingCount: candidates.filter((c) => c.verificationStatus === "PENDING").length,
-      rejectedCount: candidates.filter((c) => c.verificationStatus === "REJECTED").length,
+
+      technicalSubmittedCount: candidates.filter(
+        (c) => normalizeStage(c.currentStage, c) === SELECTOR_STAGES.TECHNICAL_TEST_SUBMITTED
+      ).length,
+
+      technicalQualifiedCount: candidates.filter(
+        (c) => normalizeStage(c.currentStage, c) === SELECTOR_STAGES.TECHNICAL_QUALIFIED
+      ).length,
+
+      personalityAssignedCount: candidates.filter(
+        (c) => normalizeStage(c.currentStage, c) === SELECTOR_STAGES.PERSONALITY_TEST_ASSIGNED
+      ).length,
+
+      finalReviewCount: candidates.filter(
+        (c) => normalizeStage(c.currentStage, c) === SELECTOR_STAGES.FINAL_REVIEW
+      ).length,
+
+      completedCount: candidates.filter((c) =>
+        [
+          SELECTOR_STAGES.SELECTED,
+          SELECTOR_STAGES.WAITLISTED,
+          SELECTOR_STAGES.FINAL_REJECTED,
+        ].includes(normalizeStage(c.currentStage, c))
+      ).length,
+
+      verifiedEligibleCount: candidates.filter(
+        (c) => c.verificationStatus === "ELIGIBLE"
+      ).length,
+
+      reviewCount: candidates.filter(
+        (c) => c.verificationStatus === "REVIEW"
+      ).length,
+
+      rejectedCount: candidates.filter(
+        (c) => c.verificationStatus === "REJECTED"
+      ).length,
+
+      totalCandidates: total,
     };
   }, [candidates]);
 
@@ -97,17 +137,17 @@ export default function SelectorAnalytics() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_35%)]" />
 
             <div className="relative">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-blue-100">
+              <p className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-blue-100">
                 Selector Analytics
               </p>
 
               <h1 className="text-2xl font-semibold sm:text-3xl">
-                Workflow performance and decision readiness
+                Assessment scores and workflow readiness
               </h1>
 
               <p className="mt-3 max-w-3xl text-sm leading-7 text-blue-100">
-                Review backend-driven candidate scores, verification outcomes,
-                stage movement, and final review readiness.
+                Review technical scores, personality scores, cutoff movement,
+                final review readiness, and selector outcomes.
               </p>
             </div>
           </section>
@@ -128,21 +168,21 @@ export default function SelectorAnalytics() {
                   accent="blue"
                 />
                 <MetricCard
-                  title="Avg Verification"
-                  value={`${analytics.averageVerificationScore}%`}
-                  note="Profile verification score"
-                  accent="purple"
-                />
-                <MetricCard
                   title="Avg Technical"
                   value={analytics.averageTechnicalScore}
                   note="Technical score average"
                   accent="green"
                 />
                 <MetricCard
+                  title="Avg Personality"
+                  value={analytics.averagePersonalityScore}
+                  note="Personality score average"
+                  accent="purple"
+                />
+                <MetricCard
                   title="Final Review Pool"
                   value={analytics.finalReviewCount}
-                  note="Ready or near decision"
+                  note="Ready for final judgement"
                   accent="amber"
                 />
               </div>
@@ -150,7 +190,7 @@ export default function SelectorAnalytics() {
               <Panel>
                 <SectionHeader
                   title="Candidate Score Overview"
-                  subtitle="Verification, technical, personality, and overall score comparison."
+                  subtitle="Technical, personality, and overall score comparison."
                 />
 
                 <div className="relative h-[340px] min-h-[340px] w-full min-w-0 overflow-hidden">
@@ -183,9 +223,6 @@ export default function SelectorAnalytics() {
                             border: `1px solid ${tooltipBorder}`,
                             backgroundColor: tooltipBg,
                             color: tooltipText,
-                            boxShadow: dark
-                              ? "0 10px 25px rgba(0,0,0,0.35)"
-                              : "0 10px 25px rgba(0,0,0,0.08)",
                           }}
                           labelStyle={{ color: tooltipText, fontWeight: 600 }}
                           itemStyle={{ color: tooltipText }}
@@ -200,7 +237,6 @@ export default function SelectorAnalytics() {
                           }}
                         />
 
-                        <Bar dataKey="verification" name="Verification" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
                         <Bar dataKey="technical" name="Technical" fill="#3b82f6" radius={[8, 8, 0, 0]} />
                         <Bar dataKey="personality" name="Personality" fill="#10b981" radius={[8, 8, 0, 0]} />
                         <Bar dataKey="overall" name="Overall" fill="#f59e0b" radius={[8, 8, 0, 0]} />
@@ -214,20 +250,10 @@ export default function SelectorAnalytics() {
 
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
                 <Panel className="xl:col-span-2">
-                  <div className="mb-4 flex flex-col gap-3 border-b border-gray-200 pb-4 dark:border-gray-700 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Candidate Ranking
-                      </h2>
-                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Ranked by overall score from backend values.
-                      </p>
-                    </div>
-
-                    <span className="w-fit rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                      Highest score first
-                    </span>
-                  </div>
+                  <SectionHeader
+                    title="Candidate Ranking"
+                    subtitle="Ranked by backend overall score."
+                  />
 
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[820px] text-sm">
@@ -235,7 +261,6 @@ export default function SelectorAnalytics() {
                         <tr>
                           <th className="p-3 text-left">Rank</th>
                           <th className="p-3 text-left">Candidate</th>
-                          <th className="p-3 text-left">Verification</th>
                           <th className="p-3 text-left">Technical</th>
                           <th className="p-3 text-left">Personality</th>
                           <th className="p-3 text-left">Overall</th>
@@ -276,10 +301,6 @@ export default function SelectorAnalytics() {
                               </td>
 
                               <td className="p-3 text-gray-700 dark:text-gray-300">
-                                {c.verificationScore || 0}%
-                              </td>
-
-                              <td className="p-3 text-gray-700 dark:text-gray-300">
                                 {c.technicalScore ?? "-"}
                               </td>
 
@@ -294,16 +315,16 @@ export default function SelectorAnalytics() {
                               </td>
 
                               <td className="p-3">
-                                <span className={getStageColor(c.currentStage)}>
-                                  {formatStage(c.currentStage)}
-                                </span>
+                                <Badge variant={getStageBadgeVariant(c.normalizedStage, c)}>
+                                  {formatStage(c.normalizedStage, c)}
+                                </Badge>
                               </td>
                             </tr>
                           ))
                         ) : (
                           <tr>
                             <td
-                              colSpan="7"
+                              colSpan="6"
                               className="p-8 text-center text-sm text-gray-500 dark:text-gray-400"
                             >
                               No candidates available.
@@ -317,41 +338,18 @@ export default function SelectorAnalytics() {
 
                 <Panel>
                   <SectionHeader
-                    title="Verification Insights"
-                    subtitle="Verification outcomes from backend records."
+                    title="Workflow Insights"
+                    subtitle="Stage movement from backend records."
                   />
 
                   <div className="space-y-3">
-                    <InsightCard
-                      label="Verified Eligible"
-                      value={analytics.verifiedEligibleCount}
-                      accent="green"
-                    />
-                    <InsightCard
-                      label="Under Review"
-                      value={analytics.reviewCount}
-                      accent="blue"
-                    />
-                    <InsightCard
-                      label="Pending"
-                      value={analytics.pendingCount}
-                      accent="amber"
-                    />
-                    <InsightCard
-                      label="Rejected"
-                      value={analytics.rejectedCount}
-                      accent="red"
-                    />
-                    <InsightCard
-                      label="Avg Verification Score"
-                      value={`${analytics.averageVerificationScore}%`}
-                      accent="blue"
-                    />
-                    <InsightCard
-                      label="Completed Decisions"
-                      value={analytics.completedCount}
-                      accent="green"
-                    />
+                    <InsightCard label="Verified Eligible" value={analytics.verifiedEligibleCount} accent="green" />
+                    <InsightCard label="Technical Submitted" value={analytics.technicalSubmittedCount} accent="blue" />
+                    <InsightCard label="Technical Qualified" value={analytics.technicalQualifiedCount} accent="green" />
+                    <InsightCard label="Personality Assigned" value={analytics.personalityAssignedCount} accent="amber" />
+                    <InsightCard label="Final Review" value={analytics.finalReviewCount} accent="blue" />
+                    <InsightCard label="Completed Decisions" value={analytics.completedCount} accent="green" />
+                    <InsightCard label="Verification Rejected" value={analytics.rejectedCount} accent="red" />
                   </div>
                 </Panel>
               </div>
@@ -380,9 +378,7 @@ function SectionHeader({ title, subtitle }) {
         {title}
       </h2>
       {subtitle && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {subtitle}
-        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
       )}
     </div>
   );
@@ -399,12 +395,9 @@ function EmptyState({ message }) {
 function MetricCard({ title, value, note, accent = "blue" }) {
   const accentStyles = {
     blue: "from-blue-500/10 to-blue-100 dark:from-blue-500/10 dark:to-blue-900/20",
-    purple:
-      "from-purple-500/10 to-purple-100 dark:from-purple-500/10 dark:to-purple-900/20",
-    green:
-      "from-green-500/10 to-green-100 dark:from-green-500/10 dark:to-green-900/20",
-    amber:
-      "from-yellow-500/10 to-yellow-100 dark:from-yellow-500/10 dark:to-yellow-900/20",
+    purple: "from-purple-500/10 to-purple-100 dark:from-purple-500/10 dark:to-purple-900/20",
+    green: "from-green-500/10 to-green-100 dark:from-green-500/10 dark:to-green-900/20",
+    amber: "from-yellow-500/10 to-yellow-100 dark:from-yellow-500/10 dark:to-yellow-900/20",
   };
 
   return (
@@ -430,17 +423,16 @@ function MetricCard({ title, value, note, accent = "blue" }) {
 
 function InsightCard({ label, value, accent = "blue" }) {
   const accentMap = {
-    green:
-      "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300",
+    green: "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300",
     red: "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300",
     blue: "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300",
-    amber:
-      "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300",
+    amber: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300",
   };
 
   return (
     <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/40">
       <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+
       <div className="mt-3">
         <span
           className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
@@ -452,21 +444,4 @@ function InsightCard({ label, value, accent = "blue" }) {
       </div>
     </div>
   );
-}
-
-function getStageColor(stage) {
-  switch (stage) {
-    case "FINAL_REVIEW":
-      return "inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
-    case "VERIFICATION":
-      return "inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
-    case "TECHNICAL":
-      return "inline-flex rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300";
-    case "PERSONALITY":
-      return "inline-flex rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
-    case "COMPLETED":
-      return "inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300";
-    default:
-      return "inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300";
-  }
 }
