@@ -228,13 +228,12 @@ applicationSchema.index({ vacancyId: 1, currentStage: 1 });
 applicationSchema.index({ vacancyId: 1, verificationStatus: 1 });
 applicationSchema.index({ vacancyId: 1, finalStatus: 1 });
 
-applicationSchema.pre("save", function (next) {
+applicationSchema.pre("save", function () {
   if (!this.applicationId) {
     this.applicationId = `APP-${Date.now()}-${Math.floor(
       Math.random() * 10000
     )}`;
   }
-  next();
 });
 
 const Application =

@@ -403,20 +403,25 @@ exports.updateTechnicalResult = async (req, res) => {
   try {
     const { technicalScore, technicalRemarks = "" } = req.body;
 
-    const status = Number(technicalScore) >= 60 ? "SHORTLISTED" : "REJECTED";
+    const score = Number(technicalScore || 0);
+    const qualified = score >= 60;
 
     const application = await Application.findByIdAndUpdate(
       req.params.id,
       {
-        technicalScore,
+        technicalScore: score,
         technicalRemarks,
-        technicalTestStatus: status,
-        currentStage: status === "SHORTLISTED" ? "PERSONALITY" : "COMPLETED",
-        personalityTestStatus: status === "SHORTLISTED" ? "ASSIGNED" : "NOT_ASSIGNED",
+        technicalTestStatus: qualified ? "QUALIFIED" : "REJECTED",
+        currentStage: qualified
+          ? "PERSONALITY_TEST_ASSIGNED"
+          : "TECHNICAL_REJECTED",
+        personalityTestStatus: qualified ? "ASSIGNED" : "NOT_ASSIGNED",
         $push: {
           timeline: {
-            stage: "TECHNICAL",
-            note: `Technical result updated. Score: ${technicalScore}`,
+            stage: qualified
+              ? "PERSONALITY_TEST_ASSIGNED"
+              : "TECHNICAL_REJECTED",
+            note: `Technical result updated. Score: ${score}`,
             date: new Date(),
           },
         },
@@ -437,6 +442,53 @@ exports.updateTechnicalResult = async (req, res) => {
       application,
     });
   } catch (err) {
+    console.error("UPDATE TECHNICAL ERROR:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};exports.updateTechnicalResult = async (req, res) => {
+  try {
+    const { technicalScore, technicalRemarks = "" } = req.body;
+
+    const score = Number(technicalScore || 0);
+    const qualified = score >= 60;
+
+    const application = await Application.findByIdAndUpdate(
+      req.params.id,
+      {
+        technicalScore: score,
+        technicalRemarks,
+        technicalTestStatus: qualified ? "QUALIFIED" : "REJECTED",
+        currentStage: qualified
+          ? "PERSONALITY_TEST_ASSIGNED"
+          : "TECHNICAL_REJECTED",
+        personalityTestStatus: qualified ? "ASSIGNED" : "NOT_ASSIGNED",
+        $push: {
+          timeline: {
+            stage: qualified
+              ? "PERSONALITY_TEST_ASSIGNED"
+              : "TECHNICAL_REJECTED",
+            note: `Technical result updated. Score: ${score}`,
+            date: new Date(),
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Technical result updated successfully",
+      application,
+    });
+  } catch (err) {
+    console.error("UPDATE TECHNICAL ERROR:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -515,13 +567,13 @@ exports.shortlistCandidates = async (req, res) => {
         app.verificationStatus === "ELIGIBLE" &&
         Number(app.technicalScore || 0) >= minTechnicalScore
       ) {
-        app.technicalTestStatus = "SHORTLISTED";
-        app.currentStage = "PERSONALITY";
+        app.technicalTestStatus = "QUALIFIED";
+        app.currentStage = "PERSONALITY_TEST_ASSIGNED";
         app.personalityTestStatus = "ASSIGNED";
 
         app.timeline.push({
-          stage: "SHORTLISTING",
-          note: "Candidate shortlisted for personality stage",
+          stage: "PERSONALITY_TEST_ASSIGNED",
+          note: "Candidate shortlisted for personality test",
           date: new Date(),
         });
 
@@ -537,6 +589,7 @@ exports.shortlistCandidates = async (req, res) => {
       shortlisted: updated,
     });
   } catch (err) {
+    console.error("SHORTLIST ERROR:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
