@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Button from "../../../shared/components/ui/Button";
 import ThemeToggle from "../../../shared/components/navigation/ThemeToggle";
+import GoogleTranslate from "../../../shared/components/navigation/GoogleTranslate";
 import ashok from "../../../assets/images/ashok.png";
 
 export default function Header() {
@@ -34,6 +35,7 @@ export default function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     navigate("/", { replace: true });
   };
 
@@ -101,7 +103,7 @@ export default function Header() {
             </div>
 
             {/* Toggles */}
-            <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2 py-1 transition-all duration-300 dark:border-gray-700 dark:bg-gray-900">
+            <div className="flex flex-wrap items-center justify-end gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2 py-1 transition-all duration-300 dark:border-gray-700 dark:bg-gray-900">
               {isPublicPage && (
                 <div className="flex items-center overflow-hidden rounded-lg border border-gray-300 dark:border-gray-600">
                   <button
@@ -129,6 +131,8 @@ export default function Header() {
                   </button>
                 </div>
               )}
+
+              {isDashboardPage && <GoogleTranslate />}
 
               <ThemeToggle />
             </div>
