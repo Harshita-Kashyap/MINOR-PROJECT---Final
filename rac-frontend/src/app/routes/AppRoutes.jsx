@@ -32,9 +32,9 @@ import VacancyManagement from "../../features/admin/pages/VacancyManagement";
 import CreateVacancy from "../../features/admin/pages/CreateVacancy";
 import EditVacancy from "../../features/admin/pages/EditVacancy";
 import ApplicationsManagement from "../../features/admin/pages/ApplicationsManagement";
-import Shortlisting from "../../features/admin/pages/Shortlisting";
-import FinalMeritList from "../../features/admin/pages/FinalMeritList";
 import AdminAnalytics from "../../features/admin/pages/AdminAnalytics";
+import VacancyProgress from "../../features/admin/pages/VacancyProgress";
+import UserManagement from "../../features/admin/pages/UserManagement";
 
 // ================= APPLICANT PAGES =================
 import ApplicantDashboard from "../../features/applicant/pages/ApplicantDashboard";
@@ -154,22 +154,23 @@ function AppRoutes() {
         />
 
         <Route
-          path="/admin/shortlisting"
+          path="/admin/vacancies/:id/progress"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <Shortlisting />
+              <VacancyProgress />
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/results"
+          path="/admin/users"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <FinalMeritList />
+              <UserManagement />
             </ProtectedRoute>
           }
         />
+
 
         {/* ================= APPLICANT ROUTES ================= */}
         <Route path="/applicant" element={<Navigate to="/applicant/dashboard" replace />} />
@@ -245,7 +246,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        
+
 
         <Route
           path="/applicant/profile"

@@ -1,10 +1,7 @@
-// models/Vacancy.js
-
 const mongoose = require("mongoose");
 
 const vacancySchema = new mongoose.Schema(
   {
-    // 🧾 BASIC DETAILS
     title: {
       type: String,
       required: true,
@@ -21,6 +18,7 @@ const vacancySchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: "",
+      index: true,
     },
 
     location: {
@@ -32,7 +30,7 @@ const vacancySchema = new mongoose.Schema(
     mode: {
       type: String,
       trim: true,
-      default: "",
+      default: "Online Application",
     },
 
     totalPosts: {
@@ -41,7 +39,6 @@ const vacancySchema = new mongoose.Schema(
       min: 0,
     },
 
-    // 📄 DESCRIPTION
     description: {
       type: String,
       default: "",
@@ -57,19 +54,19 @@ const vacancySchema = new mongoose.Schema(
       default: "",
     },
 
-    // ⏳ DEADLINE
     deadline: {
       type: Date,
+      required: true,
+      index: true,
     },
 
-    // 📊 STATUS
     status: {
       type: String,
-      enum: ["OPEN", "CLOSED", "DRAFT"],
+      enum: ["DRAFT", "OPEN", "CLOSED"],
       default: "DRAFT",
+      index: true,
     },
 
-    // 🎓 ELIGIBILITY RULES
     discipline: {
       type: String,
       trim: true,
@@ -78,28 +75,35 @@ const vacancySchema = new mongoose.Schema(
 
     examTypeRequired: {
       type: String,
-      trim: true,
+      enum: ["", "GATE", "NET", "NONE"],
       default: "",
     },
 
     minGraduationPercentage: {
       type: Number,
       default: null,
+      min: 0,
+      max: 100,
     },
 
     minTwelfthPercentage: {
       type: Number,
       default: null,
+      min: 0,
+      max: 100,
     },
 
     minTenthPercentage: {
       type: Number,
       default: null,
+      min: 0,
+      max: 100,
     },
 
     minGateScore: {
       type: Number,
       default: null,
+      min: 0,
     },
 
     allowedCategories: [
@@ -109,24 +113,51 @@ const vacancySchema = new mongoose.Schema(
       },
     ],
 
-    // 🔁 WORKFLOW (ADVANCED)
-    workflowStages: [
-      {
-        stage: {
-          type: String,
-          trim: true,
+    workflowStages: {
+      type: [
+        {
+          stage: {
+            type: String,
+            trim: true,
+          },
+          label: {
+            type: String,
+            trim: true,
+          },
+          order: {
+            type: Number,
+          },
         },
-        label: {
-          type: String,
-          trim: true,
+      ],
+      default: [
+        {
+          stage: "APPLICATION",
+          label: "Application Submission",
+          order: 1,
         },
-        order: {
-          type: Number,
+        {
+          stage: "VERIFICATION",
+          label: "Automatic Eligibility Verification",
+          order: 2,
         },
-      },
-    ],
+        {
+          stage: "TECHNICAL_TEST",
+          label: "Technical Test",
+          order: 3,
+        },
+        {
+          stage: "PERSONALITY_TEST",
+          label: "Personality Test",
+          order: 4,
+        },
+        {
+          stage: "FINAL_DECISION",
+          label: "Final Decision",
+          order: 5,
+        },
+      ],
+    },
 
-    // 👤 ADMIN WHO CREATED
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -136,7 +167,8 @@ const vacancySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// 🔥 Prevent model overwrite in dev
+vacancySchema.index({ title: "text", department: "text", discipline: "text" });
+
 const Vacancy =
   mongoose.models.Vacancy || mongoose.model("Vacancy", vacancySchema);
 

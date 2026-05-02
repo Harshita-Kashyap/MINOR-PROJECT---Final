@@ -1,9 +1,7 @@
-// routes/vacancyRoutes.js
-
 const express = require("express");
 const router = express.Router();
 
-const {protect }= require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware");
 const { authorize } = require("../middleware/roleMiddleware");
 
 const {
@@ -15,38 +13,21 @@ const {
   updateVacancyStatus,
   publishVacancy,
   closeVacancy,
+  getVacancyApplicationProgress,
 } = require("../controllers/vacancyController");
 
-// ========================
-// 🔓 PUBLIC ROUTES
-// ========================
-
-// Get all vacancies (for applicants)
+// Public/applicant/selector readable
 router.get("/", getAllVacancies);
-
-// Get single vacancy
 router.get("/:id", getVacancyById);
+router.get("/:id/progress", protect, authorize("admin", "selector"), getVacancyApplicationProgress);
 
-// ========================
-// 🔒 ADMIN ROUTES
-// ========================
-
-// Create vacancy
+// Admin-only vacancy management
 router.post("/", protect, authorize("admin"), createVacancy);
-
-// Update vacancy
 router.put("/:id", protect, authorize("admin"), updateVacancy);
-
-// Delete vacancy
 router.delete("/:id", protect, authorize("admin"), deleteVacancy);
 
-// Update vacancy status
-router.put("/status/:id", protect, authorize("admin"), updateVacancyStatus);
-
-// Publish vacancy
-router.put("/publish/:id", protect, authorize("admin"), publishVacancy);
-
-// Close vacancy
-router.put("/close/:id", protect, authorize("admin"), closeVacancy);
+router.patch("/:id/status", protect, authorize("admin"), updateVacancyStatus);
+router.patch("/:id/publish", protect, authorize("admin"), publishVacancy);
+router.patch("/:id/close", protect, authorize("admin"), closeVacancy);
 
 module.exports = router;

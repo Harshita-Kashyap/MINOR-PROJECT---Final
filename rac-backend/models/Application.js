@@ -1,6 +1,28 @@
-// models/Application.js
-
 const mongoose = require("mongoose");
+
+const APPLICATION_STAGES = [
+  "APPLIED",
+
+  "VERIFICATION_PENDING",
+  "VERIFICATION_ELIGIBLE",
+  "VERIFICATION_REVIEW",
+  "VERIFICATION_REJECTED",
+
+  "TECHNICAL_TEST_ASSIGNED",
+  "TECHNICAL_TEST_IN_PROGRESS",
+  "TECHNICAL_TEST_SUBMITTED",
+  "TECHNICAL_QUALIFIED",
+  "TECHNICAL_REJECTED",
+
+  "PERSONALITY_TEST_ASSIGNED",
+  "PERSONALITY_TEST_IN_PROGRESS",
+  "PERSONALITY_TEST_SUBMITTED",
+
+  "FINAL_REVIEW",
+  "SELECTED",
+  "WAITLISTED",
+  "FINAL_REJECTED",
+];
 
 const applicationSchema = new mongoose.Schema(
   {
@@ -8,30 +30,29 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       trim: true,
       unique: true,
+      index: true,
     },
 
-    // Applicant reference
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
 
-    // Applicant profile reference
     profileId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ApplicantProfile",
       required: true,
     },
 
-    // Vacancy reference
     vacancyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vacancy",
       required: true,
+      index: true,
     },
 
-    // Helpful denormalized fields for dashboard/listing
     vacancyTitle: {
       type: String,
       trim: true,
@@ -41,10 +62,9 @@ const applicationSchema = new mongoose.Schema(
     department: {
       type: String,
       trim: true,
-      default: "",
+      default: "DRDO RAC",
     },
 
-    // Optional RAC candidate/application label
     cid: {
       type: String,
       trim: true,
@@ -56,40 +76,18 @@ const applicationSchema = new mongoose.Schema(
       default: Date.now,
     },
 
-    // Overall workflow stage
     currentStage: {
       type: String,
-      enum: [
-        "APPLIED",
-
-        "VERIFICATION_PENDING",
-        "VERIFICATION_ELIGIBLE",
-        "VERIFICATION_REVIEW",
-        "VERIFICATION_REJECTED",
-
-        "TECHNICAL_TEST_ASSIGNED",
-        "TECHNICAL_TEST_IN_PROGRESS",
-        "TECHNICAL_TEST_SUBMITTED",
-        "TECHNICAL_QUALIFIED",
-        "TECHNICAL_REJECTED",
-
-        "PERSONALITY_TEST_ASSIGNED",
-        "PERSONALITY_TEST_IN_PROGRESS",
-        "PERSONALITY_TEST_SUBMITTED",
-
-        "FINAL_REVIEW",
-        "SELECTED",
-        "WAITLISTED",
-        "FINAL_REJECTED",
-      ],
+      enum: APPLICATION_STAGES,
       default: "APPLIED",
+      index: true,
     },
 
-    // Verification stage
     verificationStatus: {
       type: String,
       enum: ["PENDING", "ELIGIBLE", "REVIEW", "REJECTED"],
       default: "PENDING",
+      index: true,
     },
 
     verificationScore: {
@@ -104,14 +102,27 @@ const applicationSchema = new mongoose.Schema(
       default: "",
     },
 
-    // Technical stage
     technicalTestStatus: {
       type: String,
-      enum: ["NOT_ASSIGNED", "ASSIGNED", "IN_PROGRESS", "SUBMITTED", "SHORTLISTED", "REJECTED"],
+      enum: [
+        "NOT_ASSIGNED",
+        "ASSIGNED",
+        "IN_PROGRESS",
+        "SUBMITTED",
+        "QUALIFIED",
+        "REJECTED",
+      ],
       default: "NOT_ASSIGNED",
+      index: true,
     },
 
     technicalScore: {
+      type: Number,
+      default: null,
+      min: 0,
+    },
+
+    technicalCutoff: {
       type: Number,
       default: null,
       min: 0,
@@ -129,13 +140,11 @@ const applicationSchema = new mongoose.Schema(
       default: null,
     },
 
-
-
-    // Personality stage
     personalityTestStatus: {
       type: String,
       enum: ["NOT_ASSIGNED", "ASSIGNED", "IN_PROGRESS", "SUBMITTED"],
       default: "NOT_ASSIGNED",
+      index: true,
     },
 
     personalityScore: {
@@ -156,7 +165,6 @@ const applicationSchema = new mongoose.Schema(
       default: null,
     },
 
-    // Final evaluation
     overallScore: {
       type: Number,
       default: 0,
@@ -165,16 +173,9 @@ const applicationSchema = new mongoose.Schema(
 
     finalStatus: {
       type: String,
-      enum: [
-        "NOT_DECIDED",
-        "PENDING",
-        "RECOMMENDED",
-        "SELECTED",
-        "REJECTED",
-        "HOLD",
-        "WAITLISTED",
-      ],
+      enum: ["NOT_DECIDED", "SELECTED", "WAITLISTED", "REJECTED"],
       default: "NOT_DECIDED",
+      index: true,
     },
 
     finalReason: {
@@ -184,19 +185,6 @@ const applicationSchema = new mongoose.Schema(
     },
 
     finalRemarks: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    // Selector-side decision metadata
-    selectorDecision: {
-      type: String,
-      enum: ["PENDING", "RECOMMENDED", "HOLD", "NOT_RECOMMENDED", "WAITLISTED"],
-      default: "PENDING",
-    },
-
-    selectorRemarks: {
       type: String,
       trim: true,
       default: "",
@@ -213,7 +201,6 @@ const applicationSchema = new mongoose.Schema(
       default: null,
     },
 
-    // Timeline / audit trail
     timeline: [
       {
         stage: {
@@ -233,15 +220,23 @@ const applicationSchema = new mongoose.Schema(
       },
     ],
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// Prevent duplicate applications for same applicant on same vacancy
 applicationSchema.index({ userId: 1, vacancyId: 1 }, { unique: true });
+applicationSchema.index({ vacancyId: 1, currentStage: 1 });
+applicationSchema.index({ vacancyId: 1, verificationStatus: 1 });
+applicationSchema.index({ vacancyId: 1, finalStatus: 1 });
 
-// Safe model export
+applicationSchema.pre("save", function (next) {
+  if (!this.applicationId) {
+    this.applicationId = `APP-${Date.now()}-${Math.floor(
+      Math.random() * 10000
+    )}`;
+  }
+  next();
+});
+
 const Application =
   mongoose.models.Application ||
   mongoose.model("Application", applicationSchema);

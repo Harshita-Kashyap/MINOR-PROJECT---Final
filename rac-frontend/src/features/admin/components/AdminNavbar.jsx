@@ -5,8 +5,7 @@ const links = [
   { name: "Vacancies", path: "/admin/vacancies" },
   { name: "Create Vacancy", path: "/admin/create-vacancy" },
   { name: "Applications", path: "/admin/applications" },
-  { name: "Shortlisting", path: "/admin/shortlisting" },
-  { name: "Results", path: "/admin/results" },
+  { name: "Users", path: "/admin/users" },
   { name: "Analytics", path: "/admin/analytics" },
 ];
 

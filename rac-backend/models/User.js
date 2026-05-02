@@ -1,5 +1,3 @@
-// models/user.js
-
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
@@ -16,6 +14,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
+      index: true,
     },
 
     phone: {
@@ -23,6 +22,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
+      index: true,
     },
 
     passwordHash: {
@@ -34,6 +34,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["applicant", "admin", "selector"],
       default: "applicant",
+      index: true,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+      index: true,
     },
   },
   { timestamps: true }

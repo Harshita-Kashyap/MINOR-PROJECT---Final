@@ -1,20 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import Header from "../../landing/components/Header";
 import AdminNavbar from "../components/AdminNavbar";
-import Button from "../../../shared/components/ui/Button";
 import Card from "../../../shared/components/ui/Card";
 import Input from "../../../shared/components/ui/Input";
-import {
-  getAllApplications,
-  updateApplicationVerification,
-  updateFinalResult,
-} from "../services/vacancyService";
+import { getAdminApplications } from "../services/adminService";
 
 function ApplicationsManagement() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [stageFilter, setStageFilter] = useState("");
+  const [verificationFilter, setVerificationFilter] = useState("");
+  const [finalFilter, setFinalFilter] = useState("");
   const [error, setError] = useState("");
 
   const fetchApplications = async () => {
@@ -22,10 +19,15 @@ function ApplicationsManagement() {
       setLoading(true);
       setError("");
 
-      const res = await getAllApplications();
-      setApplications(res.data?.applications || []);
+      const params = {};
+      if (stageFilter) params.stage = stageFilter;
+      if (verificationFilter) params.verificationStatus = verificationFilter;
+      if (finalFilter) params.finalStatus = finalFilter;
+
+      const res = await getAdminApplications(params);
+      setApplications(Array.isArray(res.data?.applications) ? res.data.applications : []);
     } catch (error) {
-      console.error("Error fetching applications:", error);
+      console.error("Admin applications fetch error:", error);
       setError("Failed to load applications");
     } finally {
       setLoading(false);
@@ -34,7 +36,7 @@ function ApplicationsManagement() {
 
   useEffect(() => {
     fetchApplications();
-  }, []);
+  }, [stageFilter, verificationFilter, finalFilter]);
 
   const getCandidateName = (app) =>
     app.profileId?.fullName || app.userId?.name || "Candidate";
@@ -45,89 +47,26 @@ function ApplicationsManagement() {
   const getVacancyTitle = (app) =>
     app.vacancyId?.title || app.vacancyTitle || "-";
 
-  const getDisplayStatus = (app) => {
-    if (app.finalStatus === "SELECTED") return "Selected";
-    if (app.finalStatus === "REJECTED") return "Rejected";
-    if (app.technicalTestStatus === "SHORTLISTED") return "Shortlisted";
-    if (app.verificationStatus === "ELIGIBLE") return "Eligible";
-    if (app.verificationStatus === "REJECTED") return "Rejected";
-    return "Applied";
-  };
-
-  const markEligible = async (id) => {
-    await updateApplicationVerification(id, {
-      verificationStatus: "ELIGIBLE",
-      verificationReason: "Candidate verified as eligible.",
-    });
-    fetchApplications();
-  };
-
-  const rejectVerification = async (id) => {
-    await updateApplicationVerification(id, {
-      verificationStatus: "REJECTED",
-      verificationReason: "Candidate does not meet eligibility criteria.",
-    });
-    fetchApplications();
-  };
-
-  const selectCandidate = async (app) => {
-    await updateFinalResult(app._id, {
-      personalityScore: app.personalityScore || 70,
-      finalStatus: "SELECTED",
-      finalRemarks: "Candidate selected after final review.",
-    });
-    fetchApplications();
-  };
-
   const filteredApplications = useMemo(() => {
-    let data = [...applications];
+    if (!search.trim()) return applications;
 
-    if (search.trim()) {
-      const term = search.toLowerCase();
+    const term = search.toLowerCase();
 
-      data = data.filter(
-        (app) =>
-          getCandidateName(app).toLowerCase().includes(term) ||
-          getCandidateEmail(app).toLowerCase().includes(term) ||
-          getVacancyTitle(app).toLowerCase().includes(term)
-      );
-    }
+    return applications.filter(
+      (app) =>
+        getCandidateName(app).toLowerCase().includes(term) ||
+        getCandidateEmail(app).toLowerCase().includes(term) ||
+        getVacancyTitle(app).toLowerCase().includes(term) ||
+        app.applicationId?.toLowerCase().includes(term)
+    );
+  }, [applications, search]);
 
-    if (statusFilter) {
-      data = data.filter((app) => getDisplayStatus(app) === statusFilter);
-    }
-
-    return data;
-  }, [applications, search, statusFilter]);
-
-  const statusCounts = {
+  const counts = {
     total: applications.length,
-    applied: applications.filter((app) => getDisplayStatus(app) === "Applied")
-      .length,
-    shortlisted: applications.filter(
-      (app) => getDisplayStatus(app) === "Shortlisted"
-    ).length,
-    selected: applications.filter((app) => getDisplayStatus(app) === "Selected")
-      .length,
-    rejected: applications.filter((app) => getDisplayStatus(app) === "Rejected")
-      .length,
-  };
-
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case "Applied":
-        return "bg-gray-100 text-gray-700 dark:bg-gray-700/70 dark:text-gray-200";
-      case "Eligible":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
-      case "Shortlisted":
-        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
-      case "Selected":
-        return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
-      case "Rejected":
-        return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300";
-      default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-700/70 dark:text-gray-200";
-    }
+    verificationReview: applications.filter((app) => app.verificationStatus === "REVIEW").length,
+    technicalQualified: applications.filter((app) => app.technicalTestStatus === "QUALIFIED").length,
+    finalReview: applications.filter((app) => app.currentStage === "FINAL_REVIEW").length,
+    selected: applications.filter((app) => app.finalStatus === "SELECTED").length,
   };
 
   return (
@@ -139,41 +78,75 @@ function ApplicationsManagement() {
         <div className="space-y-6">
           <section>
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-              Applications Management
+              Applications Monitoring
             </h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Review applications, verify eligibility, shortlist candidates, and update final outcomes.
+              Read-only monitoring of applicant progress. Admin does not verify, shortlist, or decide candidates.
             </p>
           </section>
 
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <MetricCard title="Total" value={statusCounts.total} tone="default" />
-            <MetricCard title="Applied" value={statusCounts.applied} tone="default" />
-            <MetricCard title="Shortlisted" value={statusCounts.shortlisted} tone="warning" />
-            <MetricCard title="Selected" value={statusCounts.selected} tone="success" />
-            <MetricCard title="Rejected" value={statusCounts.rejected} tone="danger" />
+            <MetricCard title="Total" value={counts.total} />
+            <MetricCard title="Verification Review" value={counts.verificationReview} tone="warning" />
+            <MetricCard title="Technical Qualified" value={counts.technicalQualified} tone="success" />
+            <MetricCard title="Final Review" value={counts.finalReview} tone="info" />
+            <MetricCard title="Selected" value={counts.selected} tone="success" />
           </section>
 
           <Card>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-4">
               <Input
-                placeholder="Search candidate, email, or vacancy..."
+                placeholder="Search candidate, email, vacancy, application ID..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
 
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-              >
-                <option value="">All Status</option>
-                <option value="Applied">Applied</option>
-                <option value="Eligible">Eligible</option>
-                <option value="Shortlisted">Shortlisted</option>
-                <option value="Selected">Selected</option>
-                <option value="Rejected">Rejected</option>
-              </select>
+              <Select
+                value={stageFilter}
+                onChange={setStageFilter}
+                options={[
+                  ["", "All Stages"],
+                  ["APPLIED", "Applied"],
+                  ["VERIFICATION_PENDING", "Verification Pending"],
+                  ["VERIFICATION_ELIGIBLE", "Verification Eligible"],
+                  ["VERIFICATION_REVIEW", "Verification Review"],
+                  ["VERIFICATION_REJECTED", "Verification Rejected"],
+                  ["TECHNICAL_TEST_ASSIGNED", "Technical Assigned"],
+                  ["TECHNICAL_TEST_SUBMITTED", "Technical Submitted"],
+                  ["TECHNICAL_QUALIFIED", "Technical Qualified"],
+                  ["TECHNICAL_REJECTED", "Technical Rejected"],
+                  ["PERSONALITY_TEST_ASSIGNED", "Personality Assigned"],
+                  ["PERSONALITY_TEST_SUBMITTED", "Personality Submitted"],
+                  ["FINAL_REVIEW", "Final Review"],
+                  ["SELECTED", "Selected"],
+                  ["WAITLISTED", "Waitlisted"],
+                  ["FINAL_REJECTED", "Final Rejected"],
+                ]}
+              />
+
+              <Select
+                value={verificationFilter}
+                onChange={setVerificationFilter}
+                options={[
+                  ["", "All Verification"],
+                  ["PENDING", "Pending"],
+                  ["ELIGIBLE", "Eligible"],
+                  ["REVIEW", "Review"],
+                  ["REJECTED", "Rejected"],
+                ]}
+              />
+
+              <Select
+                value={finalFilter}
+                onChange={setFinalFilter}
+                options={[
+                  ["", "All Final Status"],
+                  ["NOT_DECIDED", "Not Decided"],
+                  ["SELECTED", "Selected"],
+                  ["WAITLISTED", "Waitlisted"],
+                  ["REJECTED", "Rejected"],
+                ]}
+              />
             </div>
           </Card>
 
@@ -194,59 +167,61 @@ function ApplicationsManagement() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[1150px] text-left">
+                <table className="w-full min-w-[1250px] text-left">
                   <thead className="bg-gray-100 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-200">
                     <tr>
+                      <th className="p-4">Application ID</th>
                       <th className="p-4">Candidate</th>
                       <th className="p-4">Email</th>
                       <th className="p-4">Vacancy</th>
+                      <th className="p-4">Stage</th>
                       <th className="p-4">Verification</th>
                       <th className="p-4">Technical</th>
+                      <th className="p-4">Personality</th>
                       <th className="p-4">Final</th>
-                      <th className="p-4">Status</th>
-                      <th className="p-4 text-center">Actions</th>
+                      <th className="p-4">Scores</th>
                     </tr>
                   </thead>
 
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {filteredApplications.map((app) => {
-                      const status = getDisplayStatus(app);
-
-                      return (
-                        <tr key={app._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <td className="p-4 font-medium text-gray-800 dark:text-gray-100">
-                            {getCandidateName(app)}
-                          </td>
-                          <td className="p-4 text-gray-600 dark:text-gray-300">
-                            {getCandidateEmail(app)}
-                          </td>
-                          <td className="p-4 text-gray-600 dark:text-gray-300">
-                            {getVacancyTitle(app)}
-                          </td>
-                          <td className="p-4">{app.verificationStatus}</td>
-                          <td className="p-4">{app.technicalTestStatus}</td>
-                          <td className="p-4">{app.finalStatus}</td>
-                          <td className="p-4">
-                            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusStyle(status)}`}>
-                              {status}
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex flex-wrap justify-center gap-2">
-                              <Button size="sm" variant="outline" onClick={() => markEligible(app._id)}>
-                                Eligible
-                              </Button>
-                              <Button size="sm" onClick={() => selectCandidate(app)}>
-                                Select
-                              </Button>
-                              <Button size="sm" variant="danger" onClick={() => rejectVerification(app._id)}>
-                                Reject
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {filteredApplications.map((app) => (
+                      <tr key={app._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
+                          {app.applicationId || "-"}
+                        </td>
+                        <td className="p-4 font-medium text-gray-800 dark:text-gray-100">
+                          {getCandidateName(app)}
+                        </td>
+                        <td className="p-4 text-gray-600 dark:text-gray-300">
+                          {getCandidateEmail(app)}
+                        </td>
+                        <td className="p-4 text-gray-600 dark:text-gray-300">
+                          {getVacancyTitle(app)}
+                        </td>
+                        <td className="p-4">
+                          <Pill value={app.currentStage} />
+                        </td>
+                        <td className="p-4">
+                          <Pill value={app.verificationStatus} />
+                        </td>
+                        <td className="p-4">
+                          <Pill value={app.technicalTestStatus} />
+                        </td>
+                        <td className="p-4">
+                          <Pill value={app.personalityTestStatus} />
+                        </td>
+                        <td className="p-4">
+                          <Pill value={app.finalStatus} />
+                        </td>
+                        <td className="p-4">
+                          <ScoreGroup
+                            technical={app.technicalScore}
+                            personality={app.personalityScore}
+                            overall={app.overallScore}
+                          />
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -258,19 +233,68 @@ function ApplicationsManagement() {
   );
 }
 
+function Select({ value, onChange, options }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+    >
+      {options.map(([val, label]) => (
+        <option key={val || "all"} value={val}>
+          {label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function Pill({ value }) {
+  return (
+    <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+      {value || "-"}
+    </span>
+  );
+}
+
+function ScoreGroup({ technical, personality, overall }) {
+  return (
+    <div className="flex min-w-[190px] flex-col gap-2">
+      <ScoreItem label="Technical" value={technical} />
+      <ScoreItem label="Personality" value={personality} />
+      <ScoreItem label="Overall" value={overall} highlight />
+    </div>
+  );
+}
+
+function ScoreItem({ label, value, highlight = false }) {
+  const displayValue = value === null || value === undefined ? "-" : value;
+
+  return (
+    <div
+      className={`flex items-center justify-between rounded-lg border px-3 py-1.5 text-xs ${
+        highlight
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300"
+          : "border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-800/70 dark:text-gray-300"
+      }`}
+    >
+      <span>{label}</span>
+      <span className="font-semibold">{displayValue}</span>
+    </div>
+  );
+}
+
 function MetricCard({ title, value, tone }) {
   const toneMap = {
     default: "from-gray-50 to-white dark:from-gray-900 dark:to-gray-800",
     warning: "from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-gray-800",
     success: "from-green-50 to-emerald-50 dark:from-emerald-950/30 dark:to-gray-800",
-    danger: "from-red-50 to-rose-50 dark:from-red-950/30 dark:to-gray-800",
+    info: "from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-gray-800",
   };
 
   return (
     <Card className={`bg-gradient-to-br ${toneMap[tone || "default"]}`}>
-      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-        {title}
-      </p>
+      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
       <h3 className="mt-3 text-3xl font-bold text-gray-900 dark:text-gray-100">
         {value}
       </h3>

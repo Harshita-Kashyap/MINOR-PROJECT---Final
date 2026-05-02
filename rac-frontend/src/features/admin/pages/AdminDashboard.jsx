@@ -4,15 +4,32 @@ import Header from "../../landing/components/Header";
 import AdminNavbar from "../components/AdminNavbar";
 import Card from "../../../shared/components/ui/Card";
 import Button from "../../../shared/components/ui/Button";
-import { getAdminAnalytics } from "../services/vacancyService";
+import { getAdminDashboardStats } from "../services/adminService";
 
 function AdminDashboard() {
   const [stats, setStats] = useState({
+    totalVacancies: 0,
     activeVacancies: 0,
+    closedVacancies: 0,
     totalApplications: 0,
+
+    verificationPending: 0,
+    verificationEligible: 0,
     verificationReview: 0,
-    finalReviewPending: 0,
-    resultsPending: 0,
+    verificationRejected: 0,
+
+    technicalAssigned: 0,
+    technicalSubmitted: 0,
+    technicalQualified: 0,
+    technicalRejected: 0,
+
+    personalityAssigned: 0,
+    personalitySubmitted: 0,
+
+    finalReview: 0,
+    selected: 0,
+    waitlisted: 0,
+    finalRejected: 0,
   });
 
   const user = useMemo(() => {
@@ -27,15 +44,34 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const res = await getAdminAnalytics();
-        const data = res.data?.analytics || {};
+        const res = await getAdminDashboardStats();
+        const data = res.data?.stats || {};
+        const vacancies = data.vacancies || {};
+        const applications = data.applications || {};
 
         setStats({
-          activeVacancies: data.activeVacancies || 0,
-          totalApplications: data.totalApplications || 0,
-          verificationReview: data.verificationReview || 0,
-          finalReviewPending: data.finalReviewPending || 0,
-          resultsPending: data.selected || 0,
+          totalVacancies: vacancies.totalVacancies || 0,
+          activeVacancies: vacancies.activeVacancies || 0,
+          closedVacancies: vacancies.closedVacancies || 0,
+          totalApplications: applications.totalApplications || 0,
+
+          verificationPending: applications.verificationPending || 0,
+          verificationEligible: applications.verificationEligible || 0,
+          verificationReview: applications.verificationReview || 0,
+          verificationRejected: applications.verificationRejected || 0,
+
+          technicalAssigned: applications.technicalAssigned || 0,
+          technicalSubmitted: applications.technicalSubmitted || 0,
+          technicalQualified: applications.technicalQualified || 0,
+          technicalRejected: applications.technicalRejected || 0,
+
+          personalityAssigned: applications.personalityAssigned || 0,
+          personalitySubmitted: applications.personalitySubmitted || 0,
+
+          finalReview: applications.finalReview || 0,
+          selected: applications.selected || 0,
+          waitlisted: applications.waitlisted || 0,
+          finalRejected: applications.finalRejected || 0,
         });
       } catch (error) {
         console.error("Admin dashboard stats error:", error);
@@ -45,42 +81,35 @@ function AdminDashboard() {
     fetchDashboardStats();
   }, []);
 
-  const priorityItems = [
-    `${stats.verificationReview} applications require verification review.`,
-    `${stats.finalReviewPending} candidates are waiting in final review or selector decision stage.`,
-    `${stats.resultsPending} selected results are ready for merit confirmation or publishing.`,
-  ];
-
-  const recentActivity = [
-    `${stats.activeVacancies} active vacancies currently open`,
-    `${stats.totalApplications} total applications received`,
-    `${stats.verificationReview} candidates under review`,
-    `${stats.resultsPending} result actions pending publication`,
+  const alerts = [
+    `${stats.verificationReview} applications are in verification review.`,
+    `${stats.technicalAssigned} candidates have technical tests assigned.`,
+    `${stats.finalReview} candidates are waiting in final review.`,
   ];
 
   const quickActions = [
     {
       title: "Create Vacancy",
-      description: "Start a new recruitment cycle with eligibility and stage rules.",
+      description: "Create a new vacancy with eligibility rules and deadline.",
       to: "/admin/create-vacancy",
       variant: "primary",
     },
     {
       title: "Manage Vacancies",
-      description: "Edit, close, and monitor all active and expired vacancies.",
+      description: "Edit, delete, publish, close, and monitor vacancies.",
       to: "/admin/vacancies",
       variant: "outline",
     },
     {
-      title: "Review Applications",
-      description: "Inspect stage-wise applicant movement across the system.",
+      title: "Monitor Applications",
+      description: "View applicant progress across all workflow stages.",
       to: "/admin/applications",
       variant: "secondary",
     },
     {
-      title: "Run Shortlisting",
-      description: "Preview and control shortlisting progression to next stages.",
-      to: "/admin/shortlisting",
+      title: "View Analytics",
+      description: "Track funnel, stage distribution, and final outcomes.",
+      to: "/admin/analytics",
       variant: "secondary",
     },
   ];
@@ -106,8 +135,8 @@ function AdminDashboard() {
                 </h1>
 
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-blue-100">
-                  Configure vacancies, monitor recruitment flow, control shortlisting,
-                  and publish final outcomes across the full RAC simulation process.
+                  Manage vacancies, users, and system-wide recruitment monitoring.
+                  Candidate movement is handled by the system and Selector workflow.
                 </p>
               </div>
 
@@ -116,64 +145,41 @@ function AdminDashboard() {
                   <Button variant="secondary">Create Vacancy</Button>
                 </Link>
 
-                <Link to="/admin/vacancies">
-                  <Button variant="outlineWhite">Manage Vacancies</Button>
+                <Link to="/admin/applications">
+                  <Button variant="outlineWhite">Monitor Applications</Button>
                 </Link>
               </div>
             </div>
           </section>
 
-          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <MetricCard
-              title="Active Vacancies"
-              value={stats.activeVacancies}
-              tone="info"
-              description="Open recruitment cycles available for applicants."
-            />
-            <MetricCard
-              title="Applications"
-              value={stats.totalApplications}
-              tone="default"
-              description="Total applications received across active vacancies."
-            />
-            <MetricCard
-              title="Verification Review"
-              value={stats.verificationReview}
-              tone="warning"
-              description="Profiles needing admin or system review attention."
-            />
-            <MetricCard
-              title="Final Review Pending"
-              value={stats.finalReviewPending}
-              tone="danger"
-              description="Candidates waiting for final recommendation closure."
-            />
-            <MetricCard
-              title="Results Pending"
-              value={stats.resultsPending}
-              tone="success"
-              description="Result sets ready for merit confirmation or publishing."
-            />
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricCard title="Total Vacancies" value={stats.totalVacancies} tone="default" />
+            <MetricCard title="Open Vacancies" value={stats.activeVacancies} tone="info" />
+            <MetricCard title="Applications" value={stats.totalApplications} tone="default" />
+            <MetricCard title="Final Review" value={stats.finalReview} tone="warning" />
+          </section>
+
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricCard title="Verification Review" value={stats.verificationReview} tone="warning" />
+            <MetricCard title="Technical Qualified" value={stats.technicalQualified} tone="success" />
+            <MetricCard title="Personality Submitted" value={stats.personalitySubmitted} tone="info" />
+            <MetricCard title="Selected" value={stats.selected} tone="success" />
           </section>
 
           <div className="grid gap-6 xl:grid-cols-12">
-            <Card className="xl:col-span-7 border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
-              <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Priority Actions
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Direct access to high-impact administrative controls.
-                  </p>
-                </div>
-              </div>
+            <Card className="xl:col-span-7 border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-700/70 dark:bg-gray-900/80">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Admin Actions
+              </h2>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Admin controls resources and monitors the process. Admin does not shortlist or decide candidates.
+              </p>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
                 {quickActions.map((action) => (
                   <div
                     key={action.title}
-                    className="rounded-2xl border border-gray-100 bg-gray-50 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm dark:border-gray-700 dark:bg-gray-800/60"
+                    className="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/60"
                   >
                     <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
                       {action.title}
@@ -194,23 +200,19 @@ function AdminDashboard() {
               </div>
             </Card>
 
-            <Card className="xl:col-span-5 border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
-              <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Operational Alerts
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    What needs attention right now.
-                  </p>
-                </div>
-              </div>
+            <Card className="xl:col-span-5 border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-700/70 dark:bg-gray-900/80">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Monitoring Alerts
+              </h2>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Read-only workflow attention points.
+              </p>
 
-              <div className="space-y-3">
-                {priorityItems.map((item) => (
+              <div className="mt-5 space-y-3">
+                {alerts.map((item) => (
                   <div
                     key={item}
-                    className="rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-gray-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-gray-200"
+                    className="rounded-xl border border-blue-200 bg-blue-50/70 px-4 py-3 text-sm text-gray-800 dark:border-blue-900/60 dark:bg-blue-950/20 dark:text-gray-200"
                   >
                     {item}
                   </div>
@@ -219,78 +221,44 @@ function AdminDashboard() {
             </Card>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-12">
-            <Card className="xl:col-span-7 border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
-              <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Recruitment Pipeline Summary
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    High-level movement of candidates across the recruitment flow.
-                  </p>
-                </div>
-              </div>
+          <Card className="border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-700/70 dark:bg-gray-900/80">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Recruitment Pipeline Summary
+            </h2>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <PipelineItem label="Applied" value={stats.totalApplications} />
-                <PipelineItem label="Verification Review" value={stats.verificationReview} />
-                <PipelineItem label="Final Review" value={stats.finalReviewPending} />
-                <PipelineItem label="Results Pending" value={stats.resultsPending} />
-              </div>
-            </Card>
-
-            <Card className="xl:col-span-5 border border-gray-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-900/80">
-              <div className="mb-5 flex items-end justify-between gap-3 border-b border-gray-200 pb-3 dark:border-gray-700">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Recent Activity
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Snapshot of current system activity.
-                  </p>
-                </div>
-              </div>
-
-              <ul className="space-y-3">
-                {recentActivity.map((item) => (
-                  <li
-                    key={item}
-                    className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-300"
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </div>
+            <div className="mt-5 grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+              <PipelineItem label="Applied" value={stats.totalApplications} />
+              <PipelineItem label="Verification Eligible" value={stats.verificationEligible} />
+              <PipelineItem label="Technical Assigned" value={stats.technicalAssigned} />
+              <PipelineItem label="Technical Qualified" value={stats.technicalQualified} />
+              <PipelineItem label="Personality Submitted" value={stats.personalitySubmitted} />
+              <PipelineItem label="Selected" value={stats.selected} />
+            </div>
+          </Card>
         </div>
       </main>
     </div>
   );
 }
 
-function MetricCard({ title, value, description, tone }) {
+function MetricCard({ title, value, tone }) {
   const toneMap = {
     default: "from-gray-50 to-white dark:from-gray-900 dark:to-gray-800",
     info: "from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-gray-800",
     warning: "from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-gray-800",
-    danger: "from-red-50 to-rose-50 dark:from-red-950/30 dark:to-gray-800",
     success: "from-green-50 to-emerald-50 dark:from-emerald-950/30 dark:to-gray-800",
   };
 
   return (
     <Card
-      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 ${toneMap[tone || "default"]
-        }`}
+      className={`border border-gray-200/80 bg-gradient-to-br shadow-sm dark:border-gray-700/70 ${
+        toneMap[tone || "default"]
+      }`}
     >
       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-      <h3 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+      <h3 className="mt-3 text-3xl font-bold text-gray-900 dark:text-gray-100">
         {value}
       </h3>
-      <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
-        {description}
-      </p>
     </Card>
   );
 }
