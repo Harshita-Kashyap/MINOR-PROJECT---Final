@@ -10,10 +10,11 @@ const footerLinks = [
   { label: "Refund/Cancellation", path: "/footer/refund-cancellation" },
   { label: "Disclaimer", path: "/footer/disclaimer" },
   { label: "Website Policies", path: "/footer/website-policies" },
-  { label: "RTI", path: "/footer/rti" },
-  { label: "GoI Directory", path: "https://www.goidirectory.gov.in/" },
-  { label: "National Portal of India", path: "https://www.india.gov.in/" },
-  { label: "Public Grievances", path: "https://pgportal.gov.in/" },
+
+  { label: "RTI", path: "https://rtionline.gov.in/", external: "rti" },
+  { label: "GoI Directory", path: "https://igod.gov.in/", external: true },
+  { label: "National Portal of India", path: "https://www.india.gov.in/", external: true },
+  { label: "Public Grievances", path: "https://pgportal.gov.in/", external: true },
 ];
 
 export default function OfficialFooter() {
@@ -21,12 +22,20 @@ export default function OfficialFooter() {
     <footer className="mt-0 bg-black text-white">
       <div className="flex flex-wrap items-center justify-center gap-x-7 gap-y-3 border-b border-dotted border-gray-500 px-4 py-4 text-[12px] font-semibold">
         {footerLinks.map((link) =>
-          link.path.startsWith("http") ? (
+          link.external === "rti" ? (
+            <span
+              key={link.label}
+              onClick={() => {
+                window.location.href = link.path;
+              }}
+              className="cursor-pointer hover:underline"
+            >
+              {link.label}
+            </span>
+          ) : link.external ? (
             <a
               key={link.label}
               href={link.path}
-              target="_blank"
-              rel="noreferrer"
               className="hover:underline"
             >
               {link.label}
