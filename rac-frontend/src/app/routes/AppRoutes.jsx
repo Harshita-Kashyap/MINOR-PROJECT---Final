@@ -86,6 +86,7 @@ function AppRoutes() {
         <Route path="/grahpatrika" element={<Grahpatrika />} />
         <Route path="/certificate-formats" element={<CertificateFormats />} />
         <Route path="/certificate-formats/:pdfKey" element={<PdfViewerPage />} />
+        <Route path="/notices/:pdfKey" element={<PdfViewerPage />} />
 
         {/* ================= FOOTER ROUTES ================= */}
         <Route path="/footer/archive" element={<FooterPage page="archive" />} />
