@@ -197,7 +197,7 @@ useEffect(() => {
       } else {
         setMultiFaceCount(0);
       }
-    }, 1000);
+    }, 2000);
   };
 
   // 🔥 wait until video is actually ready
