@@ -124,21 +124,23 @@ export default function ApplicationStatusCard({ application }) {
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
         {displayStage === APPLICATION_STAGES.TECHNICAL_TEST_ASSIGNED && (
           <Button
-            onClick={() => navigate(`/applicant/technical-test/${application._id}`)}
-          >
-            Start Technical Test
-          </Button>
+  onClick={() =>
+    navigate(`/guidelines/technical/${application._id}`)
+  }
+>
+  Start Technical Test
+</Button>
         )}
 
         {displayStage === APPLICATION_STAGES.PERSONALITY_TEST_ASSIGNED && (
           <Button
-            variant="outline"
-            onClick={() =>
-              navigate(`/applicant/personality-test/${application._id}`)
-            }
-          >
-            Start Personality Test
-          </Button>
+  variant="outline"
+  onClick={() =>
+    navigate(`/guidelines/personality/${application._id}`)
+  }
+>
+  Start Personality Test
+</Button>
         )}
 
       </div>

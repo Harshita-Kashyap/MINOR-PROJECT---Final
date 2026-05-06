@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 
+import Guidelines from "../../features/assessment/pages/Guidelines";
+
 // ================= AUTH PAGES =================
 import Login from "../../features/auth/pages/Login";
 import Register from "../../features/auth/pages/Register";
@@ -174,7 +176,10 @@ function AppRoutes() {
 
         {/* ================= APPLICANT ROUTES ================= */}
         <Route path="/applicant" element={<Navigate to="/applicant/dashboard" replace />} />
-
+        <Route
+          path="/guidelines/:type/:id"
+          element={<Guidelines />}
+        />
         <Route
           path="/applicant/dashboard"
           element={
