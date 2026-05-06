@@ -90,6 +90,18 @@ const pdfMap = {
     title: "Central Govt Civilian Employee",
     url: "https://rac.gov.in/drdo/public/docs_formats/Declaration_for_intimation_ADA_128.pdf",
   },
+  publicNoticeGate: {
+  title: "Public Notice",
+  url: "https://rac.gov.in/download/GATEpublicNotice2026.pdf",
+},
+alertNotice: {
+  title: "ALERT / सावधान",
+  url: "https://rac.gov.in/download/alertApplicants.pdf",
+},
+cautionNotice: {
+  title: "CAUTION / चेतावनी",
+  url: "https://rac.gov.in/download/cautionApplicants.pdf",
+},
 };
 
 const formatItems = [
@@ -180,11 +192,6 @@ function PdfViewerPage() {
     );
   }
 
-  const backendBaseUrl = "http://localhost:5000";
-  const proxiedPdfUrl = pdfData
-    ? `${backendBaseUrl}/api/pdf-proxy?url=${encodeURIComponent(pdfData.url)}`
-    : null;
-
   return (
     <div className="min-h-screen bg-gray-100 transition-colors dark:bg-gray-900">
       <Header />
@@ -227,7 +234,7 @@ function PdfViewerPage() {
               {pdfData && (
                 <div className="flex items-center justify-end gap-3 border-b border-gray-200 bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800">
                   <a
-                    href={proxiedPdfUrl}
+                    href={pdfData.url}
                     target="_blank"
                     rel="noreferrer"
                     className="text-sm font-medium text-blue-700 hover:underline dark:text-blue-400"
@@ -249,14 +256,28 @@ function PdfViewerPage() {
                 <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                   {selectedContent ? (
                     selectedContent.content
+                  ) : pdfData ? (
+                    <div className="flex flex-col items-center justify-center gap-6 p-20">
+  <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+    PDF cannot be displayed here due to security restrictions.
+  </p>
+
+  <a
+    href={pdfData.url}
+    target="_blank"
+    rel="noreferrer"
+    className="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
+  >
+    Open {pdfData.title} PDF
+  </a>
+</div>
                   ) : (
                     <div className="p-10">
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                        {currentItem?.label || "Content not available"}
+                        Content not available
                       </h2>
                       <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300">
-                        Formatted page content has not been added yet for this
-                        document.
+                        Formatted page content has not been added yet for this document.
                       </p>
                     </div>
                   )}

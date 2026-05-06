@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import LandingLayout from "../../../layouts/LandingLayout";
 
 const pages = {
   archive: {
-    title: "footerArchiveTitle",
+    title: "Archive",
     type: "archive",
   },
   "web-information-manager": {
@@ -118,6 +119,7 @@ export default function FooterPage({ page }) {
   const { t, i18n } = useTranslation();
   const config = pages[page];
   const isHi = i18n.language === "hi";
+  
 
   if (!config) return null;
 
@@ -157,9 +159,11 @@ export default function FooterPage({ page }) {
   return (
     <LandingLayout>
       <div className="min-h-[360px] border border-sky-300 bg-white p-6 text-[15px] leading-7 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-        <h1 className="mb-6 text-4xl font-bold text-amber-900 dark:text-amber-400">
-          {t(config.title)}
-        </h1>
+        {config.type !== "interface" && (
+          <h1 className="mb-6 text-4xl font-bold text-amber-900 dark:text-amber-400">
+            {t(config.title)}
+          </h1>
+        )}
 
         {config.type === "archive" && (
           <div className="overflow-x-auto">
@@ -248,10 +252,10 @@ export default function FooterPage({ page }) {
             <div>
               <div className="inline-block border border-gray-300 bg-white p-2 shadow-md">
                 <img
-                  src="https://rac.gov.in/images/content/about.jpg"
-                  alt="RAC Building"
-                  className="w-full max-w-[280px]"
-                />
+  src="https://rac.gov.in/images/content/rac-building.jpg"
+  alt="RAC Building"
+  className="h-auto w-full max-w-[280px] object-cover"
+/>
               </div>
             </div>
 
@@ -275,7 +279,7 @@ export default function FooterPage({ page }) {
         {config.type === "interface" && (
           <div>
             <h1 className="mb-5 text-4xl font-bold text-amber-900 dark:text-amber-400">
-              {t("footerInterfaceHeading")}
+              Interface Desk 011-23889599, 011-23915134
             </h1>
 
             <table className="w-full border-collapse text-left">
@@ -430,32 +434,39 @@ export default function FooterPage({ page }) {
         )}
 
         {config.type === "policies" && (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[330px_1fr]">
-            <div className="border border-gray-200">
-              {policyMenu.map((item, index) => (
-                <div
-                  key={item}
-                  className={`border-b px-4 py-3 ${
-                    index === 0
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-900"
-                  }`}
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
+  <div className="grid grid-cols-1 gap-8 lg:grid-cols-[330px_1fr]">
 
-            <div className="space-y-6">
-              {policyContent.map(([heading, text]) => (
-                <section key={heading} className="border-b border-gray-300 pb-4">
-                  <h2 className="mb-3 text-3xl">{heading}</h2>
-                  <p>{t(text)}</p>
-                </section>
-              ))}
-            </div>
-          </div>
-        )}
+    {/* LEFT MENU */}
+    <div className="border border-gray-200">
+      {policyMenu.map((item, index) => (
+        <a
+          key={item}
+          href={`#policy-${index}`}
+          className="block border-b px-4 py-3 bg-white text-gray-900 hover:bg-blue-600 hover:text-white"
+        >
+          {item}
+        </a>
+      ))}
+    </div>
+
+    {/* RIGHT CONTENT (ALL VISIBLE) */}
+    <div className="space-y-6">
+      {policyContent.map(([heading, text], index) => (
+        <section
+          key={heading}
+          id={`policy-${index}`}
+          className="border-b border-gray-300 pb-4"
+        >
+          <h2 className="mb-3 text-3xl">{heading}</h2>
+          <p>{t(text)}</p>
+        </section>
+      ))}
+    </div>
+
+  </div>
+)}
+
+        
       </div>
     </LandingLayout>
   );
