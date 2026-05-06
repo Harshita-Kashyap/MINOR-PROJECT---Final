@@ -446,12 +446,16 @@ exports.setTechnicalCutoff = async (req, res) => {
 
       if (Number(submission.finalScore || 0) >= numericCutoff) {
         application.currentStage = "TECHNICAL_QUALIFIED";
-        application.technicalTestStatus = "SHORTLISTED";
+        application.technicalTestStatus = "QUALIFIED";
+        application.technicalScore = Number(submission.finalScore || 0);
+        application.technicalCutoff = numericCutoff;
         application.technicalRemarks = `Qualified technical cutoff. Score: ${submission.finalScore}, Cutoff: ${numericCutoff}`;
         qualifiedCount++;
       } else {
         application.currentStage = "TECHNICAL_REJECTED";
         application.technicalTestStatus = "REJECTED";
+        application.technicalScore = Number(submission.finalScore || 0);
+        application.technicalCutoff = numericCutoff;
         application.technicalRemarks = `Did not meet technical cutoff. Score: ${submission.finalScore}, Cutoff: ${numericCutoff}`;
         rejectedCount++;
       }
@@ -554,7 +558,7 @@ exports.schedulePersonalityTest = async (req, res) => {
       {
         vacancyId,
         currentStage: "TECHNICAL_QUALIFIED",
-        technicalTestStatus: "SHORTLISTED",
+        technicalTestStatus: "QUALIFIED",
       },
       {
         $set: {
