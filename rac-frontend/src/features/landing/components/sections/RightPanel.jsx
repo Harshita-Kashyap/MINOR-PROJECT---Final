@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
+import API from "../../../../shared/services/api";
 
 export default function RightPanel() {
   const { t } = useTranslation();
@@ -9,6 +11,22 @@ export default function RightPanel() {
   const [active, setActive] = useState("latest");
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
+  const [vacancies, setVacancies] = useState([]);
+  useEffect(() => {
+  fetchVacancies();
+}, []);
+
+const fetchVacancies = async () => {
+  try {
+    const res = await API.get("api/vacancies");
+
+    if (res.data.success) {
+      setVacancies(res.data.vacancies);
+    }
+  } catch (error) {
+    console.error("Vacancy fetch error:", error);
+  }
+};
 
   const statusRows = [
     {
@@ -80,63 +98,50 @@ export default function RightPanel() {
 ];
 
   const tabContent = {
-    latest: [
-      {
-        type: "notice",
-        title: t("rightPublicNotice"),
-        pdf: "161.86 KB",
-        text: t("rightNoticeText"),
-        date: `${t("rightPublishedOn")} 27 Aug, 2025`,
-      },
-      {
-        type: "advertisement",
-        advNo: t("rightAdv156"),
-        updated: `${t("rightLastUpdated")} 18 Mar, 2026 18:25 hrs.`,
-        title: t("rightAdv156Title"),
-        buttons: [
-          t("rightTentativeSchedule"),
-          t("rightCheckUpdates"),
-          t("rightAdv156Btn3"),
-          t("rightAdv156Btn4"),
-          t("rightAdvertisement"),
-        ],
-        closing: t("rightAdv156Closing"),
-        published: `${t("rightPublishedOn")} 20 May, 2025`,
-      },
-      {
-        type: "advertisement",
-        advNo: t("rightAdv152"),
-        updated: `${t("rightLastUpdated")} 2 Jan, 2026 15:00 hrs.`,
-        title: t("rightAdv152Title"),
-        buttons: [
-          t("rightAdvertisement"),
-          t("rightFaq"),
-          t("rightPayEquivalence"),
-          t("rightTentativeSchedule"),
-          t("rightCheckUpdates"),
-        ],
-        closing: t("rightAdv152Closing"),
-        published: `${t("rightPublishedOn")} 17 Apr, 2025`,
-      },
-      {
-        type: "advertisement",
-        advNo: t("rightAdv154"),
-        updated: `${t("rightLastUpdated")} 20 Aug, 2025 12:45 hrs.`,
-        title: t("rightAdv154Title"),
-        buttons: [
-          t("rightAdvertisement"),
-          t("rightPayEquivalence"),
-          t("rightTentativeSchedule"),
-        ],
-        closing: t("rightAdv154Closing"),
-        published: `${t("rightPublishedOn")} 10 Mar, 2025`,
-      },
-    ],
-    status: [{ type: "statusTable" }],
-    notices: [{ type: "noticesList" }],
-    queryStatus: [{ type: "queryForm" }],
-  };
+  latest: [
+    {
+      type: "notice",
+      title: t("rightPublicNotice"),
+      pdf: "161.86 KB",
+      text: t("rightNoticeText"),
+      date: `${t("rightPublishedOn")} 27 Aug, 2025`,
+    },
 
+    ...vacancies.map((vacancy) => ({
+      type: "advertisement",
+
+      advNo:
+        vacancy.advertisementNo ||
+        vacancy.title,
+
+      updated: `Last Updated: ${new Date(
+        vacancy.updatedAt
+      ).toLocaleDateString()}`,
+
+      title: vacancy.title,
+
+      buttons: [
+        "Advertisement",
+        "Apply",
+        "Details",
+      ],
+
+      closing: new Date(
+        vacancy.deadline
+      ).toLocaleDateString(),
+
+      published: `Published On: ${new Date(
+        vacancy.createdAt
+      ).toLocaleDateString()}`,
+    })),
+  ],
+
+  status: [{ type: "statusTable" }],
+
+  notices: [{ type: "noticesList" }],
+
+  queryStatus: [{ type: "queryForm" }],
+};
   const renderButton = (label, index) => {
     const isBlue = label === t("rightCheckUpdates");
     const isRed = label === t("rightTentativeSchedule");
